@@ -31,9 +31,9 @@ async function createApplication(_, { application }, { headers, db, decodedToken
                         return reject(err);
                     } else {
                         const params = {...sendEmail.emailParams};
-                        params.Template = 'AppCreationNotificationToAdmin',
+                        params.Template = 'ProductCreationNotificationToAdmin',
                         params.Source = 'sumitvekariya7@gmail.com',
-                        params.Destination.ToAddresses = ['sumitvekariya7@gmail.com'],
+                        params.Destination.ToAddresses = ['sumitvekariya7@gmail.com'], // 'sumi@dreamjobb.com'
                         params.TemplateData = JSON.stringify({
                             'name': 'Sumit',
                             'appName': application.name,

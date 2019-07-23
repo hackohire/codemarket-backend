@@ -9,8 +9,8 @@ const { AWS_COGNITO_CLIENT_ID } = process.env;
 
 async function login(_, { username, password }, { db }) {
     var authenticationData = {
-        Username : 'sarkazein7@gmail.com',
-        Password : 'Chandnee@20',
+        Username : username,
+        Password : password,
     };
     var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
     var poolData = { 
@@ -19,7 +19,7 @@ async function login(_, { username, password }, { db }) {
     };
     var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
     var userData = {
-        Username : 'sarkazein7@gmail.com',
+        Username : username,
         Pool : userPool
     };
     var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);

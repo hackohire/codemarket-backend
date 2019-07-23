@@ -41,7 +41,7 @@ type Product {
   featuredImage: String
   createdBy: ID
   priceAndFiles: PriceAndFiles
-  totalPrice: Float
+  totalPrice: Int
   categories: [String]
   demo_url: String
   documentation_url: String
@@ -57,7 +57,7 @@ input ProductInput {
   featuredImage: String
   createdBy: ID
   priceAndFiles: PriceAndFilesInput
-  totalPrice: Float
+  totalPrice: Int
   categories: [String]
   demo_url: String
   documentation_url: String
@@ -68,13 +68,13 @@ input ProductInput {
 type PriceAndFiles {
   fileName: String
   file: String
-  price: Float
+  price: Int
 }
 
 input PriceAndFilesInput {
   fileName: String
   file: String
-  price: Float
+  price: Int
 }
 
 enum ProductStatus {
@@ -98,6 +98,9 @@ type Query {
   hello: String
   getUsers(_page: Int _limit: Int): [User!]!
   getSelectedUser(id: String): User!
+
+  getProductsByUserId(userId: String): [Product]
+  getProductById(productId: String): Product
 }
 
 type Mutation {
@@ -105,6 +108,7 @@ type Mutation {
   updateUser(user: UserInput): User
 
   addProduct(product: ProductInput): Product
+  updateProduct(product: ProductInput): Product
 }
 `;
 
