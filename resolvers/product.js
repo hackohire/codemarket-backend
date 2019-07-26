@@ -23,19 +23,19 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
                 User.find({'roles': 'Admin'}, (err, admins) => {
                     if(err) { console.log(err) }
                     else {
-                        admins.forEach((admin, i) => {
-                            const params = {...sendEmail.emailParams};
-                            params.Template = 'ProductCreationNotificationToAdmin',
-                            params.Source = 'sumitvekariya7@gmail.com',
-                            params.Destination.ToAddresses = [admin.email], // 'sumi@dreamjobb.com'
-                            params.TemplateData = JSON.stringify({
-                                'name': admin.name,
-                                'productName': p.name,
-                                'link': `${process.env.FRONT_END_URL}/#/application/applications/${p._id}`,
-                                'productDetails': `${p.description}`
-                            });
-                            sendEmail.sendTemplatedEmail(params);
-                        })
+                        // admins.forEach((admin, i) => {
+                        //     const params = {...sendEmail.emailParams};
+                        //     params.Template = 'ProductCreationNotificationToAdmin',
+                        //     params.Source = 'sumitvekariya7@gmail.com',
+                        //     params.Destination.ToAddresses = [admin.email], // 'sumi@dreamjobb.com'
+                        //     params.TemplateData = JSON.stringify({
+                        //         'name': admin.name,
+                        //         'productName': p.name,
+                        //         'link': `${process.env.FRONT_END_URL}/#/application/applications/${p._id}`,
+                        //         'productDetails': `${p.description}`
+                        //     });
+                        //     sendEmail.sendTemplatedEmail(params);
+                        // })
                     }
                 })
 
@@ -93,7 +93,7 @@ async function getProductsByUserId(_, { userId }, { headers, db, decodedToken })
                 console.log('Using existing mongoose connection.');
             }
 
-            Product.find({ 'createdBy': userId }, (err, res) => {
+            Product.find({ 'createdBy': userId }).populate('createdBy').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -122,7 +122,35 @@ async function getProductById(_, { productId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Product.findById(productId, (err, res) => {
+            Product.findById(productId).populate('createdBy').exec((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res);
+            });
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function getAllProducts(_, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Product.find({}).populate('createdBy').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -143,6 +171,7 @@ async function getProductById(_, { productId }, { headers, db, decodedToken }) {
 module.exports = {
     addProduct,
     updateProduct,
+    getAllProducts,
     getProductsByUserId,
     getProductById
 }

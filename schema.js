@@ -39,7 +39,7 @@ type Product {
   description: String
   shortDescription: String
   featuredImage: String
-  createdBy: ID
+  createdBy: User
   priceAndFiles: PriceAndFiles
   totalPrice: Int
   categories: [String]
@@ -47,6 +47,8 @@ type Product {
   documentation_url: String
   video_url: String
   status: ProductStatus
+  createdAt: String
+  updatedAt: String
 }
 
 input ProductInput {
@@ -99,6 +101,7 @@ type Query {
   getUsers(_page: Int _limit: Int): [User!]!
   getSelectedUser(id: String): User!
 
+  getAllProducts: [Product]
   getProductsByUserId(userId: String): [Product]
   getProductById(productId: String): Product
 }
