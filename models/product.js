@@ -10,6 +10,16 @@ const priceAndFiles = new Schema(
 );
 
 
+const snippet = new Schema(
+    {
+        language: String,
+        r: Number,
+        second_best: {},
+        top: {},
+        value: String
+    }
+);
+
 const productSchema = new Schema(
     {
         name: String,
@@ -31,7 +41,9 @@ const productSchema = new Schema(
             type: String,
             enum: ['Created', 'Drafted', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
             default: 'Created'
-        }
+        },
+        snippets: [snippet],
+        addedToCart: Boolean
     },
     {
         timestamps: true,

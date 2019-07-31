@@ -1,6 +1,7 @@
 const {getUsers, createUser, updateUser} = require('./user');
 const { createApplication, getApplications, getApplicationById, updateApplication } = require('./application');
 const { addProduct, updateProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
+const { addQuery } = require('./help');
 
 module.exports = {
   Query: {
@@ -15,6 +16,8 @@ module.exports = {
     updateUser,
 
     addProduct,
-    updateProduct
+    updateProduct,
+
+    addQuery
   },
 };

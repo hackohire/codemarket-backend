@@ -40,7 +40,7 @@ type Product {
   shortDescription: String
   featuredImage: String
   createdBy: User
-  priceAndFiles: PriceAndFiles
+  priceAndFiles: [PriceAndFiles]
   totalPrice: Int
   categories: [String]
   demo_url: String
@@ -49,6 +49,8 @@ type Product {
   status: ProductStatus
   createdAt: String
   updatedAt: String
+  snippets: [Snippet]
+  addedToCart: Boolean
 }
 
 input ProductInput {
@@ -58,13 +60,27 @@ input ProductInput {
   shortDescription: String
   featuredImage: String
   createdBy: ID
-  priceAndFiles: PriceAndFilesInput
+  priceAndFiles: [PriceAndFilesInput]
   totalPrice: Int
   categories: [String]
   demo_url: String
   documentation_url: String
   video_url: String
   status: ProductStatus
+  snippets: [SnippetInput]
+  addedToCart: Boolean
+}
+
+type Snippet {
+  language: String
+  r: Int
+  value: String
+}
+
+input SnippetInput {
+  language: String
+  r: Int
+  value: String
 }
 
 type PriceAndFiles {
@@ -94,6 +110,40 @@ enum Roles {
   Admin
 }
 
+type HelpQuery {
+  question: String
+  description: String
+  price: Int
+  _id: ID
+  createdBy: User
+  createdAt: String
+  updatedAt: String
+  status: HelpQueryStatus
+}
+
+input HelpQueryInput {
+  question: String
+  description: String
+  price: Int
+  _id: ID
+  createdBy: String
+  createdAt: String
+  updatedAt: String
+  status: HelpQueryStatus
+}
+
+enum HelpQueryStatus {
+  Created
+  Submitted
+  Approved
+  Rejected
+  Archieved
+  Deleted
+  Published
+  Unpublished
+  Resolved
+}
+
 
 
 type Query {
@@ -112,6 +162,8 @@ type Mutation {
 
   addProduct(product: ProductInput): Product
   updateProduct(product: ProductInput): Product
+
+  addQuery(helpQuery: HelpQueryInput): HelpQuery
 }
 `;
 
