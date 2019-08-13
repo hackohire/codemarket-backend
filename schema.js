@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-lambda');
+const { gql } = require('apollo-server-lambda')
 
 const schema = `
 type User {
@@ -36,7 +36,7 @@ input UserInput {
 type Product {
   _id: ID
   name: String
-  description: String
+  description: [descriptionBlocks]
   shortDescription: String
   featuredImage: String
   createdBy: User
@@ -56,7 +56,7 @@ type Product {
 input ProductInput {
   _id: ID
   name: String
-  description: String
+  description: [InputdescriptionBlock]
   shortDescription: String
   featuredImage: String
   createdBy: ID
@@ -112,24 +112,36 @@ enum Roles {
 
 type HelpQuery {
   question: String
-  description: String
+  description: [descriptionBlocks]
   price: Int
   _id: ID
   createdBy: User
   createdAt: String
   updatedAt: String
   status: HelpQueryStatus
+  categories: [String]
+  demo_url: String
+  documentation_url: String
+  video_url: String
+  snippets: [Snippet]
+  shortDescription: String
 }
 
 input HelpQueryInput {
   question: String
-  description: String
+  description: [InputdescriptionBlock]
   price: Int
   _id: ID
   createdBy: String
   createdAt: String
   updatedAt: String
   status: HelpQueryStatus
+  categories: [String]
+  demo_url: String
+  documentation_url: String
+  video_url: String
+  snippets: [SnippetInput]
+  shortDescription: String
 }
 
 enum HelpQueryStatus {
@@ -142,6 +154,63 @@ enum HelpQueryStatus {
   Published
   Unpublished
   Resolved
+}
+
+input InputdescriptionBlock {
+  type: String
+  data: InputdescriptionBlocks
+}
+
+input InputdescriptionBlocks {
+  code: String
+  language: String
+
+  caption: String
+  file: URLInput
+  stretched: Boolean
+  withBackground: Boolean
+  withBorder: Boolean
+}
+
+
+
+
+
+
+union descriptionBlocks = CodeBlock | ImageBlock
+
+type CodeBlock {
+  type: String
+  data: Code
+}
+
+type Code {
+  code: String
+  language: String
+}
+
+type ImageBlock {
+  type: String
+  data: Image
+}
+
+
+type Image {
+  caption: String
+  file: URL
+  stretched: Boolean
+  withBackground: Boolean
+  withBorder: Boolean
+}
+
+
+
+type URL {
+  url: String
+}
+
+input URLInput {
+  url: String
 }
 
 
@@ -165,6 +234,6 @@ type Mutation {
 
   addQuery(helpQuery: HelpQueryInput): HelpQuery
 }
-`;
+`
 
-module.exports = gql(schema);
+module.exports = gql(schema)

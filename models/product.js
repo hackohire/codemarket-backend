@@ -23,7 +23,7 @@ const snippet = new Schema(
 const productSchema = new Schema(
     {
         name: String,
-        description: String,
+        description: [],
         shortDescription: String,
         featuredImage: String,
         createdBy: {
