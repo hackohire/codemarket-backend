@@ -71,6 +71,62 @@ input ProductInput {
   addedToCart: Boolean
 }
 
+type Requirement {
+  _id: ID
+  name: String
+  description: [descriptionBlocks]
+  shortDescription: String
+  featuredImage: String
+  createdBy: User
+  price: Int
+  categories: [String]
+  demo_url: String
+  status: ProductStatus
+  createdAt: String
+  updatedAt: String
+}
+
+input RequirementInput {
+  _id: ID
+  name: String
+  description: [InputdescriptionBlock]
+  shortDescription: String
+  featuredImage: String
+  createdBy: ID
+  price: Int
+  categories: [String]
+  demo_url: String
+  status: ProductStatus
+}
+
+type Interview {
+  _id: ID
+  name: String
+  description: [descriptionBlocks]
+  shortDescription: String
+  featuredImage: String
+  createdBy: User
+  price: Int
+  categories: [String]
+  demo_url: String
+  status: ProductStatus
+  createdAt: String
+  updatedAt: String
+}
+
+input InterviewInput {
+  _id: ID
+  name: String
+  description: [InputdescriptionBlock]
+  shortDescription: String
+  featuredImage: String
+  createdBy: ID
+  price: Int
+  categories: [String]
+  demo_url: String
+  status: ProductStatus
+}
+
 type Snippet {
   language: String
   r: Int
@@ -162,6 +218,8 @@ input InputdescriptionBlock {
 }
 
 input InputdescriptionBlocks {
+  text: String
+  level: Int
   code: String
   language: String
 
@@ -177,7 +235,7 @@ input InputdescriptionBlocks {
 
 
 
-union descriptionBlocks = CodeBlock | ImageBlock
+union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock
 
 type CodeBlock {
   type: String
@@ -194,7 +252,6 @@ type ImageBlock {
   data: Image
 }
 
-
 type Image {
   caption: String
   file: URL
@@ -202,6 +259,28 @@ type Image {
   withBackground: Boolean
   withBorder: Boolean
 }
+
+type ParagraphBlock {
+  type: String
+  data: Paragraph
+}
+
+type Paragraph {
+  text: String
+}
+
+
+type HeaderBlock {
+  type: String
+  data: Header
+}
+
+type Header {
+  text: String
+  level: Int
+}
+
+
 
 
 
@@ -233,6 +312,10 @@ type Mutation {
   updateProduct(product: ProductInput): Product
 
   addQuery(helpQuery: HelpQueryInput): HelpQuery
+
+  addInterview(interview: InterviewInput): Interview
+
+  addRequirement(requirement: RequirementInput): Requirement
 }
 `
 
