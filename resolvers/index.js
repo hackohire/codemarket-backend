@@ -1,17 +1,31 @@
 const { getUsers, createUser, updateUser } = require('./user');
-const { createApplication, getApplications, getApplicationById, updateApplication } = require('./application');
 const { addProduct, updateProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
-const { addQuery } = require('./help');
-const { addInterview } = require('./interview')
-const { addRequirement } = require('./requirement')
+const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId } = require('./help');
+const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId } = require('./interview')
+const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId } = require('./requirement')
 
 module.exports = {
   Query: {
     hello: () => 'Hello world!',
     getUsers,
+
     getAllProducts,
     getProductsByUserId,
-    getProductById
+    getProductById,
+
+    getAllHelpRequests,
+    getHelpRequestsByUserId,
+    getHelpRequestById,
+  
+  
+    getAllInterviews,
+    getInterviewsByUserId,
+    getInterviewById,
+  
+  
+    getAllRequirements,
+    getRequirementsByUserId,
+    getRequirementById
   },
   Mutation: {
     createUser,

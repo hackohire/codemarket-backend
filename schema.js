@@ -302,6 +302,20 @@ type Query {
   getAllProducts: [Product]
   getProductsByUserId(userId: String): [Product]
   getProductById(productId: String): Product
+
+  getAllHelpRequests: [HelpQuery]
+  getHelpRequestsByUserId(userId: String): [HelpQuery]
+  getHelpRequestById(helpRequestId: String): HelpQuery
+
+
+  getAllInterviews: [Interview]
+  getInterviewsByUserId(userId: String): [Interview]
+  getInterviewById(interviewId: String): Interview
+
+
+  getAllRequirements: [Requirement]
+  getRequirementsByUserId(userId: String): [Requirement]
+  getRequirementById(requirementId: String): Requirement
 }
 
 type Mutation {

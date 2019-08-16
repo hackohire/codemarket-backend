@@ -19,7 +19,7 @@ const querySchema = new Schema(
         price: Number,
         createdBy: {
             type: Schema.Types.ObjectId,
-            ref: "User",
+            ref: "user",
             // required: true
         },
         email: String,

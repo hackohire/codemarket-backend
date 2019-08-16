@@ -31,6 +31,96 @@ async function addRequirement(_, { requirement }, { headers, db, decodedToken })
     });
 }
 
+async function getRequirementsByUserId(_, { userId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Requirement.find({ 'createdBy': userId }).populate('createdBy').exec((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res);
+            });
+
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function getRequirementById(_, { helpQueryId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Requirement.findById(helpQueryId).populate('createdBy').exec((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res);
+            });
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function getAllRequirements(_, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Requirement.find({}).populate('createdBy').exec((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res);
+            });
+
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 module.exports = {
-    addRequirement
+    addRequirement,
+    getRequirementsByUserId,
+    getRequirementById,
+    getAllRequirements
+
 }
