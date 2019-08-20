@@ -23,6 +23,10 @@ const interviewSchema = new Schema(
             enum: ['Created', 'Drafted', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
             default: 'Created'
         },
+        tags: [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+        }],
         // snippets: [snippet],
         // addedToCart: Boolean
     },

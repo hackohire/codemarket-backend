@@ -1,5 +1,6 @@
 const connectToMongoDB = require('../helpers/db');
 const Requirement = require('../models/requirement')();
+const helper = require('../helpers/helper');
 let conn;
 
 async function addRequirement(_, { requirement }, { headers, db, decodedToken }) {
@@ -11,6 +12,10 @@ async function addRequirement(_, { requirement }, { headers, db, decodedToken })
                 conn = await connectToMongoDB();
             } else {
                 console.log('Using existing mongoose connection.');
+            }
+
+            if (requirement.tags && requirement.tags.length) {
+                requirement.tags = await helper.insertManyIntoTags(requirement.tags);
             }
 
 

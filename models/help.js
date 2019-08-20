@@ -34,6 +34,10 @@ const querySchema = new Schema(
         video_url: String,
         snippets: [snippet],
         shortDescription: String,
+        tags: [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+        }],
     },
     {
         timestamps: true,

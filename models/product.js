@@ -10,6 +10,8 @@ const priceAndFiles = new Schema(
 );
 
 
+
+
 const snippet = new Schema(
     {
         language: String,
@@ -43,7 +45,11 @@ const productSchema = new Schema(
             default: 'Created'
         },
         snippets: [snippet],
-        addedToCart: Boolean
+        tags: [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+        }],
+        // addedToCart: Boolean
     },
     {
         timestamps: true,

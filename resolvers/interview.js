@@ -1,5 +1,6 @@
 const connectToMongoDB = require('../helpers/db');
 const Interview = require('../models/interview')();
+const helper = require('../helpers/helper');
 let conn;
 
 async function addInterview(_, { interview }, { headers, db, decodedToken }) {
@@ -13,12 +14,18 @@ async function addInterview(_, { interview }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
+            if (interview.tags && interview.tags.length) {
+                interview.tags = await helper.insertManyIntoTags(interview.tags);
+            }
+
 
             const int = await new Interview(interview);
             await int.save(interview).then(async p => {
                 console.log(p)
 
-                return resolve(p);
+                p.populate('createdBy').populate('tags').execPopulate().then(populatedInterview => {
+                    return resolve(populatedInterview);
+                })
                 // return resolve([a]);
 
             });

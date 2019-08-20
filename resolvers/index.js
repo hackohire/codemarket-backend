@@ -1,5 +1,5 @@
 const { getUsers, createUser, updateUser } = require('./user');
-const { addProduct, updateProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
+const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
 const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId } = require('./help');
 const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId } = require('./interview')
 const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId } = require('./requirement')
@@ -33,6 +33,7 @@ module.exports = {
 
     addProduct,
     updateProduct,
+    deleteProduct,
 
     addQuery,
 

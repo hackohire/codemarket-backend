@@ -1,5 +1,6 @@
 const connectToMongoDB = require('../helpers/db');
 const Product = require('../models/product')();
+const helper = require('../helpers/helper');
 const sendEmail = require('../helpers/ses_sendTemplatedEmail');
 const User = require('./../models/user')();
 let conn;
@@ -15,34 +16,42 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
+            if (product.tags && product.tags.length) {
+                product.tags = await helper.insertManyIntoTags(product.tags);
+            }
 
             const prod = await new Product(product);
-            await prod.save(product).then(async p => {
-                console.log(p)
-
-                User.find({'roles': 'Admin'}, (err, admins) => {
-                    if(err) { console.log(err) }
-                    else {
-                        // admins.forEach((admin, i) => {
-                        //     const params = {...sendEmail.emailParams};
-                        //     params.Template = 'ProductCreationNotificationToAdmin',
-                        //     params.Source = 'sumitvekariya7@gmail.com',
-                        //     params.Destination.ToAddresses = [admin.email], // 'sumi@dreamjobb.com'
-                        //     params.TemplateData = JSON.stringify({
-                        //         'name': admin.name,
-                        //         'productName': p.name,
-                        //         'link': `${process.env.FRONT_END_URL}/#/application/applications/${p._id}`,
-                        //         'productDetails': `${p.description}`
-                        //     });
-                        //     sendEmail.sendTemplatedEmail(params);
-                        // })
-                    }
-                })
-
-                return resolve(p);
-                // return resolve([a]);
-
+            const savedProduct = await prod.save(product);
+            savedProduct.populate('createdBy').populate('tags').execPopulate().then((sd) => {
+                console.log(sd);
+                return resolve(sd)
             });
+            // await prod.save(product).then(async p => {
+            //     console.log(p.)
+
+            //     // User.find({'roles': 'Admin'}, (err, admins) => {
+            //     //     if(err) { console.log(err) }
+            //     //     else {
+            //     //         admins.forEach((admin, i) => {
+            //     //             const params = {...sendEmail.emailParams};
+            //     //             params.Template = 'ProductCreationNotificationToAdmin',
+            //     //             params.Source = 'sumitvekariya7@gmail.com',
+            //     //             params.Destination.ToAddresses = [admin.email], // 'sumi@dreamjobb.com'
+            //     //             params.TemplateData = JSON.stringify({
+            //     //                 'name': admin.name,
+            //     //                 'productName': p.name,
+            //     //                 'link': `${process.env.FRONT_END_URL}/#/application/applications/${p._id}`,
+            //     //                 'productDetails': `${p.description}`
+            //     //             });
+            //     //             sendEmail.sendTemplatedEmail(params);
+            //     //         })
+            //     //     }
+            //     // })
+
+            //     return resolve(p);
+            //     // return resolve([a]);
+
+            // });
 
 
         } catch (e) {
@@ -64,12 +73,19 @@ async function updateProduct(_, { product }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
+            if (product.tags && product.tags.length) {
+                product.tags = await helper.insertManyIntoTags(product.tags);
+            }
+
+
             await Product.findByIdAndUpdate(product._id, product, (err, res) => {
                 if (err) {
                     return reject(err)
                 }
 
-                return resolve(res);
+                res.populate('createdBy').populate('tags').execPopulate().then((d) => {
+                    return resolve(d);
+                });
             });
 
 
@@ -93,7 +109,7 @@ async function getProductsByUserId(_, { userId }, { headers, db, decodedToken })
                 console.log('Using existing mongoose connection.');
             }
 
-            Product.find({ 'createdBy': userId }).populate('createdBy').exec((err, res) => {
+            Product.find({ 'createdBy': userId }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -122,7 +138,7 @@ async function getProductById(_, { productId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Product.findById(productId).populate('createdBy').exec((err, res) => {
+            Product.findById(productId).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -168,10 +184,41 @@ async function getAllProducts(_, { headers, db, decodedToken }) {
     });
 }
 
+async function deleteProduct(_, { productId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Product.deleteOne({_id: productId}, ((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res.deletedCount);
+                })
+            );
+
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 module.exports = {
     addProduct,
     updateProduct,
     getAllProducts,
     getProductsByUserId,
-    getProductById
+    getProductById,
+    deleteProduct
 }

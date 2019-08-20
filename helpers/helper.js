@@ -1,4 +1,5 @@
 var auth = require('./auth');
+const Tag = require('../models/tag')();
 
 async function checkIfUserIsAdmin (decodedToken) {
     const isUserAdmin = new Promise((resolve, reject) => {
@@ -14,6 +15,18 @@ async function checkIfUserIsAdmin (decodedToken) {
     return isUserAdmin;
 }
 
+async function insertManyIntoTags(tags) {
+    console.log(tags);
+    const tagsAdded = new Promise((resolve, reject) => {
+        Tag.insertMany(tags, {ordered: false, rawResult: true}).then((d) => {
+            console.log(d)
+            resolve(d.ops.map(id => id._id));
+        });
+    })
+    return tagsAdded;
+}
+
 module.exports = {
-    checkIfUserIsAdmin
+    checkIfUserIsAdmin,
+    insertManyIntoTags
 }
