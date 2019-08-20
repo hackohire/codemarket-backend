@@ -1,37 +1,6 @@
 const { gql } = require('apollo-server-lambda')
 
 const schema = `
-type User {
-  _id: ID!
-  name: String
-  email: String
-  sub: String
-  email_verified: Boolean
-  programming_languages: [String]
-  github_url: String
-  linkedin_url: String
-  stackoverflow_url: String
-  portfolio_links: [String]
-  location: String
-  avatar: String
-  roles: [String]
-}
-
-input UserInput {
-  _id: ID
-  name: String
-  email: String
-  sub: String
-  email_verified: Boolean
-  programming_languages: [String]
-  github_url: String
-  linkedin_url: String
-  stackoverflow_url: String
-  portfolio_links: [String]
-  location: String
-  avatar: String
-  roles: [String]
-}
 
 type Product {
   _id: ID
@@ -50,7 +19,7 @@ type Product {
   createdAt: String
   updatedAt: String
   snippets: [Snippet]
-  addedToCart: Boolean
+  tags: [Tag]
 }
 
 input ProductInput {
@@ -69,6 +38,17 @@ input ProductInput {
   status: ProductStatus
   snippets: [SnippetInput]
   addedToCart: Boolean
+  tags: [TagInput]
+}
+
+type Tag {
+  name: String
+  _id: ID
+}
+
+input TagInput {
+  name: String
+  _id: ID
 }
 
 type Requirement {
@@ -84,6 +64,7 @@ type Requirement {
   status: ProductStatus
   createdAt: String
   updatedAt: String
+  tags: [Tag]
 }
 
 input RequirementInput {
@@ -97,6 +78,7 @@ input RequirementInput {
   categories: [String]
   demo_url: String
   status: ProductStatus
+  tags: [TagInput]
 }
 
 type Interview {
@@ -112,6 +94,7 @@ type Interview {
   status: ProductStatus
   createdAt: String
   updatedAt: String
+  tags: [Tag]
 }
 
 input InterviewInput {
@@ -125,6 +108,7 @@ input InterviewInput {
   categories: [String]
   demo_url: String
   status: ProductStatus
+  tags: [TagInput]
 }
 
 type Snippet {
@@ -181,6 +165,7 @@ type HelpQuery {
   video_url: String
   snippets: [Snippet]
   shortDescription: String
+  tags: [Tag]
 }
 
 input HelpQueryInput {
@@ -198,6 +183,7 @@ input HelpQueryInput {
   video_url: String
   snippets: [SnippetInput]
   shortDescription: String
+  tags: [TagInput]
 }
 
 enum HelpQueryStatus {
@@ -296,8 +282,6 @@ input URLInput {
 
 type Query {
   hello: String
-  getUsers(_page: Int _limit: Int): [User!]!
-  getSelectedUser(id: String): User!
 
   getAllProducts: [Product]
   getProductsByUserId(userId: String): [Product]
@@ -319,11 +303,10 @@ type Query {
 }
 
 type Mutation {
-  createUser(user: UserInput!): User
-  updateUser(user: UserInput): User
 
   addProduct(product: ProductInput): Product
   updateProduct(product: ProductInput): Product
+  deleteProduct(productId: String): Boolean
 
   addQuery(helpQuery: HelpQueryInput): HelpQuery
 

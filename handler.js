@@ -1,5 +1,5 @@
 const {ApolloServer} = require('apollo-server-lambda');
-const typeDefs = require('./schema');
+const typeDefs = require('./schemas');
 const resolvers = require('./resolvers');
 const connectToMongoDB = require('./helpers/db');
 const auth = require('./helpers/auth');
@@ -16,7 +16,7 @@ const server = new ApolloServer({
     event,
     context,
     // decodedToken: auth.auth(event.headers),
-    // db: await connectToMongoDB() 
+    db: await connectToMongoDB() 
   }),
   introspection: true,
   playground: true,
