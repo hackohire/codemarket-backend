@@ -309,10 +309,16 @@ type Mutation {
   deleteProduct(productId: String): Boolean
 
   addQuery(helpQuery: HelpQueryInput): HelpQuery
+  updateHelpRequest(helpRequest: HelpQueryInput): HelpQuery
+  deleteHelpRequest(helpRequestId: String): Boolean
 
   addInterview(interview: InterviewInput): Interview
+  updateInterview(interview: InterviewInput): Interview
+  deleteInterview(interviewId: String): Boolean
 
   addRequirement(requirement: RequirementInput): Requirement
+  updateRequirement(requirement: RequirementInput): Requirement
+  deleteRequirement(requirementId: String): Boolean
 }
 `
 

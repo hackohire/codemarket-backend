@@ -166,7 +166,7 @@ async function getAllProducts(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Product.find({}).populate('createdBy').exec((err, res) => {
+            Product.find({}).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)

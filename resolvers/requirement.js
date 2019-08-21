@@ -22,8 +22,9 @@ async function addRequirement(_, { requirement }, { headers, db, decodedToken })
             const int = await new Requirement(requirement);
             await int.save(requirement).then(async p => {
                 console.log(p)
-
-                return resolve(p);
+                p.populate('createdBy').populate('tags').execPopulate().then(populatedRequirement => {
+                    return resolve(populatedRequirement);
+                })
                 // return resolve([a]);
 
             });
@@ -47,7 +48,7 @@ async function getRequirementsByUserId(_, { userId }, { headers, db, decodedToke
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.find({ 'createdBy': userId }).populate('createdBy').exec((err, res) => {
+            Requirement.find({ 'createdBy': userId }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -76,7 +77,7 @@ async function getRequirementById(_, { helpQueryId }, { headers, db, decodedToke
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.findById(helpQueryId).populate('createdBy').exec((err, res) => {
+            Requirement.findById(helpQueryId).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -104,7 +105,7 @@ async function getAllRequirements(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.find({}).populate('createdBy').exec((err, res) => {
+            Requirement.find({}).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -122,10 +123,79 @@ async function getAllRequirements(_, { headers, db, decodedToken }) {
     });
 }
 
+
+async function updateRequirement(_, { requirement }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            if (requirement.tags && requirement.tags.length) {
+                requirement.tags = await helper.insertManyIntoTags(requirement.tags);
+            }
+
+
+            await Requirement.findByIdAndUpdate(requirement._id, requirement, (err, res) => {
+                if (err) {
+                    return reject(err)
+                }
+
+                res.populate('createdBy').populate('tags').execPopulate().then((d) => {
+                    return resolve(d);
+                });
+            });
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+
+
+async function deleteRequirement(_, { requirementId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Requirement.deleteOne({ _id: requirementId }, ((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res.deletedCount);
+            })
+            );
+
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+
 module.exports = {
     addRequirement,
     getRequirementsByUserId,
     getRequirementById,
-    getAllRequirements
-
+    getAllRequirements,
+    updateRequirement,
+    deleteRequirement
 }

@@ -49,7 +49,7 @@ async function getInterviewsByUserId(_, { userId }, { headers, db, decodedToken 
                 console.log('Using existing mongoose connection.');
             }
 
-            Interview.find({ 'createdBy': userId }).populate('createdBy').exec((err, res) => {
+            Interview.find({ 'createdBy': userId }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -78,7 +78,7 @@ async function getInterviewById(_, { interviewId }, { headers, db, decodedToken 
                 console.log('Using existing mongoose connection.');
             }
 
-            Interview.findById(interviewId).populate('createdBy').exec((err, res) => {
+            Interview.findById(interviewId).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -106,7 +106,7 @@ async function getAllInterviews(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Interview.find({}).populate('createdBy').exec((err, res) => {
+            Interview.find({}).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -124,9 +124,75 @@ async function getAllInterviews(_, { headers, db, decodedToken }) {
     });
 }
 
+async function updateInterview(_, { interview }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            if (interview.tags && interview.tags.length) {
+                interview.tags = await helper.insertManyIntoTags(interview.tags);
+            }
+
+
+            await Interview.findByIdAndUpdate(interview._id, interview, (err, res) => {
+                if (err) {
+                    return reject(err)
+                }
+
+                res.populate('createdBy').populate('tags').execPopulate().then((d) => {
+                    return resolve(d);
+                });
+            });
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function deleteInterview(_, { interviewId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Interview.deleteOne({_id: interviewId}, ((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res.deletedCount);
+                })
+            );
+
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 module.exports = {
     addInterview,
     getInterviewsByUserId,
     getInterviewById,
-    getAllInterviews
+    getAllInterviews,
+    updateInterview,
+    deleteInterview
 }

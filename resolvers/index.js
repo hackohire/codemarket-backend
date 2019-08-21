@@ -1,8 +1,8 @@
 const { getUsers, createUser, updateUser } = require('./user');
 const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
-const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId } = require('./help');
-const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId } = require('./interview')
-const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId } = require('./requirement')
+const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId, updateHelpRequest, deleteHelpRequest } = require('./help');
+const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview')
+const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement')
 
 module.exports = {
   Query: {
@@ -25,7 +25,8 @@ module.exports = {
   
     getAllRequirements,
     getRequirementsByUserId,
-    getRequirementById
+    getRequirementById,
+
   },
   Mutation: {
     createUser,
@@ -36,10 +37,16 @@ module.exports = {
     deleteProduct,
 
     addQuery,
+    updateHelpRequest,
+    deleteHelpRequest,
 
     addInterview,
+    updateInterview,
+    deleteInterview,
 
-    addRequirement
+    addRequirement,
+    updateRequirement,
+    deleteRequirement
 
   },
 

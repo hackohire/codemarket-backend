@@ -52,7 +52,7 @@ async function getHelpRequestsByUserId(_, { userId }, { headers, db, decodedToke
                 console.log('Using existing mongoose connection.');
             }
 
-            HelpRequest.find({ 'createdBy': userId }).populate('createdBy').exec((err, res) => {
+            HelpRequest.find({ 'createdBy': userId }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -81,7 +81,7 @@ async function getHelpRequestById(_, { helpRequestId }, { headers, db, decodedTo
                 console.log('Using existing mongoose connection.');
             }
 
-            HelpRequest.findById(helpRequestId).populate('createdBy').exec((err, res) => {
+            HelpRequest.findById(helpRequestId).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -109,7 +109,7 @@ async function getAllHelpRequests(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            HelpRequest.find({}).populate('createdBy').exec((err, res) => {
+            HelpRequest.find({}).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -127,9 +127,77 @@ async function getAllHelpRequests(_, { headers, db, decodedToken }) {
     });
 }
 
+async function updateHelpRequest(_, { helpRequest }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            if (helpRequest.tags && helpRequest.tags.length) {
+                helpRequest.tags = await helper.insertManyIntoTags(helpRequest.tags);
+            }
+
+
+            await HelpRequest.findByIdAndUpdate(helpRequest._id, helpRequest, (err, res) => {
+                if (err) {
+                    return reject(err)
+                }
+
+                res.populate('createdBy').populate('tags').execPopulate().then((d) => {
+                    return resolve(d);
+                });
+            });
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+
+
+async function deleteHelpRequest(_, { helpRequestId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            HelpRequest.deleteOne({ _id: helpRequestId }, ((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res.deletedCount);
+            })
+            );
+
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 module.exports = {
     addQuery,
     getHelpRequestsByUserId,
     getHelpRequestById,
-    getAllHelpRequests
+    getAllHelpRequests,
+    updateHelpRequest,
+    deleteHelpRequest
 }
