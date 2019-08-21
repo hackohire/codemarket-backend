@@ -13,7 +13,7 @@ const interviewSchema = new Schema(
             // required: true
         },
         // priceAndFiles: [priceAndFiles],
-        totalPrice: Number,
+        price: Number,
         categories: [],
         demo_url: String,
         // documentation_url: String,
