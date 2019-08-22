@@ -1,4 +1,4 @@
-const { getUsers, createUser, updateUser } = require('./user');
+const { getUsers, createUser, updateUser, authorize } = require('./user');
 const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
 const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId, updateHelpRequest, deleteHelpRequest } = require('./help');
 const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview')
@@ -31,6 +31,7 @@ module.exports = {
   Mutation: {
     createUser,
     updateUser,
+    authorize,
 
     addProduct,
     updateProduct,

@@ -16,6 +16,7 @@ type User {
     location: String
     avatar: String
     roles: [String]
+    currentJobDetails: CurrentJobDetails
   }
   
   input UserInput {
@@ -32,6 +33,19 @@ type User {
     location: String
     avatar: String
     roles: [String]
+    currentJobDetails: CurrentJobDetailsInput
+  }
+
+  input CurrentJobDetailsInput {
+    jobProfile: String
+    companyName: String
+    companyLocation: String
+  }
+  
+  type CurrentJobDetails {
+    jobProfile: String
+    companyName: String
+    companyLocation: String
   }
 
   extend type Query {
@@ -42,6 +56,7 @@ type User {
   extend type Mutation {
     createUser(user: UserInput!): User
     updateUser(user: UserInput): User
+    authorize(applicationId: String): User
   }
 `
 
