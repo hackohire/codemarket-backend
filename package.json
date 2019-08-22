@@ -27,6 +27,7 @@
     "jwk-to-pem": "^2.0.1",
     "jwks-rsa": "^1.5.1",
     "mongoose": "^5.5.14",
-    "uuid-apikey": "^1.4.3"
+    "uuid-apikey": "^1.4.3",
+    "lodash": "^4.17.14"
   }
 }
