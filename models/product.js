@@ -28,6 +28,7 @@ const productSchema = new Schema(
         description: [],
         shortDescription: String,
         featuredImage: String,
+        parentId: Schema.Types.ObjectId,
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: "user",
@@ -49,6 +50,10 @@ const productSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "tag",
         }],
+        comments: [{
+            type: Schema.Types.ObjectId,
+            ref: "comment", 
+        }]
         // addedToCart: Boolean
     },
     {
