@@ -20,6 +20,7 @@ type Product {
   updatedAt: String
   snippets: [Snippet]
   tags: [Tag]
+  comments: [Comment]
 }
 
 input ProductInput {
@@ -39,6 +40,26 @@ input ProductInput {
   snippets: [SnippetInput]
   addedToCart: Boolean
   tags: [TagInput]
+  comments: [CommentInput]
+}
+
+type Comment {
+  parents: [Comment]
+  children: [Comment]
+  _id: ID
+  text: String
+  parentId: ID
+  createdBy: ID
+}
+
+input CommentInput {
+  parents: [ID]
+  children: [ID]
+  discussion_id: String
+  parentId: ID
+  _id: ID
+  text: String
+  createdBy: ID
 }
 
 type Tag {
@@ -287,6 +308,8 @@ type Query {
   getProductsByUserId(userId: String): [Product]
   getProductById(productId: String): Product
 
+  getComments(commentId: String): Comment
+
   getAllHelpRequests: [HelpQuery]
   getHelpRequestsByUserId(userId: String): [HelpQuery]
   getHelpRequestById(helpRequestId: String): HelpQuery
@@ -307,6 +330,8 @@ type Mutation {
   addProduct(product: ProductInput): Product
   updateProduct(product: ProductInput): Product
   deleteProduct(productId: String): Boolean
+
+  addComment(comment: CommentInput): Comment
 
   addQuery(helpQuery: HelpQueryInput): HelpQuery
   updateHelpRequest(helpRequest: HelpQueryInput): HelpQuery
