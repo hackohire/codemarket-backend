@@ -15,7 +15,7 @@ const server = new ApolloServer({
     functionName: context.functionName,
     event,
     context,
-    decodedToken: await auth.auth(event.headers),
+    decodedToken: event.headers && event.headers.Authorization ?  await auth.auth(event.headers) : null,
     db: await connectToMongoDB() 
   }),
   introspection: true,
