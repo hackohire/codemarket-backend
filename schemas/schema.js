@@ -21,6 +21,7 @@ type Product {
   snippets: [Snippet]
   tags: [Tag]
   comments: [Comment]
+  support: Support
 }
 
 input ProductInput {
@@ -41,6 +42,17 @@ input ProductInput {
   addedToCart: Boolean
   tags: [TagInput]
   comments: [CommentInput]
+  support: SupportInput
+}
+
+type Support {
+  time: Int
+  description: [descriptionBlocks]
+}
+
+input SupportInput {
+  time: Int
+  description: [InputdescriptionBlock]
 }
 
 type Comment {
@@ -86,6 +98,7 @@ type Requirement {
   createdAt: String
   updatedAt: String
   tags: [Tag]
+  support: Support
 }
 
 input RequirementInput {
@@ -100,6 +113,7 @@ input RequirementInput {
   demo_url: String
   status: ProductStatus
   tags: [TagInput]
+  support: SupportInput
 }
 
 type Interview {
@@ -116,6 +130,7 @@ type Interview {
   createdAt: String
   updatedAt: String
   tags: [Tag]
+  support: Support
 }
 
 input InterviewInput {
@@ -130,6 +145,7 @@ input InterviewInput {
   demo_url: String
   status: ProductStatus
   tags: [TagInput]
+  support: SupportInput
 }
 
 type Snippet {
@@ -187,6 +203,7 @@ type HelpQuery {
   snippets: [Snippet]
   shortDescription: String
   tags: [Tag]
+  support: Support
 }
 
 input HelpQueryInput {
@@ -205,6 +222,7 @@ input HelpQueryInput {
   snippets: [SnippetInput]
   shortDescription: String
   tags: [TagInput]
+  support: SupportInput
 }
 
 enum HelpQueryStatus {

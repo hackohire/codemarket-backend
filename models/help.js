@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const support  = require('./support');
+
 
 const snippet = new Schema(
     {
@@ -38,6 +40,7 @@ const querySchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "tag",
         }],
+        support: support
     },
     {
         timestamps: true,

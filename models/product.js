@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const support  = require('./support');
 
 const priceAndFiles = new Schema(
     {
@@ -8,9 +9,6 @@ const priceAndFiles = new Schema(
         price: Number
     }
 );
-
-
-
 
 const snippet = new Schema(
     {
@@ -50,6 +48,10 @@ const productSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "tag",
         }],
+        support: {
+            type: support,
+            default: null
+        },
         comments: [{
             type: Schema.Types.ObjectId,
             ref: "comment", 

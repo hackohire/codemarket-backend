@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const support  = require('./support');
+
 
 const requirementSchema = new Schema(
     {
@@ -27,6 +29,7 @@ const requirementSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "tag",
         }],
+        support: support
         // snippets: [snippet],
         // addedToCart: Boolean
     },
