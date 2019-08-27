@@ -188,7 +188,7 @@ enum Roles {
 }
 
 type HelpQuery {
-  question: String
+  name: String
   description: [descriptionBlocks]
   price: Int
   _id: ID
@@ -207,7 +207,7 @@ type HelpQuery {
 }
 
 input HelpQueryInput {
-  question: String
+  name: String
   description: [InputdescriptionBlock]
   price: Int
   _id: ID
@@ -253,6 +253,16 @@ input InputdescriptionBlocks {
   stretched: Boolean
   withBackground: Boolean
   withBorder: Boolean
+
+  style: String
+  items: [String]
+
+  alignment: String
+
+  content: [[String]]
+
+  title: String
+  message: String
 }
 
 
@@ -260,7 +270,7 @@ input InputdescriptionBlocks {
 
 
 
-union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock
+union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock
 
 type CodeBlock {
   type: String
@@ -285,6 +295,16 @@ type Image {
   withBorder: Boolean
 }
 
+type ListBlock {
+  type: String
+  data: List
+}
+
+type List {
+  style: String
+  items: [String]
+}
+
 type ParagraphBlock {
   type: String
   data: Paragraph
@@ -303,6 +323,36 @@ type HeaderBlock {
 type Header {
   text: String
   level: Int
+}
+
+type QuoteBlock {
+  type: String
+  data: Quote
+}
+
+type Quote {
+  text: String
+  caption: String
+  alignment: String
+}
+
+type TableBlock {
+  type: String
+  data: Table
+}
+
+type Table {
+  content: [[String]]
+}
+
+type WarningBlock {
+  type: String
+  data: Warning
+}
+
+type Warning {
+  title: String
+  message: String
 }
 
 

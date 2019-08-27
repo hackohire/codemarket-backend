@@ -73,6 +73,18 @@ module.exports = {
         case 'image': 
           return 'ImageBlock';
 
+        case 'list':
+          return 'ListBlock'
+
+        case 'quote':
+          return 'QuoteBlock'
+
+        case 'table':
+          return 'TableBlock'
+
+        case 'warning':
+          return 'WarningBlock'
+
         default:
           console.log('default case')
           return null;
