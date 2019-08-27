@@ -16,7 +16,7 @@ const snippet = new Schema(
 
 const querySchema = new Schema(
     {
-        question: String,
+        name: String,
         description: [],
         price: Number,
         createdBy: {
