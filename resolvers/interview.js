@@ -140,7 +140,7 @@ async function updateInterview(_, { interview }, { headers, db, decodedToken }) 
             }
 
 
-            await Interview.findByIdAndUpdate(interview._id, interview, (err, res) => {
+            await Interview.findByIdAndUpdate(interview._id, interview, {new: true}, (err, res) => {
                 if (err) {
                     return reject(err)
                 }

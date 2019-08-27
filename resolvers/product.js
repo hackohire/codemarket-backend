@@ -92,7 +92,7 @@ async function updateProduct(_, { product }, { headers, db, decodedToken }) {
             }
 
 
-            await Product.findByIdAndUpdate(product._id, product, (err, res) => {
+            await Product.findByIdAndUpdate(product._id, product, {new: true}, (err, res) => {
                 if (err) {
                     return reject(err)
                 }

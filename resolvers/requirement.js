@@ -66,7 +66,7 @@ async function getRequirementsByUserId(_, { userId }, { headers, db, decodedToke
     });
 }
 
-async function getRequirementById(_, { helpQueryId }, { headers, db, decodedToken }) {
+async function getRequirementById(_, { requirementId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -77,7 +77,7 @@ async function getRequirementById(_, { helpQueryId }, { headers, db, decodedToke
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.findById(helpQueryId).populate('createdBy').populate('tags').exec((err, res) => {
+            Requirement.findById(requirementId).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -140,7 +140,7 @@ async function updateRequirement(_, { requirement }, { headers, db, decodedToken
             }
 
 
-            await Requirement.findByIdAndUpdate(requirement._id, requirement, (err, res) => {
+            await Requirement.findByIdAndUpdate(requirement._id, requirement, {new: true}, (err, res) => {
                 if (err) {
                     return reject(err)
                 }

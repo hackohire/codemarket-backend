@@ -143,7 +143,7 @@ async function updateHelpRequest(_, { helpRequest }, { headers, db, decodedToken
             }
 
 
-            await HelpRequest.findByIdAndUpdate(helpRequest._id, helpRequest, (err, res) => {
+            await HelpRequest.findByIdAndUpdate(helpRequest._id, helpRequest, {new: true}, (err, res) => {
                 if (err) {
                     return reject(err)
                 }
