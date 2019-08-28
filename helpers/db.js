@@ -13,7 +13,9 @@ const connectToDatabase = () => {
   }
 
   console.log('Creating new database connection');
-  return mongoose.connect(process.env.MONGODB_URL)
+  return mongoose.connect(process.env.MONGODB_URL, {
+    reconnectTries: 30, reconnectInterval: 500, poolSize: 1, socketTimeoutMS: 2000000, keepAlive: true
+  })
     .then(db => {
       isConnected = db.connections[0].readyState;
     });
