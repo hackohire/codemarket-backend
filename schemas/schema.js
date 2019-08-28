@@ -59,9 +59,12 @@ type Comment {
   parents: [Comment]
   children: [Comment]
   _id: ID
-  text: String
+  text: [descriptionBlocks]
+  referenceId: ID,
+  type: String
   parentId: ID
-  createdBy: ID
+  createdBy: User
+  createdAt: String
 }
 
 input CommentInput {
@@ -69,9 +72,12 @@ input CommentInput {
   children: [ID]
   discussion_id: String
   parentId: ID
+  referenceId: ID
+  type: String
   _id: ID
-  text: String
+  text: [InputdescriptionBlock]
   createdBy: ID
+  createdAt: String
 }
 
 type Tag {
@@ -377,6 +383,7 @@ type Query {
   getProductById(productId: String): Product
 
   getComments(commentId: String): Comment
+  getCommentsByReferenceId(referenceId: String): [Comment]
 
   getAllHelpRequests: [HelpQuery]
   getHelpRequestsByUserId(userId: String): [HelpQuery]
