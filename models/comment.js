@@ -7,6 +7,9 @@ const commentSchema = new Schema(
         parentId: {
             type: Schema.Types.ObjectId,
         },
+        referenceId: {
+            type: Schema.Types.ObjectId // Id of a product / help-request / requirement / interview
+        },
         children: [{
             type: Schema.Types.ObjectId,
             ref: 'comment',
@@ -22,12 +25,16 @@ const commentSchema = new Schema(
             ref: "user",
             // required: true
         },
+        type: {
+            type: String,
+            enum: ['product', 'help-request', 'requirement', 'interview'],
+        },
         status: {
             type: String,
             enum: ['Created', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted', 'Published', 'Unpublished', 'Resolved'],
             default: 'Created'
         },
-        text: String
+        text: []
     },
     {
         timestamps: true,
