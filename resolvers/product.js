@@ -7,6 +7,18 @@ const Comment = require('./../models/comment')();
 let conn;
 
 
+function generateSlug() {
+
+    let slug = '';
+    let chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+
+    for (let i = 0; i < 5; i++) {
+        slug += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    return slug;
+}
+
 async function addProduct(_, { product }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -216,6 +228,89 @@ async function deleteProduct(_, { productId }, { headers, db, decodedToken }) {
     });
 }
 
+async function addComment(_, { comment }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            const c = new Comment(comment);
+
+            if (c.parentId) {
+                // let parentCommentId = c.parents[c.parents.length - 1];
+
+
+                const pcForChildren = await Comment.findById(c.parentId).exec();
+
+                await pcForChildren.children.push(c._id);
+
+                await pcForChildren.update({children: pcForChildren.children});
+
+                const parentComment = await Comment.findById(c.parentId).exec();
+                
+                parentComment.parents.push(c._id);
+
+                c.parents = parentComment.parents;
+
+                await c.save().then( async (com) => {
+                    console.log(com);
+                    await com.populate('parents').populate('children').execPopulate();
+                    resolve(com);
+                })
+
+            } else {
+                //  actually insert the parent comment
+                c.parents.push(c._id);
+                await c.save().then( async (com) => {
+                    console.log(com);
+                    await com.populate('parents').execPopulate();
+                    resolve(com);
+                })
+            }
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+
+async function getComments(_, { commentId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            // let subdiscussion = await Comment.findOne({
+            //     'discussion_id': commentId,
+            //     'full_slug': { $regex: '/^/'} }).exec();
+
+            let subdiscussion = await Comment.findById(commentId)
+            .populate({path: 'children', populate: {path: 'children'}})
+            .populate({path: 'parents', populate: {path: 'parents'}}).exec();
+            // subdiscussion = subdiscussion.sort('full_slug')
+            console.log(subdiscussion);
+            resolve(subdiscussion);
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
 
 
 
@@ -227,4 +322,6 @@ module.exports = {
     getProductsByUserId,
     getProductById,
     deleteProduct,
+    addComment,
+    getComments
 }

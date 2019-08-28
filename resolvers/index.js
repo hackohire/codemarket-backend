@@ -1,9 +1,8 @@
 const { getUsers, createUser, updateUser, authorize } = require('./user');
-const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
+const { addProduct, addComment, getComments, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
 const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId, updateHelpRequest, deleteHelpRequest } = require('./help');
 const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview')
 const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement')
-const { addComment, getComments, getCommentsByReferenceId, } = require('./comment')
 
 module.exports = {
   Query: {
@@ -15,7 +14,6 @@ module.exports = {
     getProductById,
 
     getComments,
-    getCommentsByReferenceId,
 
     getAllHelpRequests,
     getHelpRequestsByUserId,
