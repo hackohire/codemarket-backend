@@ -60,7 +60,7 @@ async function getCommentsByReferenceId(_, { referenceId }, { headers, db, decod
             }
 
 
-            let subdiscussion = await Comment.find({referenceId: referenceId})
+            let subdiscussion = await Comment.find({referenceId: referenceId, parentId: null})
             .populate('createdBy')
             .populate({path: 'children', populate: {path: 'createdBy'}}).exec();
             // subdiscussion = subdiscussion.sort('full_slug')

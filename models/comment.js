@@ -6,6 +6,7 @@ const commentSchema = new Schema(
     {
         parentId: {
             type: Schema.Types.ObjectId,
+            default: null
         },
         referenceId: {
             type: Schema.Types.ObjectId // Id of a product / help-request / requirement / interview
