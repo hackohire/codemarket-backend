@@ -1,14 +1,16 @@
-const { getUsers, createUser, updateUser, authorize } = require('./user');
+const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount } = require('./user');
 const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
 const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId, updateHelpRequest, deleteHelpRequest } = require('./help');
 const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview')
 const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement')
 const { addComment, getComments, getCommentsByReferenceId, } = require('./comment')
+const { searchCategories } = require('./categories')
 
 module.exports = {
   Query: {
     hello: () => 'Hello world!',
     getUsers,
+    getUsersAndBugFixesCount,
 
     getAllProducts,
     getProductsByUserId,
@@ -30,6 +32,8 @@ module.exports = {
     getAllRequirements,
     getRequirementsByUserId,
     getRequirementById,
+
+    searchCategories
 
   },
   Mutation: {

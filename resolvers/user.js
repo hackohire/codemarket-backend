@@ -154,9 +154,53 @@ async function authorize(_, { applicationId }, { headers, db, decodedToken }) {
     });
 }
 
+async function getUsersAndBugFixesCount(_, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // const decodedToken = await auth.auth(headers);
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+
+            // let options = { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false };
+
+            const userData = await User.aggregate([
+                {
+                    $lookup: {
+                        from: 'products',
+                        localField: '_id',
+                        foreignField: 'createdBy',
+                        as: 'productData'
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        name: 1,
+                        productCount: {$size: '$productData'}
+                    }
+                }
+            ]).exec();
+
+            return resolve(userData);
+            
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+
+
 module.exports = {
     getUsers,
     createUser,
     updateUser,
-    authorize
+    authorize,
+    getUsersAndBugFixesCount
 };
