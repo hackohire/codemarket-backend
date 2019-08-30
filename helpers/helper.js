@@ -17,12 +17,18 @@ async function checkIfUserIsAdmin (decodedToken) {
     return isUserAdmin;
 }
 
+// This method adds the tag only without Id, and then returns the array of ID of added tags with the id of tags we get from argument
 async function insertManyIntoTags(tags) {
     console.log(tags);
+    const tagsWithIds = tags.filter(p => p._id).map(p => p._id);
+    const tagsWithoutIds = tags.filter(p => !p._id);
+
     const tagsAdded = new Promise((resolve, reject) => {
-        Tag.insertMany(tags, {ordered: false, rawResult: true}).then((d) => {
+        Tag.insertMany(tagsWithoutIds, {ordered: false, rawResult: true}).then((d) => {
             console.log(d)
-            resolve(d.ops.map(id => id._id));
+            const addedTags = d && d.ops && d.ops.length ? d.ops.map(id => id._id) : []
+            const returnTags = addedTags.concat(tagsWithIds);
+            resolve(returnTags.length ? returnTags : []);
         });
     })
     return tagsAdded;
