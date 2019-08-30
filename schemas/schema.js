@@ -10,7 +10,7 @@ type Product {
   featuredImage: String
   createdBy: User
   priceAndFiles: [PriceAndFiles]
-  totalPrice: Int
+  price: Int
   categories: [String]
   demo_url: String
   documentation_url: String
@@ -32,7 +32,7 @@ input ProductInput {
   featuredImage: String
   createdBy: ID
   priceAndFiles: [PriceAndFilesInput]
-  totalPrice: Int
+  price: Int
   categories: [String]
   demo_url: String
   documentation_url: String
