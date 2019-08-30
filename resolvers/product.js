@@ -45,6 +45,13 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
             //     //                 'link': `${process.env.FRONT_END_URL}/#/application/applications/${p._id}`,
             //     //                 'productDetails': `${p.description}`
             //     //             });
+                                // helper.getHtmlContent('productCreate', (err, htmlContent) => {
+                                //     htmlContent = htmlContent.replace("{name}", sd.createdBy.name);
+                                //     htmlContent = htmlContent.replace("{productName}", sd.name);
+                                //     htmlContent = htmlContent.replace("{link}", `${process.env.FRONT_END_URL}/#/application/applications/${p._id}`);
+                                //     htmlContent = htmlContent.replace("{productDetails}", `${p.description}`);
+                                //     helper.sendEmail(sd.createdBy.email, "Product creation", htmlContent);
+                                // });
             //     //             sendEmail.sendTemplatedEmail(params);
             //     //         })
             //     //     }

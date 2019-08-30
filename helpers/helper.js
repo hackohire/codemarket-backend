@@ -1,3 +1,5 @@
+const nodemailer = require('nodemailer');
+const fs = require('fs');
 var auth = require('./auth');
 const Tag = require('../models/tag')();
 
@@ -26,7 +28,59 @@ async function insertManyIntoTags(tags) {
     return tagsAdded;
 }
 
+async function sendEmail(toEmail, subject, body) {
+    console.log(toEmail, "==> ", subject, "==>", body)
+    try {
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASSWORD
+            }
+        });
+        transporter.sendMail({
+            from: process.env.fromEmail,
+            to: toEmail,
+            subject: subject,
+            html: body
+        }, (error, response) => {
+            if (error) {
+                return false;
+            } else {
+                return true;
+            }
+        });
+    } catch(err) {
+        console.log("THis is Catch Block ==>", err);
+        return err;
+    }
+}
+
+async function getHtmlContent(flag, cb) {
+    var filePath = '';
+    try {
+        if (flag === 'productCreate') {
+            filePath = basePath + 'email-template/productCreate.html';
+        }
+        if (flag === 'commentFlag') {
+            filePath = basePath + 'email-template/commentCreate.html';
+        }
+        fs.readFile(filePath, 'utf8',(err, html) => {
+            if (err) {
+                cb(err);
+            } else {
+                cb(null, html);
+            }
+        });
+    } catch (err) {
+        cb(err);
+    }
+}
+
 module.exports = {
     checkIfUserIsAdmin,
-    insertManyIntoTags
+    insertManyIntoTags,
+    sendEmail,
+    getHtmlContent
 }
