@@ -17,6 +17,7 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
             } else {
                 console.log('Using existing mongoose connection.');
             }
+            
 
             if (product.tags && product.tags.length) {
                 product.tags = await helper.insertManyIntoTags(product.tags);
@@ -78,7 +79,6 @@ async function updateProduct(_, { product }, { headers, db, decodedToken }) {
             if (product.tags && product.tags.length) {
                 product.tags = await helper.insertManyIntoTags(product.tags);
             }
-
 
             await Product.findByIdAndUpdate(product._id, product, {new: true}, (err, res) => {
                 if (err) {
