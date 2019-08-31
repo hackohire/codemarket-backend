@@ -16,6 +16,7 @@ type User {
     location: String
     avatar: String
     roles: [String]
+    createdAt: String
     currentJobDetails: CurrentJobDetails
   }
   
@@ -33,6 +34,7 @@ type User {
     location: String
     avatar: String
     roles: [String]
+    createdAt: String
     currentJobDetails: CurrentJobDetailsInput
   }
 
