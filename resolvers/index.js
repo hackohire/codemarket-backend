@@ -3,7 +3,7 @@ const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByU
 const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId, updateHelpRequest, deleteHelpRequest } = require('./help');
 const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview')
 const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement')
-const { addComment, getComments, getCommentsByReferenceId, } = require('./comment')
+const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment')
 const { searchCategories } = require('./categories')
 
 module.exports = {
@@ -18,6 +18,7 @@ module.exports = {
 
     getComments,
     getCommentsByReferenceId,
+    deleteComment,
 
     getAllHelpRequests,
     getHelpRequestsByUserId,
@@ -47,6 +48,7 @@ module.exports = {
 
 
     addComment,
+    updateComment,
 
     addQuery,
     updateHelpRequest,

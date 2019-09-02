@@ -392,6 +392,7 @@ type Query {
 
   getComments(commentId: String): Comment
   getCommentsByReferenceId(referenceId: String): [Comment]
+  deleteComment(commentId: String): String
 
   getAllHelpRequests: [HelpQuery]
   getHelpRequestsByUserId(userId: String): [HelpQuery]
@@ -417,6 +418,7 @@ type Mutation {
   deleteProduct(productId: String): Boolean
 
   addComment(comment: CommentInput): Comment
+  updateComment(commentId: String, text: [InputdescriptionBlock]): Comment
 
   addQuery(helpQuery: HelpQueryInput): HelpQuery
   updateHelpRequest(helpRequest: HelpQueryInput): HelpQuery
