@@ -35,7 +35,6 @@ async function insertManyIntoTags(tags) {
 }
 
 async function sendEmail(toEmail, subject, body) {
-    console.log(toEmail, "==> ", subject, "==>", body)
     try {
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
@@ -58,7 +57,6 @@ async function sendEmail(toEmail, subject, body) {
             }
         });
     } catch(err) {
-        console.log("THis is Catch Block ==>", err);
         return err;
     }
 }
@@ -69,7 +67,7 @@ async function getHtmlContent(flag, cb) {
         if (flag === 'productCreate') {
             filePath = basePath + 'email-template/productCreate.html';
         }
-        if (flag === 'commentFlag') {
+        if (flag === 'commentCreate') {
             filePath = basePath + 'email-template/commentCreate.html';
         }
         fs.readFile(filePath, 'utf8',(err, html) => {

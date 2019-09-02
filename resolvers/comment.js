@@ -1,4 +1,5 @@
 const connectToMongoDB = require('../helpers/db');
+const helper = require('../helpers/helper');
 const Comment = require('./../models/comment')();
 let conn;
 
@@ -35,6 +36,11 @@ async function addComment(_, { comment }, { headers, db, decodedToken }) {
                 await c.save().then( async (com) => {
                     console.log(com);
                     await com.populate('createdBy').execPopulate();
+                    helper.getHtmlContent('commentCreate', (err, htmlContent) => {
+                        htmlContent = htmlContent.replace("{name}", com.createdBy.name);
+                        htmlContent = htmlContent.replace("{comment}", JSON.stringify(com.text));
+                        helper.sendEmail(com.createdBy.email, "Comment Created", htmlContent);
+                    });
                     resolve(com);
                 })
             }
