@@ -5,6 +5,7 @@ const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId,
 const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement')
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment')
 const { searchCategories } = require('./categories')
+const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase')
 
 module.exports = {
   Query: {
@@ -34,7 +35,9 @@ module.exports = {
     getRequirementsByUserId,
     getRequirementById,
 
-    searchCategories
+    searchCategories,
+
+    getPurchasedUnitsByUserId
 
   },
   Mutation: {
@@ -60,7 +63,9 @@ module.exports = {
 
     addRequirement,
     updateRequirement,
-    deleteRequirement
+    deleteRequirement,
+
+    addTransaction
 
   },
 
