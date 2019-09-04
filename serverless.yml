@@ -4,7 +4,7 @@ provider:
   name: aws
   runtime: nodejs8.10
   region: ap-south-1
-  stage: prod
+  stage: dev
   environment:
     MONGODB_URL: ${file(env.yml):${self:provider.stage}.MONGODB_URL}
     MONGODB_DBNAME: ${file(env.yml):${self:provider.stage}.MONGODB_DBNAME}

@@ -66,9 +66,9 @@ async function getCommentsByReferenceId(_, { referenceId }, { headers, db, decod
             }
 
 
-            let subdiscussion = await Comment.find({referenceId: referenceId, parentId: null})
+            let subdiscussion = await Comment.find({referenceId: referenceId, parentId: null, status: { $ne: 'Deleted' }})
             .populate('createdBy')
-            .populate({path: 'children', populate: {path: 'createdBy'}}).exec();
+            .populate({path: 'children', match: { status: { $ne: 'Deleted' }}, populate: {path: 'createdBy'}}).exec();
             // subdiscussion = subdiscussion.sort('full_slug')
             console.log(subdiscussion);
             resolve(subdiscussion);
@@ -95,12 +95,9 @@ async function getComments(_, { commentId }, { headers, db, decodedToken }) {
             }
 
 
-            let subdiscussion = await Comment.findById(commentId)
+            let subdiscussion = await Comment.find({_id: commentId, status: { $ne: 'Deleted' }})
             .populate('createdBy')
-            .populate({path: 'children', populate: {path: 'children'}})
-            .populate({path: 'parents', populate: {path: 'parents'}}).exec();
-            // subdiscussion = subdiscussion.sort('full_slug')
-            console.log(subdiscussion);
+            .populate({path: 'children', match: { status: { $ne: 'Deleted' }}, populate: {path: 'children', match: { status: { $ne: 'Deleted' }}}}).exec();
             resolve(subdiscussion);
 
 
@@ -111,8 +108,55 @@ async function getComments(_, { commentId }, { headers, db, decodedToken }) {
     });
 }
 
+async function deleteComment(_, { commentId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+
+            let c = await Comment.findByIdAndUpdate(commentId, { status: 'Deleted' }).exec();
+
+            return resolve(c._id);
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+
+async function updateComment(_, { commentId, text }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+
+            let c = await Comment.findByIdAndUpdate(commentId, { text: text }, { new: true }).exec();
+
+            return resolve(c);
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 module.exports = {
     addComment,
     getComments,
-    getCommentsByReferenceId
+    getCommentsByReferenceId,
+    deleteComment,
+    updateComment
 }

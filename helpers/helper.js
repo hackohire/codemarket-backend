@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 var auth = require('./auth');
 const Tag = require('../models/tag')();
+const Unit = require('../models/purchased_units')();
 
 async function checkIfUserIsAdmin (decodedToken) {
     const isUserAdmin = new Promise((resolve, reject) => {
@@ -82,9 +83,21 @@ async function getHtmlContent(flag, cb) {
     }
 }
 
+async function insertManyIntoPurchasedUnit(units) {
+    console.log(units);
+    const unitsAdded = new Promise((resolve, reject) => {
+        Unit.insertMany(units, {ordered: false, rawResult: true}).then((d) => {
+            console.log(d)
+            resolve(d.ops.map(id => id._id));
+        });
+    })
+    return unitsAdded;
+}
+
 module.exports = {
     checkIfUserIsAdmin,
     insertManyIntoTags,
     sendEmail,
-    getHtmlContent
+    getHtmlContent,
+    insertManyIntoPurchasedUnit
 }
