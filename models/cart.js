@@ -21,8 +21,8 @@ const cartItemSchema = new Schema(
 
 module.exports = () => {
     try {
-        return mongoose.model('cart');
+        return mongoose.model('cartitem');
     } catch (e) {
-        return mongoose.model('cart', cartItemSchema);
+        return mongoose.model('cartitem', cartItemSchema);
     }
 };

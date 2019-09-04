@@ -34,7 +34,9 @@ async function addToCart(_, { userId, referenceId }, { headers, db, decodedToken
 
             return resolve(cartList);
 
-        } catch (e) {
+        }
+        // Catch the error and print it in the console
+        catch (e) {
             console.log(e);
             return reject(e);
         }
@@ -58,7 +60,9 @@ async function getCartItemsList(_, { userId }, { headers, db, decodedToken }) {
 
             return resolve(cartList);
 
-        } catch (e) {
+        } 
+        // Catch the error and print it in the console
+        catch (e) {
             console.log(e);
             return reject(e);
         }
@@ -85,7 +89,10 @@ async function removeItemFromCart(_, { userId, referenceId }, { headers, db, dec
 
             return resolve(cartList);
 
-        } catch (e) {
+        }
+
+        // Catch the error and print it in the console 
+        catch (e) {
             console.log(e);
             return reject(e);
         }
@@ -101,7 +108,9 @@ async function returnCartListItems(userId) {
 
             return resolve(cartList);
 
-        } catch (e) {
+        }
+        // Catch the error and print it in the console
+        catch (e) {
             console.log(e);
             return reject(e);
         }
