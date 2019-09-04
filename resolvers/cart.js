@@ -9,6 +9,7 @@ async function addToCart(_, { userId, referenceId }, { headers, db, decodedToken
     return new Promise(async (resolve, reject) => {
         try {
 
+            // Check if DB is already connected, Otherwise Make a new connection
             if (!db) {
                 console.log('Creating new mongoose connection.');
                 conn = await connectToMongoDB();
@@ -16,13 +17,19 @@ async function addToCart(_, { userId, referenceId }, { headers, db, decodedToken
                 console.log('Using existing mongoose connection.');
             }
 
+            // creating an object to be added into the cart
             const item = {
-                referenceId: referenceId,
-                user: userId 
+                referenceId: referenceId, // reference to the bugfix
+                user: userId // loggedInUserId
             }
+
+            // creating mongoose model of the item
             const cartItem = await new Cart(item);
+
+            // saving the item in the cart
             const savedcartItem = await cartItem.save(item);
 
+            // return the items of the cartlist
             const cartList = await returnCartListItems(userId)
 
             return resolve(cartList);
@@ -38,6 +45,7 @@ async function getCartItemsList(_, { userId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
+            // Check if DB is already connected, Otherwise Make a new connection
             if (!db) {
                 console.log('Creating new mongoose connection.');
                 conn = await connectToMongoDB();
@@ -45,6 +53,7 @@ async function getCartItemsList(_, { userId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
+            // return the items of the cartlist
             const cartList = await returnCartListItems(userId);
 
             return resolve(cartList);
@@ -60,6 +69,7 @@ async function removeItemFromCart(_, { userId, referenceId }, { headers, db, dec
     return new Promise(async (resolve, reject) => {
         try {
 
+            // Check if DB is already connected, Otherwise Make a new connection
             if (!db) {
                 console.log('Creating new mongoose connection.');
                 conn = await connectToMongoDB();
@@ -67,10 +77,10 @@ async function removeItemFromCart(_, { userId, referenceId }, { headers, db, dec
                 console.log('Using existing mongoose connection.');
             }
 
+            // Removing an Item from the cartList, finding it by reference ID
             const deleteCartItem = await Cart.findOneAndDelete({referenceId: referenceId}).exec();
 
-            console.log(deleteCartItem);
-
+            // return the items of the cartlist
             const cartList = await returnCartListItems(userId);
 
             return resolve(cartList);
