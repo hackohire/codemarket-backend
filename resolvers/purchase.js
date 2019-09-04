@@ -2,6 +2,7 @@ const connectToMongoDB = require('../helpers/db');
 const Unit = require('../models/purchased_units')();
 const Transaction = require('../models/transaction')();
 const helper = require('../helpers/helper');
+const Cart = require('./../models/cart')();
 let conn;
 
 async function addTransaction(_, { transaction }, { headers, db, decodedToken }) {
@@ -28,6 +29,11 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
             // Saving the Transaction in the collection
             await h.save(transaction).then(async p => {
 
+                if (p && p.purchase_units && p.purchase_units.length) {
+                    const removedCount = await Cart.remove({user: transaction.purchasedBy}).exec();
+                    console.log(removedCount);
+                }
+
                 // Populating "purchase_units" and and the product and inside the product "createdBy" & "tags" field
                 p.populate({path: 'purchase_units', populate: {path: 'reference_id', populate: [{path: 'createdBy'}, {path: 'tags'}]}}).execPopulate().then((populatedTransaction) => {
                     return resolve(populatedTransaction.purchase_units);
@@ -53,10 +59,10 @@ async function getPurchasedUnitsByUserId(_, { userId }, { headers, db, decodedTo
                 console.log('Using existing mongoose connection.');
             }
 
+            // Populating Bugfix from the reference_id and the categories and the author of the bugfix
             const purchasedItems = await Unit.find({purchasedBy: userId})
                 .populate({path: 'reference_id', populate: {path: 'tags'}})
                 .populate({path: 'reference_id', populate: {path: 'createdBy'}}).exec()
-                // return resolve([a]);
 
             return resolve(purchasedItems);
 
