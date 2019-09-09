@@ -1,4 +1,4 @@
-const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount } = require('./user');
+const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
 const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
 const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId, updateHelpRequest, deleteHelpRequest } = require('./help');
 const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview')
@@ -13,6 +13,7 @@ module.exports = {
     hello: () => 'Hello world!',
     getUsers,
     getUsersAndBugFixesCount,
+    getUserById,
 
     getAllProducts,
     getProductsByUserId,

@@ -195,6 +195,37 @@ async function getUsersAndBugFixesCount(_, { headers, db, decodedToken }) {
     });
 }
 
+// Lambda Function to get the user Data by Id
+async function getUserById(_, { userId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // const decodedToken = await auth.auth(headers);
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+
+            // Getting user Data by passing the userId
+            User.findById(userId).exec((err, res) => {
+
+                // if error, reject with error
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res);
+            });
+            
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 
 
 module.exports = {
@@ -202,5 +233,6 @@ module.exports = {
     createUser,
     updateUser,
     authorize,
-    getUsersAndBugFixesCount
+    getUsersAndBugFixesCount,
+    getUserById
 };

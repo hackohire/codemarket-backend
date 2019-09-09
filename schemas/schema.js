@@ -373,18 +373,10 @@ input URLInput {
   url: String
 }
 
-type UserAndBugFixCount {
-  _id: ID,
-  name: String,
-  productCount: Int
-}
-
 
 
 type Query {
   hello: String
-
-  getUsersAndBugFixesCount: [UserAndBugFixCount]
 
   getAllProducts: [Product]
   getProductsByUserId(userId: String): [Product]
