@@ -181,6 +181,8 @@ input PriceAndFilesInput {
 enum ProductStatus {
   Created
   Drafted
+  Published
+  Unpublished
   Submitted
   Approved
   Rejected
@@ -379,7 +381,7 @@ type Query {
   hello: String
 
   getAllProducts: [Product]
-  getProductsByUserId(userId: String): [Product]
+  getProductsByUserId(userId: String, status: String): [Product]
   getProductById(productId: String): Product
 
   getComments(commentId: String): Comment
