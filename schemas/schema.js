@@ -15,7 +15,7 @@ type Product {
   demo_url: String
   documentation_url: String
   video_url: String
-  status: ProductStatus
+  status: Status
   createdAt: String
   updatedAt: String
   snippets: [Snippet]
@@ -37,7 +37,7 @@ input ProductInput {
   demo_url: String
   documentation_url: String
   video_url: String
-  status: ProductStatus
+  status: Status
   snippets: [SnippetInput]
   addedToCart: Boolean
   tags: [TagInput]
@@ -100,7 +100,7 @@ type Requirement {
   price: Int
   categories: [String]
   demo_url: String
-  status: ProductStatus
+  status: Status
   createdAt: String
   updatedAt: String
   tags: [Tag]
@@ -117,7 +117,7 @@ input RequirementInput {
   price: Int
   categories: [String]
   demo_url: String
-  status: ProductStatus
+  status: Status
   tags: [TagInput]
   support: SupportInput
 }
@@ -132,7 +132,7 @@ type Interview {
   price: Int
   categories: [String]
   demo_url: String
-  status: ProductStatus
+  status: Status
   createdAt: String
   updatedAt: String
   tags: [Tag]
@@ -149,7 +149,7 @@ input InterviewInput {
   price: Int
   categories: [String]
   demo_url: String
-  status: ProductStatus
+  status: Status
   tags: [TagInput]
   support: SupportInput
 }
@@ -178,7 +178,8 @@ input PriceAndFilesInput {
   price: Int
 }
 
-enum ProductStatus {
+
+enum Status {
   Created
   Drafted
   Published
