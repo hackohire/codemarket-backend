@@ -1,7 +1,9 @@
 const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
 const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
 const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId, updateHelpRequest, deleteHelpRequest } = require('./help');
-const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview')
+const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview');
+const { addTesting, getAllTestings, getTestingById, getTestingsByUserId, updateTesting, deleteTesting } = require('./testing');
+const { addHowtodoc, getAllHowtodocs, getHowtodocById, getHowtodocsByUserId, updateHowtodoc, deleteHowtodoc } = require('./how-to-doc');
 const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement')
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment')
 const { searchCategories } = require('./categories')
@@ -31,6 +33,14 @@ module.exports = {
     getAllInterviews,
     getInterviewsByUserId,
     getInterviewById,
+
+    getAllTestings,
+    getTestingById,
+    getTestingsByUserId,
+
+    getAllHowtodocs,
+    getHowtodocById,
+    getHowtodocsByUserId,
   
   
     getAllRequirements,
@@ -68,6 +78,14 @@ module.exports = {
     addRequirement,
     updateRequirement,
     deleteRequirement,
+
+    addTesting,
+    updateTesting,
+    deleteTesting,
+
+    addHowtodoc,
+    updateHowtodoc,
+    deleteHowtodoc,
 
     addTransaction,
 
