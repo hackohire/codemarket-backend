@@ -1,6 +1,9 @@
 const connectToMongoDB = require('../helpers/db');
 const helper = require('../helpers/helper');
 const Comment = require('./../models/comment')();
+const Product = require('./../models/product')();
+const Query = require('./../models/help')();
+const Requirement = require('./../models/requirement')();
 let conn;
 
 async function addComment(_, { comment }, { headers, db, decodedToken }) {
@@ -34,12 +37,23 @@ async function addComment(_, { comment }, { headers, db, decodedToken }) {
                 //  actually insert the parent comment
                 c.parents.push(c._id);
                 await c.save().then( async (com) => {
-                    console.log(com);
                     await com.populate('createdBy').execPopulate();
-                    helper.getHtmlContent('commentCreate', (err, htmlContent) => {
-                        htmlContent = htmlContent.replace("{name}", com.createdBy.name);
-                        htmlContent = htmlContent.replace("{comment}", JSON.stringify(com.text));
-                        helper.sendEmail(com.createdBy.email, "Comment Created", htmlContent);
+                    var data;
+                    if (com.type === 'product') {
+                        data = await Product.findOne({ _id: com.referenceId }).populate('createdBy').exec();
+                    }
+                    if (com.type === 'help-request') {
+                        data = await Query.findOne({ _id: com.referenceId }).populate('createdBy').exec();
+                    }
+                    // if (com.type === 'requirement') {
+                    //     data = await Requirement.findOne({ _id: com.referenceId }).populate('createdBy').exec();
+                    // }
+                    const filePath = basePath + 'email-template/commentCreate.html';
+                    helper.getHtmlContent(filePath, (err, htmlContent) => {
+                        var commentLink = process.env.COMMENT_URL+com.referenceId+')';
+                        htmlContent = htmlContent.replace("{NAME}", data.createdBy.name);
+                        htmlContent = htmlContent.replace("{LINK}", commentLink);
+                        helper.sendEmail(data.createdBy.email, "Comment Created", htmlContent);
                     });
                     resolve(com);
                 })

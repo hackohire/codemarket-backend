@@ -27,6 +27,15 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
             const savedProduct = await prod.save(product);
             savedProduct.populate('createdBy').populate('tags').execPopulate().then((sd) => {
                 console.log(sd);
+                const filePath = basePath + 'email-template/productCreate.html';
+                helper.getHtmlContent(filePath, (err, htmlContent) => {
+                    var productLink = process.env.PRODUCT_URL+sd.id+')';
+                    htmlContent = htmlContent.replace("{NAME}", sd.createdBy.name);
+                    htmlContent = htmlContent.replace("{PRODUCTNAME}", sd.name);
+                    htmlContent = htmlContent.replace("{LINK}", productLink);
+                    console.log(productLink, htmlContent)
+                    // helper.sendEmail(sd.createdBy.email, "Product Created", htmlContent);
+                });
                 return resolve(sd)
             });
             // await prod.save(product).then(async p => {

@@ -46,13 +46,13 @@ async function sendEmail(toEmail, subject, body) {
             }
         });
         transporter.sendMail({
-            from: process.env.fromEmail,
+            from: process.env.FROM_EMAIL,
             to: toEmail,
             subject: subject,
             html: body
         }, (error, response) => {
             if (error) {
-                return false;
+             return false;
             } else {
                 return true;
             }
@@ -62,15 +62,8 @@ async function sendEmail(toEmail, subject, body) {
     }
 }
 
-async function getHtmlContent(flag, cb) {
-    var filePath = '';
+async function getHtmlContent(filePath, cb) {
     try {
-        if (flag === 'productCreate') {
-            filePath = basePath + 'email-template/productCreate.html';
-        }
-        if (flag === 'commentCreate') {
-            filePath = basePath + 'email-template/commentCreate.html';
-        }
         fs.readFile(filePath, 'utf8',(err, html) => {
             if (err) {
                 cb(err);
