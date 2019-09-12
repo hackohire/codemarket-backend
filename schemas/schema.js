@@ -204,7 +204,7 @@ type HelpQuery {
   createdBy: User
   createdAt: String
   updatedAt: String
-  status: HelpQueryStatus
+  status: Status
   categories: [String]
   demo_url: String
   documentation_url: String
@@ -223,7 +223,7 @@ input HelpQueryInput {
   createdBy: String
   createdAt: String
   updatedAt: String
-  status: HelpQueryStatus
+  status: Status
   categories: [String]
   demo_url: String
   documentation_url: String
@@ -234,17 +234,6 @@ input HelpQueryInput {
   support: SupportInput
 }
 
-enum HelpQueryStatus {
-  Created
-  Submitted
-  Approved
-  Rejected
-  Archieved
-  Deleted
-  Published
-  Unpublished
-  Resolved
-}
 
 input InputdescriptionBlock {
   type: String
