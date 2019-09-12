@@ -4,7 +4,8 @@ const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserI
 const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview');
 const { addTesting, getAllTestings, getTestingById, getTestingsByUserId, updateTesting, deleteTesting } = require('./testing');
 const { addHowtodoc, getAllHowtodocs, getHowtodocById, getHowtodocsByUserId, updateHowtodoc, deleteHowtodoc } = require('./how-to-doc');
-const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement')
+const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement');
+const { addDesign, getAllDesigns, getDesignById, getDesignsByUserId, updateDesign, deleteDesign } = require('./design')
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment')
 const { searchCategories } = require('./categories')
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase')
@@ -47,6 +48,10 @@ module.exports = {
     getRequirementsByUserId,
     getRequirementById,
 
+    getAllDesigns,
+    getDesignsByUserId,
+    getDesignById,
+
     searchCategories,
 
     getPurchasedUnitsByUserId,
@@ -86,6 +91,10 @@ module.exports = {
     addHowtodoc,
     updateHowtodoc,
     deleteHowtodoc,
+
+    addDesign,
+    updateDesign,
+    deleteDesign,
 
     addTransaction,
 
