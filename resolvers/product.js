@@ -30,11 +30,10 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
                 const filePath = basePath + 'email-template/productCreate.html';
                 helper.getHtmlContent(filePath, (err, htmlContent) => {
                     var productLink = process.env.PRODUCT_URL+sd.id+')';
-                    htmlContent = htmlContent.replace("{NAME}", sd.createdBy.name);
+                    htmlContent = htmlContent.replace("{AUTHORNAME}", sd.createdBy.name);
                     htmlContent = htmlContent.replace("{PRODUCTNAME}", sd.name);
-                    htmlContent = htmlContent.replace("{LINK}", productLink);
-                    console.log(productLink, htmlContent)
-                    // helper.sendEmail(sd.createdBy.email, "Product Created", htmlContent);
+                    htmlContent = htmlContent.replace("{PRODUCTLINK}", productLink);
+                    helper.sendEmail(sd.createdBy.email, "Product Created", htmlContent);
                 });
                 return resolve(sd)
             });
