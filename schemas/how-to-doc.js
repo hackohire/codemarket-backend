@@ -44,7 +44,7 @@ const graphQlHowtodocSchema = `
 
     extend type Query {
         getAllHowtodocs: [Howtodoc]
-        getHowtodocsByUserId(userId: String): [Howtodoc]
+        getHowtodocsByUserId(userId: String, status: String): [Howtodoc]
         getHowtodocById(howtodocId: String): Howtodoc
     }
 

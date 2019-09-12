@@ -41,7 +41,7 @@ async function addQuery(_, { helpQuery }, { headers, db, decodedToken }) {
     });
 }
 
-async function getHelpRequestsByUserId(_, { userId }, { headers, db, decodedToken }) {
+async function getHelpRequestsByUserId(_, { userId, status }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -52,7 +52,7 @@ async function getHelpRequestsByUserId(_, { userId }, { headers, db, decodedToke
                 console.log('Using existing mongoose connection.');
             }
 
-            HelpRequest.find({ 'createdBy': userId }).populate('createdBy').populate('tags').exec((err, res) => {
+            HelpRequest.find({ 'createdBy': userId, status: status ? status : { $ne: null} }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -109,7 +109,7 @@ async function getAllHelpRequests(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            HelpRequest.find({}).populate('createdBy').populate('tags').exec((err, res) => {
+            HelpRequest.find({status: 'Published'}).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)

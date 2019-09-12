@@ -22,8 +22,8 @@ const requirementSchema = new Schema(
         // video_url: String,
         status: {
             type: String,
-            enum: ['Created', 'Drafted', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
-            default: 'Created'
+            enum: ['Created', 'Drafted', 'Published', 'Unpublished', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
+            default: 'Drafted'
         },
         tags: [{
             type: Schema.Types.ObjectId,

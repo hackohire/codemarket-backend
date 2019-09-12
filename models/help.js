@@ -27,8 +27,8 @@ const querySchema = new Schema(
         email: String,
         status: {
             type: String,
-            enum: ['Created', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted', 'Published', 'Unpublished', 'Resolved'],
-            default: 'Created'
+            enum: ['Created', 'Submitted', 'Drafted', 'Published', 'Unpublished', 'Approved', 'Rejected', 'Archieved', 'Deleted', 'Resolved'],
+            default: 'Drafted'
         },
         categories: { type: Array, default: [] },
         demo_url: String,

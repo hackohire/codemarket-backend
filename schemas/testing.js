@@ -40,7 +40,7 @@ const graphQlHowToDocSchema = `
 
     extend type Query {
         getAllTestings: [Testing]
-        getTestingsByUserId(userId: String): [Testing]
+        getTestingsByUserId(userId: String, status: String): [Testing]
         getTestingById(testingId: String): Testing
     }
 

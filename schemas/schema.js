@@ -390,17 +390,17 @@ type Query {
   deleteComment(commentId: String): String
 
   getAllHelpRequests: [HelpQuery]
-  getHelpRequestsByUserId(userId: String): [HelpQuery]
+  getHelpRequestsByUserId(userId: String, status: String): [HelpQuery]
   getHelpRequestById(helpRequestId: String): HelpQuery
 
 
   getAllInterviews: [Interview]
-  getInterviewsByUserId(userId: String): [Interview]
+  getInterviewsByUserId(userId: String, status: String): [Interview]
   getInterviewById(interviewId: String): Interview
 
 
   getAllRequirements: [Requirement]
-  getRequirementsByUserId(userId: String): [Requirement]
+  getRequirementsByUserId(userId: String, status: String): [Requirement]
   getRequirementById(requirementId: String): Requirement
 
   searchCategories(keyWord: String): [Tag]

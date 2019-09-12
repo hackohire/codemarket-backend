@@ -38,7 +38,7 @@ async function addHowtodoc(_, { howtodoc }, { headers, db, decodedToken }) {
     });
 }
 
-async function getHowtodocsByUserId(_, { userId }, { headers, db, decodedToken }) {
+async function getHowtodocsByUserId(_, { userId, status }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -49,7 +49,7 @@ async function getHowtodocsByUserId(_, { userId }, { headers, db, decodedToken }
                 console.log('Using existing mongoose connection.');
             }
 
-            Howtodoc.find({ 'createdBy': userId }).populate('createdBy').populate('tags').exec((err, res) => {
+            Howtodoc.find({ 'createdBy': userId, status: status ? status : { $ne: null} }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -106,7 +106,7 @@ async function getAllHowtodocs(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Howtodoc.find({}).populate('createdBy').populate('tags').exec((err, res) => {
+            Howtodoc.find({status: 'Published'}).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)

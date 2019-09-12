@@ -38,7 +38,7 @@ async function addTesting(_, { testing }, { headers, db, decodedToken }) {
     });
 }
 
-async function getTestingsByUserId(_, { userId }, { headers, db, decodedToken }) {
+async function getTestingsByUserId(_, { userId, status }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -49,7 +49,7 @@ async function getTestingsByUserId(_, { userId }, { headers, db, decodedToken })
                 console.log('Using existing mongoose connection.');
             }
 
-            Testing.find({ 'createdBy': userId }).populate('createdBy').populate('tags').exec((err, res) => {
+            Testing.find({ 'createdBy': userId, status: status ? status : { $ne: null} }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -106,7 +106,7 @@ async function getAllTestings(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Testing.find({}).populate('createdBy').populate('tags').exec((err, res) => {
+            Testing.find({status: 'Published'}).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)

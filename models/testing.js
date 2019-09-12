@@ -19,7 +19,7 @@ const testingSchema = new Schema(
         status: {
             type: String,
             enum: ['Created', 'Drafted', 'Published', 'Unpublished', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
-            default: 'Created'
+            default: 'Drafted'
         },
         tags: [{
             type: Schema.Types.ObjectId,

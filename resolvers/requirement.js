@@ -37,7 +37,7 @@ async function addRequirement(_, { requirement }, { headers, db, decodedToken })
     });
 }
 
-async function getRequirementsByUserId(_, { userId }, { headers, db, decodedToken }) {
+async function getRequirementsByUserId(_, { userId, status }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -48,7 +48,7 @@ async function getRequirementsByUserId(_, { userId }, { headers, db, decodedToke
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.find({ 'createdBy': userId }).populate('createdBy').populate('tags').exec((err, res) => {
+            Requirement.find({ 'createdBy': userId, status: status ? status : { $ne: null} }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -105,7 +105,7 @@ async function getAllRequirements(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.find({}).populate('createdBy').populate('tags').exec((err, res) => {
+            Requirement.find({status: 'Published'}).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
