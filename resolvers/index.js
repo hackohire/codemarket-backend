@@ -1,8 +1,11 @@
-const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount } = require('./user');
+const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
 const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
 const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId, updateHelpRequest, deleteHelpRequest } = require('./help');
-const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview')
-const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement')
+const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview');
+const { addTesting, getAllTestings, getTestingById, getTestingsByUserId, updateTesting, deleteTesting } = require('./testing');
+const { addHowtodoc, getAllHowtodocs, getHowtodocById, getHowtodocsByUserId, updateHowtodoc, deleteHowtodoc } = require('./how-to-doc');
+const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement');
+const { addDesign, getAllDesigns, getDesignById, getDesignsByUserId, updateDesign, deleteDesign } = require('./design')
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment')
 const { searchCategories } = require('./categories')
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase')
@@ -13,6 +16,7 @@ module.exports = {
     hello: () => 'Hello world!',
     getUsers,
     getUsersAndBugFixesCount,
+    getUserById,
 
     getAllProducts,
     getProductsByUserId,
@@ -30,11 +34,23 @@ module.exports = {
     getAllInterviews,
     getInterviewsByUserId,
     getInterviewById,
+
+    getAllTestings,
+    getTestingById,
+    getTestingsByUserId,
+
+    getAllHowtodocs,
+    getHowtodocById,
+    getHowtodocsByUserId,
   
   
     getAllRequirements,
     getRequirementsByUserId,
     getRequirementById,
+
+    getAllDesigns,
+    getDesignsByUserId,
+    getDesignById,
 
     searchCategories,
 
@@ -67,6 +83,18 @@ module.exports = {
     addRequirement,
     updateRequirement,
     deleteRequirement,
+
+    addTesting,
+    updateTesting,
+    deleteTesting,
+
+    addHowtodoc,
+    updateHowtodoc,
+    deleteHowtodoc,
+
+    addDesign,
+    updateDesign,
+    deleteDesign,
 
     addTransaction,
 

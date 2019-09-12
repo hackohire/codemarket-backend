@@ -50,9 +50,16 @@ type User {
     companyLocation: String
   }
 
+  type UserAndBugFixCount {
+    _id: ID,
+    name: String,
+    productCount: Int
+  }
+
   extend type Query {
     getUsers(_page: Int _limit: Int): [User!]!
-    getSelectedUser(id: String): User!
+    getUsersAndBugFixesCount: [UserAndBugFixCount]
+    getUserById(userId: String): User
   }
 
   extend type Mutation {

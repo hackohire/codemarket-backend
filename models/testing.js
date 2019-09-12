@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 const support  = require('./support');
 
 
-const requirementSchema = new Schema(
+const testingSchema = new Schema(
     {
         name: String,
         description: [],
@@ -14,12 +14,8 @@ const requirementSchema = new Schema(
             ref: "user",
             // required: true
         },
-        // priceAndFiles: [priceAndFiles],
         price: Number,
         categories: [],
-        demo_url: String,
-        // documentation_url: String,
-        // video_url: String,
         status: {
             type: String,
             enum: ['Created', 'Drafted', 'Published', 'Unpublished', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
@@ -30,8 +26,6 @@ const requirementSchema = new Schema(
             ref: "tag",
         }],
         support: support
-        // snippets: [snippet],
-        // addedToCart: Boolean
     },
     {
         timestamps: true,
@@ -43,9 +37,9 @@ const requirementSchema = new Schema(
 
 module.exports = () => {
     try {
-        return mongoose.model('requirement');
+        return mongoose.model('testing');
     } catch (e) {
-        return mongoose.model('requirement', requirementSchema);
+        return mongoose.model('testing', testingSchema);
     }
 
 };

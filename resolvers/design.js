@@ -1,9 +1,9 @@
 const connectToMongoDB = require('../helpers/db');
-const Requirement = require('../models/requirement')();
+const Design = require('../models/design')();
 const helper = require('../helpers/helper');
 let conn;
 
-async function addRequirement(_, { requirement }, { headers, db, decodedToken }) {
+async function addDesign(_, { design }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -14,16 +14,17 @@ async function addRequirement(_, { requirement }, { headers, db, decodedToken })
                 console.log('Using existing mongoose connection.');
             }
 
-            if (requirement.tags && requirement.tags.length) {
-                requirement.tags = await helper.insertManyIntoTags(requirement.tags);
+            if (design.tags && design.tags.length) {
+                design.tags = await helper.insertManyIntoTags(design.tags);
             }
 
 
-            const int = await new Requirement(requirement);
-            await int.save(requirement).then(async p => {
+            const int = await new Design(design);
+            await int.save(design).then(async p => {
                 console.log(p)
-                p.populate('createdBy').populate('tags').execPopulate().then(populatedRequirement => {
-                    return resolve(populatedRequirement);
+
+                p.populate('createdBy').populate('tags').execPopulate().then(populatedDesign => {
+                    return resolve(populatedDesign);
                 })
                 // return resolve([a]);
 
@@ -37,7 +38,7 @@ async function addRequirement(_, { requirement }, { headers, db, decodedToken })
     });
 }
 
-async function getRequirementsByUserId(_, { userId, status }, { headers, db, decodedToken }) {
+async function getDesignsByUserId(_, { userId, status }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -48,7 +49,7 @@ async function getRequirementsByUserId(_, { userId, status }, { headers, db, dec
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.find({ 'createdBy': userId, status: status ? status : { $ne: null} }).populate('createdBy').populate('tags').exec((err, res) => {
+            Design.find({ 'createdBy': userId, status: status ? status : { $ne: null} }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -66,7 +67,7 @@ async function getRequirementsByUserId(_, { userId, status }, { headers, db, dec
     });
 }
 
-async function getRequirementById(_, { requirementId }, { headers, db, decodedToken }) {
+async function getDesignById(_, { designId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -77,7 +78,7 @@ async function getRequirementById(_, { requirementId }, { headers, db, decodedTo
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.findById(requirementId).populate('createdBy').populate('tags').exec((err, res) => {
+            Design.findById(designId).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -94,7 +95,7 @@ async function getRequirementById(_, { requirementId }, { headers, db, decodedTo
     });
 }
 
-async function getAllRequirements(_, { headers, db, decodedToken }) {
+async function getAllDesigns(_, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -105,7 +106,7 @@ async function getAllRequirements(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.find({status: 'Published'}).populate('createdBy').populate('tags').exec((err, res) => {
+            Design.find({status: 'Published'}).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -123,8 +124,7 @@ async function getAllRequirements(_, { headers, db, decodedToken }) {
     });
 }
 
-
-async function updateRequirement(_, { requirement }, { headers, db, decodedToken }) {
+async function updateDesign(_, { design }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -135,12 +135,12 @@ async function updateRequirement(_, { requirement }, { headers, db, decodedToken
                 console.log('Using existing mongoose connection.');
             }
 
-            if (requirement.tags && requirement.tags.length) {
-                requirement.tags = await helper.insertManyIntoTags(requirement.tags);
+            if (design.tags && design.tags.length) {
+                design.tags = await helper.insertManyIntoTags(design.tags);
             }
 
 
-            await Requirement.findByIdAndUpdate(requirement._id, requirement, {new: true}, (err, res) => {
+            await Design.findByIdAndUpdate(design._id, design, {new: true}, (err, res) => {
                 if (err) {
                     return reject(err)
                 }
@@ -158,9 +158,7 @@ async function updateRequirement(_, { requirement }, { headers, db, decodedToken
     });
 }
 
-
-
-async function deleteRequirement(_, { requirementId }, { headers, db, decodedToken }) {
+async function deleteDesign(_, { designId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -171,14 +169,14 @@ async function deleteRequirement(_, { requirementId }, { headers, db, decodedTok
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.deleteOne({ _id: requirementId }, ((err, res) => {
+            Design.deleteOne({_id: designId}, ((err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
 
                 return resolve(res.deletedCount);
-            })
+                })
             );
 
 
@@ -190,12 +188,11 @@ async function deleteRequirement(_, { requirementId }, { headers, db, decodedTok
     });
 }
 
-
 module.exports = {
-    addRequirement,
-    getRequirementsByUserId,
-    getRequirementById,
-    getAllRequirements,
-    updateRequirement,
-    deleteRequirement
+    addDesign,
+    getDesignsByUserId,
+    getDesignById,
+    getAllDesigns,
+    updateDesign,
+    deleteDesign
 }

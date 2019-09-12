@@ -15,7 +15,7 @@ type Product {
   demo_url: String
   documentation_url: String
   video_url: String
-  status: ProductStatus
+  status: Status
   createdAt: String
   updatedAt: String
   snippets: [Snippet]
@@ -37,7 +37,7 @@ input ProductInput {
   demo_url: String
   documentation_url: String
   video_url: String
-  status: ProductStatus
+  status: Status
   snippets: [SnippetInput]
   addedToCart: Boolean
   tags: [TagInput]
@@ -100,7 +100,7 @@ type Requirement {
   price: Int
   categories: [String]
   demo_url: String
-  status: ProductStatus
+  status: Status
   createdAt: String
   updatedAt: String
   tags: [Tag]
@@ -117,7 +117,7 @@ input RequirementInput {
   price: Int
   categories: [String]
   demo_url: String
-  status: ProductStatus
+  status: Status
   tags: [TagInput]
   support: SupportInput
 }
@@ -132,7 +132,7 @@ type Interview {
   price: Int
   categories: [String]
   demo_url: String
-  status: ProductStatus
+  status: Status
   createdAt: String
   updatedAt: String
   tags: [Tag]
@@ -149,7 +149,7 @@ input InterviewInput {
   price: Int
   categories: [String]
   demo_url: String
-  status: ProductStatus
+  status: Status
   tags: [TagInput]
   support: SupportInput
 }
@@ -178,9 +178,12 @@ input PriceAndFilesInput {
   price: Int
 }
 
-enum ProductStatus {
+
+enum Status {
   Created
   Drafted
+  Published
+  Unpublished
   Submitted
   Approved
   Rejected
@@ -201,7 +204,7 @@ type HelpQuery {
   createdBy: User
   createdAt: String
   updatedAt: String
-  status: HelpQueryStatus
+  status: Status
   categories: [String]
   demo_url: String
   documentation_url: String
@@ -220,7 +223,7 @@ input HelpQueryInput {
   createdBy: String
   createdAt: String
   updatedAt: String
-  status: HelpQueryStatus
+  status: Status
   categories: [String]
   demo_url: String
   documentation_url: String
@@ -231,17 +234,6 @@ input HelpQueryInput {
   support: SupportInput
 }
 
-enum HelpQueryStatus {
-  Created
-  Submitted
-  Approved
-  Rejected
-  Archieved
-  Deleted
-  Published
-  Unpublished
-  Resolved
-}
 
 input InputdescriptionBlock {
   type: String
@@ -373,21 +365,13 @@ input URLInput {
   url: String
 }
 
-type UserAndBugFixCount {
-  _id: ID,
-  name: String,
-  productCount: Int
-}
-
 
 
 type Query {
   hello: String
 
-  getUsersAndBugFixesCount: [UserAndBugFixCount]
-
   getAllProducts: [Product]
-  getProductsByUserId(userId: String): [Product]
+  getProductsByUserId(userId: String, status: String): [Product]
   getProductById(productId: String): Product
 
   getComments(commentId: String): Comment
@@ -395,17 +379,17 @@ type Query {
   deleteComment(commentId: String): String
 
   getAllHelpRequests: [HelpQuery]
-  getHelpRequestsByUserId(userId: String): [HelpQuery]
+  getHelpRequestsByUserId(userId: String, status: String): [HelpQuery]
   getHelpRequestById(helpRequestId: String): HelpQuery
 
 
   getAllInterviews: [Interview]
-  getInterviewsByUserId(userId: String): [Interview]
+  getInterviewsByUserId(userId: String, status: String): [Interview]
   getInterviewById(interviewId: String): Interview
 
 
   getAllRequirements: [Requirement]
-  getRequirementsByUserId(userId: String): [Requirement]
+  getRequirementsByUserId(userId: String, status: String): [Requirement]
   getRequirementById(requirementId: String): Requirement
 
   searchCategories(keyWord: String): [Tag]

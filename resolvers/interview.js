@@ -38,7 +38,7 @@ async function addInterview(_, { interview }, { headers, db, decodedToken }) {
     });
 }
 
-async function getInterviewsByUserId(_, { userId }, { headers, db, decodedToken }) {
+async function getInterviewsByUserId(_, { userId, status }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -49,7 +49,7 @@ async function getInterviewsByUserId(_, { userId }, { headers, db, decodedToken 
                 console.log('Using existing mongoose connection.');
             }
 
-            Interview.find({ 'createdBy': userId }).populate('createdBy').populate('tags').exec((err, res) => {
+            Interview.find({ 'createdBy': userId, status: status ? status : { $ne: null} }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -106,7 +106,7 @@ async function getAllInterviews(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Interview.find({}).populate('createdBy').populate('tags').exec((err, res) => {
+            Interview.find({status: 'Published'}).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
