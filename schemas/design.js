@@ -16,6 +16,7 @@ const graphQlDesignSchema = `
         tags: [Tag]
         comments: [Comment]
         support: Support
+        likeCount: Int
     }
     
     input DesignInput {

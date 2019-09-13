@@ -18,6 +18,7 @@ const graphQlHowToDocSchema = `
         tags: [Tag]
         comments: [Comment]
         support: Support
+        likeCount: Int
     }
     
     input TestingInput {

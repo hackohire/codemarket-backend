@@ -7,9 +7,10 @@ const { addHowtodoc, getAllHowtodocs, getHowtodocById, getHowtodocsByUserId, upd
 const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement');
 const { addDesign, getAllDesigns, getDesignById, getDesignsByUserId, updateDesign, deleteDesign } = require('./design')
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment')
-const { searchCategories } = require('./categories')
-const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase')
-const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart')
+const { searchCategories } = require('./categories');
+const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
+const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
+const { like, checkIfUserLikedAndLikeCount } = require('./like')
 
 module.exports = {
   Query: {
@@ -56,7 +57,9 @@ module.exports = {
 
     getPurchasedUnitsByUserId,
 
-    getCartItemsList
+    getCartItemsList,
+
+    checkIfUserLikedAndLikeCount
 
   },
   Mutation: {
@@ -99,7 +102,9 @@ module.exports = {
     addTransaction,
 
     addToCart,
-    removeItemFromCart
+    removeItemFromCart,
+
+    like
 
   },
 

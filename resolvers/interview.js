@@ -1,6 +1,7 @@
 const connectToMongoDB = require('../helpers/db');
 const Interview = require('../models/interview')();
 const helper = require('../helpers/helper');
+const Like = require('./../models/like')();
 let conn;
 
 async function addInterview(_, { interview }, { headers, db, decodedToken }) {
@@ -78,11 +79,15 @@ async function getInterviewById(_, { interviewId }, { headers, db, decodedToken 
                 console.log('Using existing mongoose connection.');
             }
 
-            Interview.findById(interviewId).populate('createdBy').populate('tags').exec((err, res) => {
+            Interview.findById(interviewId).populate('createdBy').populate('tags').exec(async (err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
+
+                const likeCount = await Like.count({referenceId: interviewId})
+
+                res['likeCount'] = likeCount;
 
                 return resolve(res);
             });

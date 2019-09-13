@@ -4,6 +4,7 @@ const helper = require('../helpers/helper');
 const sendEmail = require('../helpers/ses_sendTemplatedEmail');
 const User = require('./../models/user')();
 const Comment = require('./../models/comment')();
+const Like = require('./../models/like')();
 let conn;
 
 
@@ -140,11 +141,17 @@ async function getProductById(_, { productId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Product.findById(productId).populate('createdBy').populate('tags').exec((err, res) => {
+            console.log(conn);
+
+            Product.findById(productId).populate('createdBy').populate('tags').exec(async (err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
+
+                const likeCount = await Like.count({referenceId: productId})
+
+                res['likeCount'] = likeCount;
 
                 return resolve(res);
             });
