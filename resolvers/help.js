@@ -3,6 +3,7 @@ const HelpRequest = require('../models/help')();
 const helper = require('../helpers/helper');
 // const sendEmail = require('../helpers/ses_sendTemplatedEmail');
 const User = require('./../models/user')();
+const Like = require('./../models/like')();
 let conn;
 
 async function addQuery(_, { helpQuery }, { headers, db, decodedToken }) {
@@ -81,11 +82,15 @@ async function getHelpRequestById(_, { helpRequestId }, { headers, db, decodedTo
                 console.log('Using existing mongoose connection.');
             }
 
-            HelpRequest.findById(helpRequestId).populate('createdBy').populate('tags').exec((err, res) => {
+            HelpRequest.findById(helpRequestId).populate('createdBy').populate('tags').exec( async (err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
+
+                const likeCount = await Like.count({referenceId: helpRequestId})
+
+                res['likeCount'] = likeCount;
 
                 return resolve(res);
             });

@@ -19,6 +19,7 @@ const graphQlHowtodocSchema = `
         tags: [Tag]
         comments: [Comment]
         support: Support
+        likeCount: Int
     }
 
     input HowtodocInput {

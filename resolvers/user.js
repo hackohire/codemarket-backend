@@ -2,6 +2,7 @@ const connectToMongoDB = require('./../helpers/db');
 const auth = require('./../helpers/auth');
 const User = require('./../models/user')();
 var array = require('lodash/array');
+const Like = require('./../models/like')();
 
 let conn;
 
@@ -209,12 +210,16 @@ async function getUserById(_, { userId }, { headers, db, decodedToken }) {
 
 
             // Getting user Data by passing the userId
-            User.findById(userId).exec((err, res) => {
+            User.findById(userId).exec( async (err, res) => {
 
                 // if error, reject with error
                 if (err) {
                     return reject(err)
                 }
+
+                const likeCount = await Like.count({referenceId: userId})
+
+                res['likeCount'] = likeCount;
 
                 return resolve(res);
             });

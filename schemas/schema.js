@@ -22,6 +22,7 @@ type Product {
   tags: [Tag]
   comments: [Comment]
   support: Support
+  likeCount: Int
 }
 
 input ProductInput {
@@ -105,6 +106,7 @@ type Requirement {
   updatedAt: String
   tags: [Tag]
   support: Support
+  likeCount: Int
 }
 
 input RequirementInput {
@@ -137,6 +139,7 @@ type Interview {
   updatedAt: String
   tags: [Tag]
   support: Support
+  likeCount: Int
 }
 
 input InterviewInput {
@@ -213,6 +216,7 @@ type HelpQuery {
   shortDescription: String
   tags: [Tag]
   support: Support
+  likeCount: Int
 }
 
 input HelpQueryInput {
