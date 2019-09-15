@@ -1,17 +1,17 @@
-# platformapi
+# codemarket
 
-NodeJS + Serverless + MongoDB + Mongoose + GraphQL Boilerplate
+NodeJS + Serverless + MongoDB + Mongoose + GraphQL
 
 ### Getting started
 
 ```bash
 $ git clone
 $ npm i
-$ cp config-example.js config.js
+$ cp env-example.yml env.yml
 $ npm start
 ```
 
-> Replase MONGODB_URL in config.js to point to your database.
+> Replase MONGODB_URL in env.yml to point to your database.
 
 ### Features
 
