@@ -4,6 +4,7 @@ const resolvers = require('./resolvers');
 const connectToMongoDB = require('./helpers/db');
 const auth = require('./helpers/auth');
 
+global.basePath = __dirname + '/';
 
 const server = new ApolloServer({
   cors: true,

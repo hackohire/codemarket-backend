@@ -1,3 +1,5 @@
+const nodemailer = require('nodemailer');
+const fs = require('fs');
 var auth = require('./auth');
 const Tag = require('../models/tag')();
 const Unit = require('../models/purchased_units')();
@@ -33,6 +35,47 @@ async function insertManyIntoTags(tags) {
     return tagsAdded;
 }
 
+async function sendEmail(toEmail, subject, body) {
+    try {
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASSWORD
+            }
+        });
+        transporter.sendMail({
+            from: process.env.FROM_EMAIL,
+            to: toEmail,
+            subject: subject,
+            html: body
+        }, (error, response) => {
+            if (error) {
+             return false;
+            } else {
+                return true;
+            }
+        });
+    } catch(err) {
+        return err;
+    }
+}
+
+async function getHtmlContent(filePath, cb) {
+    try {
+        fs.readFile(filePath, 'utf8',(err, html) => {
+            if (err) {
+                cb(err);
+            } else {
+                cb(null, html);
+            }
+        });
+    } catch (err) {
+        cb(err);
+    }
+}
+
 async function insertManyIntoPurchasedUnit(units) {
     console.log(units);
     const unitsAdded = new Promise((resolve, reject) => {
@@ -47,5 +90,7 @@ async function insertManyIntoPurchasedUnit(units) {
 module.exports = {
     checkIfUserIsAdmin,
     insertManyIntoTags,
+    sendEmail,
+    getHtmlContent,
     insertManyIntoPurchasedUnit
 }
