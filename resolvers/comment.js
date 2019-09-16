@@ -50,9 +50,9 @@ async function addComment(_, { comment }, { headers, db, decodedToken }) {
                     // }
                     const filePath = basePath + 'email-template/commentCreate.html';
                     helper.getHtmlContent(filePath, (err, htmlContent) => {
-                        var commentLink = process.env.COMMENT_URL+com.referenceId+')';
+                        var commentLink = process.env.FRONT_END_URL + '(main:dashboard/product-details/' + com.referenceId +')';
                         htmlContent = htmlContent.replace("{NAME}", data.createdBy.name);
-                        htmlContent = htmlContent.replace("{LINK}", commentLink);
+                        htmlContent = htmlContent.replace(/{LINK}/g, commentLink);
                         helper.sendEmail(data.createdBy.email, "Comment Created", htmlContent);
                     });
                     resolve(com);
