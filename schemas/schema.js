@@ -391,6 +391,8 @@ input URLInput {
 type Query {
   hello: String
 
+  getAllPosts: [Product]
+
   getAllProducts: [Product]
   getProductsByUserId(userId: String, status: String): [Product]
   getProductById(productId: String): Product
