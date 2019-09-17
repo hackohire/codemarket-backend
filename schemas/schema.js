@@ -24,6 +24,15 @@ type Product {
   comments: [Comment]
   support: Support
   likeCount: Int
+
+  purchasedBy: [PurchasedBy]
+}
+
+type PurchasedBy {
+  name: String
+  _id: ID
+  avatar: String
+  createdAt: String
 }
 
 input ProductInput {

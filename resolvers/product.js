@@ -5,6 +5,7 @@ const sendEmail = require('../helpers/ses_sendTemplatedEmail');
 const User = require('./../models/user')();
 const Comment = require('./../models/comment')();
 const Like = require('./../models/like')();
+const Unit = require('../models/purchased_units')();
 let conn;
 
 
@@ -156,17 +157,33 @@ async function getProductById(_, { productId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            console.log(conn);
-
             Product.findById(productId).populate('createdBy').populate('tags').exec(async (err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
 
+                let usersWhoPurchased = [];
+                const unitsSold = await Unit.find({reference_id: productId})
+                    .select('purchasedBy createdAt')
+                    .populate({path: 'purchasedBy', select: 'name avatar'})
+                    .exec();
+
+                if (unitsSold && unitsSold.length) {
+                    usersWhoPurchased = unitsSold.map((u) => {
+                                            let userWhoPurchased = {};
+                                            userWhoPurchased = u.purchasedBy;
+                                            userWhoPurchased.createdAt = u.createdAt;
+                                            return userWhoPurchased;
+                                        });
+                }
+
+                console.log(usersWhoPurchased);
+
                 const likeCount = await Like.count({referenceId: productId})
 
                 res['likeCount'] = likeCount;
+                res['purchasedBy'] = usersWhoPurchased;
 
                 return resolve(res);
             });
