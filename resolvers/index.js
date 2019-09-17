@@ -10,8 +10,7 @@ const { addComment, updateComment, getComments, getCommentsByReferenceId, delete
 const { searchCategories } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
-const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts } = require('./posts');
+const { like, checkIfUserLikedAndLikeCount } = require('./like')
 
 module.exports = {
   Query: {
@@ -19,8 +18,6 @@ module.exports = {
     getUsers,
     getUsersAndBugFixesCount,
     getUserById,
-
-    getAllPosts,
 
     getAllProducts,
     getProductsByUserId,
