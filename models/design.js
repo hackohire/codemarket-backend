@@ -8,6 +8,10 @@ const designSchema = new Schema(
         name: String,
         description: [],
         shortDescription: String,
+        type: {
+            type: String,
+            default: 'design'
+        },
         featuredImage: String,
         createdBy: {
             type: Schema.Types.ObjectId,

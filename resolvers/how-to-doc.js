@@ -1,6 +1,7 @@
 const connectToMongoDB = require('../helpers/db');
 const Howtodoc = require('../models/how-to-doc')();
 const helper = require('../helpers/helper');
+const Like = require('./../models/like')();
 let conn;
 
 async function addHowtodoc(_, { howtodoc }, { headers, db, decodedToken }) {
@@ -78,11 +79,15 @@ async function getHowtodocById(_, { howtodocId }, { headers, db, decodedToken })
                 console.log('Using existing mongoose connection.');
             }
 
-            Howtodoc.findById(howtodocId).populate('createdBy').populate('tags').exec((err, res) => {
+            Howtodoc.findById(howtodocId).populate('createdBy').populate('tags').exec( async(err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
+
+                const likeCount = await Like.count({referenceId: howtodocId})
+
+                res['likeCount'] = likeCount;
 
                 return resolve(res);
             });

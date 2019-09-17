@@ -1,6 +1,7 @@
 const connectToMongoDB = require('../helpers/db');
 const Requirement = require('../models/requirement')();
 const helper = require('../helpers/helper');
+const Like = require('./../models/like')();
 let conn;
 
 async function addRequirement(_, { requirement }, { headers, db, decodedToken }) {
@@ -77,11 +78,15 @@ async function getRequirementById(_, { requirementId }, { headers, db, decodedTo
                 console.log('Using existing mongoose connection.');
             }
 
-            Requirement.findById(requirementId).populate('createdBy').populate('tags').exec((err, res) => {
+            Requirement.findById(requirementId).populate('createdBy').populate('tags').exec( async (err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
+
+                const likeCount = await Like.count({referenceId: requirementId})
+
+                res['likeCount'] = likeCount;
 
                 return resolve(res);
             });

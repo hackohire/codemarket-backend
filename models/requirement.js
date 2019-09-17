@@ -6,6 +6,10 @@ const support  = require('./support');
 const requirementSchema = new Schema(
     {
         name: String,
+        type: {
+            type: String,
+            default: 'requirement'
+        },
         description: [],
         shortDescription: String,
         featuredImage: String,

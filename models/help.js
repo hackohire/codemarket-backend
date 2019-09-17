@@ -14,10 +14,14 @@ const snippet = new Schema(
 );
 
 
-const querySchema = new Schema(
+const helpRequestSchema = new Schema(
     {
         name: String,
         description: [],
+        type: {
+            type: String,
+            default: 'help-request'
+        },
         price: Number,
         createdBy: {
             type: Schema.Types.ObjectId,
@@ -49,8 +53,8 @@ const querySchema = new Schema(
 
 module.exports = () => {
     try {
-        return mongoose.model('query');
+        return mongoose.model('help-request');
     } catch (e) {
-        return mongoose.model('query', querySchema);
+        return mongoose.model('help-request', helpRequestSchema);
     }
 };

@@ -18,6 +18,7 @@ type User {
     roles: [String]
     createdAt: String
     currentJobDetails: CurrentJobDetails
+    likeCount: Int
   }
   
   input UserInput {

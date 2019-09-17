@@ -7,6 +7,7 @@ const graphQlHowtodocSchema = `
     type Howtodoc {
         _id: ID
         name: String
+        type: String
         description: [descriptionBlocks]
         featuredImage: String
         createdBy: User
@@ -19,11 +20,13 @@ const graphQlHowtodocSchema = `
         tags: [Tag]
         comments: [Comment]
         support: Support
+        likeCount: Int
     }
 
     input HowtodocInput {
         _id: ID
         name: String
+        type: String
         description: [InputdescriptionBlock]
         shortDescription: String
         featuredImage: String

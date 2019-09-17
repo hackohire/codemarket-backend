@@ -4,6 +4,7 @@ const schema = `
 
 type Product {
   _id: ID
+  type: String
   name: String
   description: [descriptionBlocks]
   shortDescription: String
@@ -22,11 +23,22 @@ type Product {
   tags: [Tag]
   comments: [Comment]
   support: Support
+  likeCount: Int
+
+  purchasedBy: [PurchasedBy]
+}
+
+type PurchasedBy {
+  name: String
+  _id: ID
+  avatar: String
+  createdAt: String
 }
 
 input ProductInput {
   _id: ID
   name: String
+  type: String
   description: [InputdescriptionBlock]
   shortDescription: String
   featuredImage: String
@@ -60,7 +72,7 @@ type Comment {
   children: [Comment]
   _id: ID
   text: [descriptionBlocks]
-  referenceId: ID,
+  referenceId: ID
   type: String
   parentId: ID
   createdBy: User
@@ -93,6 +105,7 @@ input TagInput {
 type Requirement {
   _id: ID
   name: String
+  type: String
   description: [descriptionBlocks]
   shortDescription: String
   featuredImage: String
@@ -105,11 +118,13 @@ type Requirement {
   updatedAt: String
   tags: [Tag]
   support: Support
+  likeCount: Int
 }
 
 input RequirementInput {
   _id: ID
   name: String
+  type: String
   description: [InputdescriptionBlock]
   shortDescription: String
   featuredImage: String
@@ -125,6 +140,7 @@ input RequirementInput {
 type Interview {
   _id: ID
   name: String
+  type: String
   description: [descriptionBlocks]
   shortDescription: String
   featuredImage: String
@@ -137,11 +153,13 @@ type Interview {
   updatedAt: String
   tags: [Tag]
   support: Support
+  likeCount: Int
 }
 
 input InterviewInput {
   _id: ID
   name: String
+  type: String
   description: [InputdescriptionBlock]
   shortDescription: String
   featuredImage: String
@@ -198,6 +216,7 @@ enum Roles {
 
 type HelpQuery {
   name: String
+  type: String
   description: [descriptionBlocks]
   price: Int
   _id: ID
@@ -213,10 +232,12 @@ type HelpQuery {
   shortDescription: String
   tags: [Tag]
   support: Support
+  likeCount: Int
 }
 
 input HelpQueryInput {
   name: String
+  type: String
   description: [InputdescriptionBlock]
   price: Int
   _id: ID
@@ -369,6 +390,8 @@ input URLInput {
 
 type Query {
   hello: String
+
+  getAllPosts: [Product]
 
   getAllProducts: [Product]
   getProductsByUserId(userId: String, status: String): [Product]
