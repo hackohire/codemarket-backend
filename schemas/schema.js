@@ -72,7 +72,7 @@ type Comment {
   children: [Comment]
   _id: ID
   text: [descriptionBlocks]
-  referenceId: ID,
+  referenceId: ID
   type: String
   parentId: ID
   createdBy: User
@@ -394,8 +394,6 @@ type Query {
   getAllProducts: [Product]
   getProductsByUserId(userId: String, status: String): [Product]
   getProductById(productId: String): Product
-
-  getAllPosts: [Product]
 
   getComments(commentId: String): Comment
   getCommentsByReferenceId(referenceId: String): [Comment]
