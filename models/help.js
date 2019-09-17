@@ -18,6 +18,10 @@ const helpRequestSchema = new Schema(
     {
         name: String,
         description: [],
+        type: {
+            type: String,
+            default: 'help-request'
+        },
         price: Number,
         createdBy: {
             type: Schema.Types.ObjectId,
