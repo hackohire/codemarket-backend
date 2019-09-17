@@ -41,7 +41,7 @@ const productSchema = new Schema(
         status: {
             type: String,
             enum: ['Created',  'Drafted', 'Published', 'Unpublished', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
-            default: 'Darfted'
+            default: 'Drafted'
         },
         snippets: [snippet],
         tags: [{

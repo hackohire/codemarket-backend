@@ -28,14 +28,32 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
 
             // Saving the Transaction in the collection
             await h.save(transaction).then(async p => {
-
                 if (p && p.purchase_units && p.purchase_units.length) {
                     const removedCount = await Cart.remove({user: transaction.purchasedBy}).exec();
                     console.log(removedCount);
                 }
 
                 // Populating "purchase_units" and and the product and inside the product "createdBy" & "tags" field
-                p.populate({path: 'purchase_units', populate: {path: 'reference_id', populate: [{path: 'createdBy'}, {path: 'tags'}]}}).execPopulate().then((populatedTransaction) => {
+                p.populate({path: 'purchase_units', populate: {path: 'reference_id', populate: [{path: 'createdBy'}, {path: 'tags'}]}}).populate('purchasedBy').execPopulate().then((populatedTransaction) => {
+                    const creatorEmail = populatedTransaction.purchase_units[0].reference_id.createdBy.email;
+                    const creatorName = populatedTransaction.purchase_units[0].reference_id.createdBy.name;
+                    const sellertPath = basePath + 'email-template/bugFixPurchaseToAuthor';
+                    const buyerPath = basePath + 'email-template/bugFixPurchaseToBuyer';
+
+                    const payLoadToBuyer = {
+                        BUYERNAME: populatedTransaction.purchasedBy.name,
+                        CREATOREMAIL: creatorEmail
+                    };
+
+                    helper.sendEmail(populatedTransaction.purchasedBy.email, buyerPath, payLoadToBuyer);
+
+                    const payLoadToAuthor = {
+                        AUTHORNAME: creatorName,
+                        BUYERNAME: populatedTransaction.purchasedBy.name,
+                        BUYER_EMAIL: populatedTransaction.purchasedBy.email
+                    };
+                    helper.sendEmail(creatorEmail, sellertPath, payLoadToAuthor);
+
                     return resolve(populatedTransaction.purchase_units);
                 })
             });

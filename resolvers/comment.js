@@ -18,7 +18,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken }) {
             }
 
             const c = new Comment(comment);
-
+            let commentObj;
             if (c.parentId) {
 
                 const pcForChildren = await Comment.findById(c.parentId).exec();
@@ -30,6 +30,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken }) {
                 await c.save().then( async (com) => {
                     console.log(com);
                     await com.populate('createdBy').populate('children').execPopulate();
+                    commentObj = com;
                     resolve(com);
                 })
 
@@ -38,28 +39,27 @@ async function addComment(_, { comment }, { headers, db, decodedToken }) {
                 c.parents.push(c._id);
                 await c.save().then( async (com) => {
                     await com.populate('createdBy').execPopulate();
-                    var data;
-                    if (com.type === 'product') {
-                        data = await Product.findOne({ _id: com.referenceId }).populate('createdBy').exec();
-                    }
-                    if (com.type === 'help-request') {
-                        data = await Query.findOne({ _id: com.referenceId }).populate('createdBy').exec();
-                    }
-                    // if (com.type === 'requirement') {
-                    //     data = await Requirement.findOne({ _id: com.referenceId }).populate('createdBy').exec();
-                    // }
-                    const filePath = basePath + 'email-template/commentCreate.html';
-                    helper.getHtmlContent(filePath, (err, htmlContent) => {
-                        var commentLink = process.env.COMMENT_URL+com.referenceId+')';
-                        htmlContent = htmlContent.replace("{NAME}", data.createdBy.name);
-                        htmlContent = htmlContent.replace("{LINK}", commentLink);
-                        helper.sendEmail(data.createdBy.email, "Comment Created", htmlContent);
-                    });
+                    commentObj = com;
                     resolve(com);
                 })
             }
-
-
+            var data;
+            if (commentObj.type === 'product') {
+                data = await Product.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
+            }
+            if (commentObj.type === 'help-request') {
+                data = await Query.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
+            }
+            // if (com.type === 'requirement') {
+            //     data = await Requirement.findOne({ _id: com.referenceId }).populate('createdBy').exec();
+            // }
+            const filePath = basePath + 'email-template/commentCreate';
+            var commentLink = process.env.COMMENT_URL+commentObj.referenceId+')';
+            const payLoad = {
+                NAME: data.createdBy.name,
+                LINK: commentLink
+            };
+            helper.sendEmail(data.createdBy.email, filePath, payLoad);
         } catch (e) {
             console.log(e);
             return reject(e);

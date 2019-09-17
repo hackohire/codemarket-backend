@@ -27,14 +27,14 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
             const savedProduct = await prod.save(product);
             savedProduct.populate('createdBy').populate('tags').execPopulate().then((sd) => {
                 console.log(sd);
-                const filePath = basePath + 'email-template/productCreate.html';
-                helper.getHtmlContent(filePath, (err, htmlContent) => {
-                    var productLink = process.env.PRODUCT_URL+sd.id+')';
-                    htmlContent = htmlContent.replace("{AUTHORNAME}", sd.createdBy.name);
-                    htmlContent = htmlContent.replace("{PRODUCTNAME}", sd.name);
-                    htmlContent = htmlContent.replace("{PRODUCTLINK}", productLink);
-                    helper.sendEmail(sd.createdBy.email, "Product Created", htmlContent);
-                });
+                const filePath = basePath + 'email-template/productCreate';
+                var productLink = process.env.PRODUCT_URL+sd.id+')';
+                const payLoad = {
+                    AUTHORNAME: sd.createdBy.name,
+                    PRODUCTNAME: sd.name,
+                    PRODUCTLINK: productLink
+                };
+                helper.sendEmail(sd.createdBy.email, filePath, payLoad);
                 return resolve(sd)
             });
             // await prod.save(product).then(async p => {
@@ -54,13 +54,6 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
             //     //                 'link': `${process.env.FRONT_END_URL}/#/application/applications/${p._id}`,
             //     //                 'productDetails': `${p.description}`
             //     //             });
-                                // helper.getHtmlContent('productCreate', (err, htmlContent) => {
-                                //     htmlContent = htmlContent.replace("{name}", admin.name);
-                                //     htmlContent = htmlContent.replace("{productName}", p.name);
-                                //     htmlContent = htmlContent.replace("{link}", `${process.env.FRONT_END_URL}/#/application/applications/${p._id}`);
-                                //     htmlContent = htmlContent.replace("{productDetails}", `${p.description}`);
-                                //     helper.sendEmail(admin.email, "Product creation", htmlContent);
-                                // });
             //     //             sendEmail.sendTemplatedEmail(params);
             //     //         })
             //     //     }

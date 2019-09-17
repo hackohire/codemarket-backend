@@ -1,8 +1,8 @@
 const nodemailer = require('nodemailer');
-const fs = require('fs');
 var auth = require('./auth');
 const Tag = require('../models/tag')();
 const Unit = require('../models/purchased_units')();
+const { EmailTemplate } = require('email-templates-v2');
 
 async function checkIfUserIsAdmin (decodedToken) {
     const isUserAdmin = new Promise((resolve, reject) => {
@@ -35,7 +35,7 @@ async function insertManyIntoTags(tags) {
     return tagsAdded;
 }
 
-async function sendEmail(toEmail, subject, body) {
+async function sendEmail(toEmail, filePath, body) {
     try {
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
@@ -45,34 +45,28 @@ async function sendEmail(toEmail, subject, body) {
                 pass: process.env.SMTP_PASSWORD
             }
         });
-        transporter.sendMail({
-            from: process.env.FROM_EMAIL,
-            to: toEmail,
-            subject: subject,
-            html: body
-        }, (error, response) => {
-            if (error) {
-             return false;
-            } else {
-                return true;
-            }
+
+        const template = new EmailTemplate(filePath);
+        template.render(body, (err, result) => {
+            const { html, subject } = result;
+            const mailOptions = {
+                from: process.env.FROM_EMAIL,
+                to: toEmail,
+                replyTo: process.env.FROM_EMAIL,
+                subject: subject,
+                html: html,
+              };
+            transporter.sendMail(mailOptions, (error, response) => {
+                if (error) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
         });
+      
     } catch(err) {
         return err;
-    }
-}
-
-async function getHtmlContent(filePath, cb) {
-    try {
-        fs.readFile(filePath, 'utf8',(err, html) => {
-            if (err) {
-                cb(err);
-            } else {
-                cb(null, html);
-            }
-        });
-    } catch (err) {
-        cb(err);
     }
 }
 
