@@ -20,8 +20,6 @@ provider:
     SMTP_USER: ${file(env.yml):${self:provider.stage}.SMTP_USER}
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
-    COMMENT_URL: ${file(env.yml):${self:provider.stage}.COMMENT_URL}
-    PRODUCT_URL: ${file(env.yml):${self:provider.stage}.PRODUCT_URL}
 functions:
   graphql:
     handler: handler.graphqlHandler
