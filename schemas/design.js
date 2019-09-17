@@ -4,6 +4,7 @@ const graphQlDesignSchema = `
     type Design {
         _id: ID
         name: String
+        type: String
         description: [descriptionBlocks]
         featuredImage: String
         createdBy: User
@@ -22,6 +23,7 @@ const graphQlDesignSchema = `
     input DesignInput {
         _id: ID
         name: String
+        type: String
         description: [InputdescriptionBlock]
         shortDescription: String
         featuredImage: String
