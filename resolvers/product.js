@@ -30,7 +30,7 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
                 console.log(sd);
                 const filePath = basePath + 'email-template/productCreate.html';
                 helper.getHtmlContent(filePath, (err, htmlContent) => {
-                    var productLink = process.env.PRODUCT_URL+sd.id+')';
+                    var productLink = process.env.FRONT_END_URL + '(main:dashboard/product-details/' + sd.referenceId +')';
                     htmlContent = htmlContent.replace("{AUTHORNAME}", sd.createdBy.name);
                     htmlContent = htmlContent.replace("{PRODUCTNAME}", sd.name);
                     htmlContent = htmlContent.replace("{PRODUCTLINK}", productLink);
