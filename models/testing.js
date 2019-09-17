@@ -6,10 +6,6 @@ const support  = require('./support');
 const testingSchema = new Schema(
     {
         name: String,
-        type: {
-            type: String,
-            default: 'testing'
-        },
         description: [],
         shortDescription: String,
         featuredImage: String,

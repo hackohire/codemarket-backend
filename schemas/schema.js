@@ -4,7 +4,6 @@ const schema = `
 
 type Product {
   _id: ID
-  type: String
   name: String
   description: [descriptionBlocks]
   shortDescription: String
@@ -38,7 +37,6 @@ type PurchasedBy {
 input ProductInput {
   _id: ID
   name: String
-  type: String
   description: [InputdescriptionBlock]
   shortDescription: String
   featuredImage: String
@@ -105,7 +103,6 @@ input TagInput {
 type Requirement {
   _id: ID
   name: String
-  type: String
   description: [descriptionBlocks]
   shortDescription: String
   featuredImage: String
@@ -124,7 +121,6 @@ type Requirement {
 input RequirementInput {
   _id: ID
   name: String
-  type: String
   description: [InputdescriptionBlock]
   shortDescription: String
   featuredImage: String
@@ -140,7 +136,6 @@ input RequirementInput {
 type Interview {
   _id: ID
   name: String
-  type: String
   description: [descriptionBlocks]
   shortDescription: String
   featuredImage: String
@@ -159,7 +154,6 @@ type Interview {
 input InterviewInput {
   _id: ID
   name: String
-  type: String
   description: [InputdescriptionBlock]
   shortDescription: String
   featuredImage: String
@@ -216,7 +210,6 @@ enum Roles {
 
 type HelpQuery {
   name: String
-  type: String
   description: [descriptionBlocks]
   price: Int
   _id: ID
@@ -237,7 +230,6 @@ type HelpQuery {
 
 input HelpQueryInput {
   name: String
-  type: String
   description: [InputdescriptionBlock]
   price: Int
   _id: ID
@@ -394,8 +386,6 @@ type Query {
   getAllProducts: [Product]
   getProductsByUserId(userId: String, status: String): [Product]
   getProductById(productId: String): Product
-
-  getAllPosts: [Product]
 
   getComments(commentId: String): Comment
   getCommentsByReferenceId(referenceId: String): [Comment]

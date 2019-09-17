@@ -6,10 +6,6 @@ const support  = require('./support');
 const interviewSchema = new Schema(
     {
         name: String,
-        type: {
-            type: String,
-            default: 'interview'
-        },
         description: [],
         shortDescription: String,
         featuredImage: String,

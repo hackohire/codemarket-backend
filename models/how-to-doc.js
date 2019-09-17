@@ -7,10 +7,6 @@ const howtodocSchema = new Schema(
     {
         name: String,
         description: [],
-        type: {
-            type: String,
-            default: 'howtodoc'
-        },
         shortDescription: String,
         featuredImage: String,
         createdBy: {

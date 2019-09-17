@@ -6,7 +6,6 @@ const graphQlHowToDocSchema = `
     type Testing {
         _id: ID
         name: String
-        type: String
         description: [descriptionBlocks]
         featuredImage: String
         createdBy: User
@@ -25,7 +24,6 @@ const graphQlHowToDocSchema = `
     input TestingInput {
         _id: ID
         name: String
-        type: String
         description: [InputdescriptionBlock]
         shortDescription: String
         featuredImage: String
