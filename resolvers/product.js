@@ -150,19 +150,28 @@ async function getProductById(_, { productId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
+            /** Fetch a Product by Id */
             Product.findById(productId).populate('createdBy').populate('tags').exec(async (err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
 
+                /** List of users who purchased the bugfix */
                 let usersWhoPurchased = [];
+
+                /** Find the unitsSold by reference_id stored as productId while purchase and populate userwho purchased */
                 const unitsSold = await Unit.find({reference_id: productId})
                     .select('purchasedBy createdAt')
                     .populate({path: 'purchasedBy', select: 'name avatar'})
                     .exec();
 
+
+
+                /** If there is more than 0 units */
                 if (unitsSold && unitsSold.length) {
+
+                    /** Map the array into the fileds "name", "_id", "createdAt" & "avatar" */
                     usersWhoPurchased = unitsSold.map((u) => {
                                             let userWhoPurchased = {};
                                             userWhoPurchased = u.purchasedBy;
@@ -171,11 +180,11 @@ async function getProductById(_, { productId }, { headers, db, decodedToken }) {
                                         });
                 }
 
-                console.log(usersWhoPurchased);
-
                 const likeCount = await Like.count({referenceId: productId})
 
                 res['likeCount'] = likeCount;
+
+                /** attach "purchasedBy" with the response */
                 res['purchasedBy'] = usersWhoPurchased;
 
                 return resolve(res);

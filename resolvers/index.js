@@ -140,6 +140,9 @@ module.exports = {
         case 'warning':
           return 'WarningBlock'
 
+        case 'embed':
+          return 'EmbedBlock'
+
         default:
           console.log('default case')
           return null;
