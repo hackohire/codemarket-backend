@@ -20,15 +20,6 @@ async function getAllPosts(_, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            // Product.find({status: 'Published'}).populate('createdBy').populate('tags').exec((err, res) => {
-
-            //     if (err) {
-            //         return reject(err)
-            //     }
-
-            //     return resolve(res);
-            // });
-
             /** Taking Empty Posts array */
             let posts = [];
 
