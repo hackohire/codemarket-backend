@@ -282,6 +282,12 @@ input InputdescriptionBlocks {
 
   title: String
   message: String
+
+  service : String
+  source : String
+  embed : String
+  width : Int
+  height : Int
 }
 
 
@@ -289,7 +295,7 @@ input InputdescriptionBlocks {
 
 
 
-union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock
+union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock
 
 type CodeBlock {
   type: String
@@ -372,6 +378,20 @@ type WarningBlock {
 type Warning {
   title: String
   message: String
+}
+
+type EmbedBlock {
+  type: String
+  data: Embed
+}
+
+type Embed {
+  service : String
+  source : String
+  embed : String
+  width : Int
+  height : Int
+  caption : String
 }
 
 
