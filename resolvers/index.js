@@ -1,5 +1,5 @@
 const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
-const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
+const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById, getListOfUsersWhoPurchased } = require('./product');
 const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId, updateHelpRequest, deleteHelpRequest } = require('./help');
 const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview');
 const { addTesting, getAllTestings, getTestingById, getTestingsByUserId, updateTesting, deleteTesting } = require('./testing');
@@ -25,6 +25,7 @@ module.exports = {
     getAllProducts,
     getProductsByUserId,
     getProductById,
+    getListOfUsersWhoPurchased,
 
     getComments,
     getCommentsByReferenceId,

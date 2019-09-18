@@ -416,6 +416,7 @@ type Query {
   getAllProducts: [Product]
   getProductsByUserId(userId: String, status: String): [Product]
   getProductById(productId: String): Product
+  getListOfUsersWhoPurchased(productId: String): [PurchasedBy]
 
   getComments(commentId: String): Comment
   getCommentsByReferenceId(referenceId: String): [Comment]
