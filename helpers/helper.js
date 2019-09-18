@@ -85,6 +85,5 @@ module.exports = {
     checkIfUserIsAdmin,
     insertManyIntoTags,
     sendEmail,
-    getHtmlContent,
     insertManyIntoPurchasedUnit
 }
