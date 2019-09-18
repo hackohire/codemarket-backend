@@ -44,17 +44,20 @@ async function addComment(_, { comment }, { headers, db, decodedToken }) {
                 })
             }
             var data;
+            var commentLink
             if (commentObj.type === 'product') {
                 data = await Product.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
-            }
-            if (commentObj.type === 'help-request') {
+                commentLink = process.env.FRONT_END_URL + '(main:dashboard/product-details/' + commentObj.referenceId +')';
+            }else if (commentObj.type === 'help-request') {
                 data = await Query.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
+                commentLink = process.env.FRONT_END_URL + '(main:dashboard/help-request-details/' + commentObj.referenceId +')';
+            } else {
+                commentLink = process.env.FRONT_END_URL + '(main:dashboard/product-details/' + commentObj.referenceId +')';
             }
             // if (com.type === 'requirement') {
             //     data = await Requirement.findOne({ _id: com.referenceId }).populate('createdBy').exec();
             // }
             const filePath = basePath + 'email-template/commentCreate';
-            var commentLink = process.env.COMMENT_URL+commentObj.referenceId+')';
             const payLoad = {
                 NAME: data.createdBy.name,
                 LINK: commentLink

@@ -30,7 +30,7 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
             savedProduct.populate('createdBy').populate('tags').execPopulate().then((sd) => {
                 console.log(sd);
                 const filePath = basePath + 'email-template/productCreate';
-                var productLink = process.env.PRODUCT_URL+sd.id+')';
+                var productLink = process.env.FRONT_END_URL + '(main:dashboard/product-details/' + sd._id +')';
                 const payLoad = {
                     AUTHORNAME: sd.createdBy.name,
                     PRODUCTNAME: sd.name,
