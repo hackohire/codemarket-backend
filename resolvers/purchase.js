@@ -35,25 +35,28 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
 
                 // Populating "purchase_units" and and the product and inside the product "createdBy" & "tags" field
                 p.populate({path: 'purchase_units', populate: {path: 'reference_id', populate: [{path: 'createdBy'}, {path: 'tags'}]}}).populate('purchasedBy').execPopulate().then((populatedTransaction) => {
-                    const creatorEmail = populatedTransaction.purchase_units[0].reference_id.createdBy.email;
-                    const creatorName = populatedTransaction.purchase_units[0].reference_id.createdBy.name;
-                    const sellertPath = basePath + 'email-template/bugFixPurchaseToAuthor';
-                    const buyerPath = basePath + 'email-template/bugFixPurchaseToBuyer';
-
-                    const payLoadToBuyer = {
-                        BUYERNAME: populatedTransaction.purchasedBy.name,
-                        CREATOREMAIL: creatorEmail
-                    };
-
-                    helper.sendEmail(populatedTransaction.purchasedBy.email, buyerPath, payLoadToBuyer);
-
-                    const payLoadToAuthor = {
-                        AUTHORNAME: creatorName,
-                        BUYERNAME: populatedTransaction.purchasedBy.name,
-                        BUYER_EMAIL: populatedTransaction.purchasedBy.email
-                    };
-                    helper.sendEmail(creatorEmail, sellertPath, payLoadToAuthor);
-
+                    
+                    for (let i = 0; i < populatedTransaction.purchase_units.length; i++) {
+                        const creatorEmail = populatedTransaction.purchase_units[i].reference_id.createdBy.email;
+                        const creatorName = populatedTransaction.purchase_units[i].reference_id.createdBy.name;
+                        const sellertPath = basePath + 'email-template/bugFixPurchaseToAuthor';
+                        const buyerPath = basePath + 'email-template/bugFixPurchaseToBuyer';
+    
+                        const payLoadToBuyer = {
+                            BUYERNAME: populatedTransaction.purchasedBy.name,
+                            CREATOREMAIL: creatorEmail
+                        };
+    
+                        helper.sendEmail(populatedTransaction.purchasedBy.email, buyerPath, payLoadToBuyer);
+    
+                        const payLoadToAuthor = {
+                            AUTHORNAME: creatorName,
+                            BUYERNAME: populatedTransaction.purchasedBy.name,
+                            BUYER_EMAIL: populatedTransaction.purchasedBy.email
+                        };
+                        helper.sendEmail(creatorEmail, sellertPath, payLoadToAuthor);
+                    }
+                
                     return resolve(populatedTransaction.purchase_units);
                 })
             });
