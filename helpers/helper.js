@@ -58,8 +58,10 @@ async function sendEmail(toEmail, filePath, body) {
               };
             transporter.sendMail(mailOptions, (error, response) => {
                 if (error) {
+                    console.log('Mail Sending Error', error);
                     return false;
                 } else {
+                    console.log('Mail Sent Successfully', response);
                     return true;
                 }
             });
