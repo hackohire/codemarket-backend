@@ -57,12 +57,19 @@ async function addComment(_, { comment }, { headers, db, decodedToken }) {
             // if (com.type === 'requirement') {
             //     data = await Requirement.findOne({ _id: com.referenceId }).populate('createdBy').exec();
             // }
-            const filePath = basePath + 'email-template/commentCreate';
-            const payLoad = {
+            const filePathToAuthor = basePath + 'email-template/commentCreateToAuthor';
+            const filePathToCommentor = basePath + 'email-template/commentCreateToCommentor';
+            const payLoadToAuthor = {
                 NAME: data.createdBy.name,
+                LINK: commentLink,
+                COMMENTOR_NAME: commentObj.createdBy.name
+            };
+            const payLoadToCommentor = {
+                NAME: commentObj.createdBy.name,
                 LINK: commentLink
             };
-            helper.sendEmail(data.createdBy.email, filePath, payLoad);
+            helper.sendEmail(data.createdBy.email, filePathToAuthor, payLoadToAuthor);
+            helper.sendEmail(commentObj.createdBy.email, filePathToCommentor, payLoadToCommentor);
         } catch (e) {
             console.log(e);
             return reject(e);
