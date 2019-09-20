@@ -27,7 +27,7 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
 
             const prod = await new Product(product);
             const savedProduct = await prod.save(product);
-            savedProduct.populate('createdBy').populate('tags').execPopulate().then((sd) => {
+            savedProduct.populate('createdBy').populate('tags').execPopulate().then(async (sd) => {
                 console.log(sd);
                 const filePath = basePath + 'email-template/productCreate';
                 var productLink = process.env.FRONT_END_URL + '(main:dashboard/product-details/' + sd._id + ')';
@@ -36,7 +36,7 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
                     PRODUCTNAME: sd.name,
                     PRODUCTLINK: productLink
                 };
-                helper.sendEmail(sd.createdBy.email, filePath, payLoad);
+                await helper.sendEmail(sd.createdBy.email, filePath, payLoad);
                 return resolve(sd)
             });
 
