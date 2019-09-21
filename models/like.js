@@ -14,7 +14,7 @@ const likeSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ['user', 'product', 'help-request', 'requirement', 'interview', 'testing', 'design', 'howtodoc'],
+            enum: ['user', 'product', 'help-request', 'requirement', 'interview', 'testing', 'design', 'howtodoc', 'goal'],
         },
     },
     {

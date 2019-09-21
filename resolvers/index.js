@@ -5,7 +5,8 @@ const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId,
 const { addTesting, getAllTestings, getTestingById, getTestingsByUserId, updateTesting, deleteTesting } = require('./testing');
 const { addHowtodoc, getAllHowtodocs, getHowtodocById, getHowtodocsByUserId, updateHowtodoc, deleteHowtodoc } = require('./how-to-doc');
 const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement');
-const { addDesign, getAllDesigns, getDesignById, getDesignsByUserId, updateDesign, deleteDesign } = require('./design')
+const { addDesign, getAllDesigns, getDesignById, getDesignsByUserId, updateDesign, deleteDesign } = require('./design');
+const { addGoal, getAllGoals, getGoalById, getGoalsByUserId, updateGoal, deleteGoal } = require('./goal');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment')
 const { searchCategories } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
@@ -57,6 +58,10 @@ module.exports = {
     getDesignsByUserId,
     getDesignById,
 
+    getAllGoals,
+    getGoalsByUserId,
+    getGoalById,
+
     searchCategories,
 
     getPurchasedUnitsByUserId,
@@ -102,6 +107,10 @@ module.exports = {
     addDesign,
     updateDesign,
     deleteDesign,
+
+    addGoal,
+    updateGoal,
+    deleteGoal,
 
     addTransaction,
 

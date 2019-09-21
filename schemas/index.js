@@ -3,6 +3,7 @@ const graphQlPurchaseSchema = require('./purchase')
 const graphQlCartSchema = require('./cart')
 const graphQlTestingSchema = require('./testing');
 const graphQlDesignSchema = require('./design');
+const graphQlGoalSchema = require('./goal');
 const graphQlLikeSchema = require('./like');
 const graphQlHowToDocSchema = require('./how-to-doc');
 const schema = require('./schema');
@@ -15,6 +16,7 @@ const schemaArray = [
     graphQlTestingSchema,
     graphQlHowToDocSchema,
     graphQlDesignSchema,
+    graphQlGoalSchema,
     graphQlLikeSchema
 ];
 

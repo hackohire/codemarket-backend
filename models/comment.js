@@ -28,7 +28,7 @@ const commentSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design'],
+            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal'],
         },
         status: {
             type: String,

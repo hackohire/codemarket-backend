@@ -5,7 +5,8 @@ const Interview = require('../models/interview')();
 const Requirement = require('../models/requirement')();
 const Testing = require('../models/testing')();
 const Design = require('../models/design')();
-const Howtodoc = require('../models/how-to-doc')(); 
+const Howtodoc = require('../models/how-to-doc')();
+const Goal = require('../models/goal')();
 let conn;
 
 
@@ -24,35 +25,39 @@ async function getAllPosts(_, { headers, db, decodedToken }) {
             let posts = [];
 
             /** Fetching all the Published Products */
-            posts = await Product.find({status: 'Published'}).populate('createdBy').populate('tags').exec();
+            posts = await Product.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
 
             /** Fetching all the Published help-requests and concating it with posts */
-            const helpRequests = await HelpRequest.find({status: 'Published'}).populate('createdBy').populate('tags').exec();
+            const helpRequests = await HelpRequest.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
             posts = posts.concat(helpRequests);
 
             /** Fetching all the Published interviews and concating it with posts */
-            const interviews = await Interview.find({status: 'Published'}).populate('createdBy').populate('tags').exec();
+            const interviews = await Interview.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
             posts = posts.concat(interviews);
 
             /** Fetching all the Published requirement and concating it with posts */
-            const requirements = await Requirement.find({status: 'Published'}).populate('createdBy').populate('tags').exec();
+            const requirements = await Requirement.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
             posts = posts.concat(requirements);
 
             /** Fetching all the Published how-to-doc and concating it with posts */
-            const howtodocs = await Howtodoc.find({status: 'Published'}).populate('createdBy').populate('tags').exec();
+            const howtodocs = await Howtodoc.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
             posts = posts.concat(howtodocs);
 
             /** Fetching all the Published testing and concating it with posts */
-            const testings = await Testing.find({status: 'Published'}).populate('createdBy').populate('tags').exec();
+            const testings = await Testing.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
             posts = posts.concat(testings);
 
             /** Fetching all the Published designs and concating it with posts */
-            const designs = await Design.find({status: 'Published'}).populate('createdBy').populate('tags').exec();
+            const designs = await Design.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
             posts = posts.concat(designs);
+
+            /** Fetching all the Published goals and concating it with posts */
+            const goals = await Goal.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            posts = posts.concat(goals);
 
             /** Resolving Promise with all the Published posts in the platform */
             return await resolve(posts);
-            
+
 
 
 
