@@ -40,7 +40,7 @@ const graphQlDesignSchema = `
     
     extend type Query {
         getAllDesigns: [Design]
-        getDesignsByUserId(userId: String, , status: String): [Design]
+        getDesignsByUserId(userId: String, status: String): [Design]
         getDesignById(designId: String): Design
     }
     extend type Mutation {
