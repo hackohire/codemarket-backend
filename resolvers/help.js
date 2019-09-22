@@ -28,6 +28,7 @@ async function addQuery(_, { helpQuery }, { headers, db, decodedToken }) {
             await h.save(helpQuery).then(async p => {
                 console.log(p.description)
                 p.populate('createdBy').populate('tags').execPopulate().then((populatedHelpRequest) => {
+                    helper.sendPostCreationEmail(populatedHelpRequest, 'Help Request');
                     return resolve(populatedHelpRequest);
                 })
                 // return resolve([a]);

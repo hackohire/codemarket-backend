@@ -25,6 +25,8 @@ async function addDesign(_, { design }, { headers, db, decodedToken }) {
                 console.log(p)
 
                 p.populate('createdBy').populate('tags').execPopulate().then(populatedDesign => {
+
+                    helper.sendPostCreationEmail(populatedDesign);
                     return resolve(populatedDesign);
                 })
                 // return resolve([a]);

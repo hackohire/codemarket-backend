@@ -24,6 +24,7 @@ async function addRequirement(_, { requirement }, { headers, db, decodedToken })
             await int.save(requirement).then(async p => {
                 console.log(p)
                 p.populate('createdBy').populate('tags').execPopulate().then(populatedRequirement => {
+                    helper.sendPostCreationEmail(populatedRequirement);
                     return resolve(populatedRequirement);
                 })
                 // return resolve([a]);

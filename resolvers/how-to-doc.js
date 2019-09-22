@@ -25,6 +25,7 @@ async function addHowtodoc(_, { howtodoc }, { headers, db, decodedToken }) {
                 console.log(p)
 
                 p.populate('createdBy').populate('tags').execPopulate().then(populatedHowtodoc => {
+                    helper.sendPostCreationEmail(populatedHowtodoc, 'How-To-Guide');
                     return resolve(populatedHowtodoc);
                 })
                 // return resolve([a]);

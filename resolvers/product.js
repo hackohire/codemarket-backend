@@ -29,14 +29,7 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
             const savedProduct = await prod.save(product);
             savedProduct.populate('createdBy').populate('tags').execPopulate().then(async (sd) => {
                 console.log(sd);
-                const filePath = basePath + 'email-template/productCreate';
-                var productLink = process.env.FRONT_END_URL + '(main:dashboard/product-details/' + sd._id + ')';
-                const payLoad = {
-                    AUTHORNAME: sd.createdBy.name,
-                    PRODUCTNAME: sd.name,
-                    PRODUCTLINK: productLink
-                };
-                await helper.sendEmail(sd.createdBy.email, filePath, payLoad);
+                helper.sendPostCreationEmail(sd, 'Bugfix');
                 return resolve(sd)
             });
 

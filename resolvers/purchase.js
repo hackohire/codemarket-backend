@@ -34,7 +34,7 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
                 }
 
                 // Populating "purchase_units" and and the product and inside the product "createdBy" & "tags" field
-                p.populate({path: 'purchase_units', populate: {path: 'reference_id', populate: [{path: 'createdBy'}, {path: 'tags'}]}}).populate('purchasedBy').execPopulate().then((populatedTransaction) => {
+                p.populate({path: 'purchase_units', populate: {path: 'reference_id', populate: [{path: 'createdBy'}, {path: 'tags'}]}}).populate('purchasedBy').execPopulate().then(async (populatedTransaction) => {
                     
                     for (let i = 0; i < populatedTransaction.purchase_units.length; i++) {
                         const creatorEmail = populatedTransaction.purchase_units[i].reference_id.createdBy.email;
@@ -47,14 +47,14 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
                             CREATOREMAIL: creatorEmail
                         };
     
-                        helper.sendEmail(populatedTransaction.purchasedBy.email, buyerPath, payLoadToBuyer);
+                        await helper.sendEmail(populatedTransaction.purchasedBy.email, buyerPath, payLoadToBuyer);
     
                         const payLoadToAuthor = {
                             AUTHORNAME: creatorName,
                             BUYERNAME: populatedTransaction.purchasedBy.name,
                             BUYER_EMAIL: populatedTransaction.purchasedBy.email
                         };
-                        helper.sendEmail(creatorEmail, sellertPath, payLoadToAuthor);
+                        await helper.sendEmail(creatorEmail, sellertPath, payLoadToAuthor);
                     }
                 
                     return resolve(populatedTransaction.purchase_units);

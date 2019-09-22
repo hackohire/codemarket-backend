@@ -25,6 +25,7 @@ async function addTesting(_, { testing }, { headers, db, decodedToken }) {
                 console.log(p)
 
                 p.populate('createdBy').populate('tags').execPopulate().then(populatedTesting => {
+                    helper.sendPostCreationEmail(populatedTesting, 'Testing Report');
                     return resolve(populatedTesting);
                 })
                 // return resolve([a]);

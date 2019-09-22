@@ -25,6 +25,7 @@ async function addInterview(_, { interview }, { headers, db, decodedToken }) {
                 console.log(p)
 
                 p.populate('createdBy').populate('tags').execPopulate().then(populatedInterview => {
+                    helper.sendPostCreationEmail(populatedInterview);
                     return resolve(populatedInterview);
                 })
                 // return resolve([a]);

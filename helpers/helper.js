@@ -3,6 +3,8 @@ var auth = require('./auth');
 const Tag = require('../models/tag')();
 const Unit = require('../models/purchased_units')();
 const { EmailTemplate } = require('email-templates-v2');
+var string = require('lodash/string');
+
 
 async function checkIfUserIsAdmin (decodedToken) {
     const isUserAdmin = new Promise((resolve, reject) => {
@@ -36,40 +38,56 @@ async function insertManyIntoTags(tags) {
 }
 
 async function sendEmail(toEmail, filePath, body) {
-    try {
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASSWORD
-            }
-        });
-
-        const template = new EmailTemplate(filePath);
-        template.render(body, (err, result) => {
-            const { html, subject } = result;
-            const mailOptions = {
-                from: process.env.FROM_EMAIL,
-                to: toEmail,
-                replyTo: process.env.FROM_EMAIL,
-                subject: subject,
-                html: html,
-              };
-            transporter.sendMail(mailOptions, (error, response) => {
-                if (error) {
-                    console.log('Mail Sending Error', error);
-                    return false;
-                } else {
-                    console.log('Mail Sent Successfully', response);
-                    return true;
-                }
+    return new Promise(async(resolve, reject) => {
+        try {
+            const transporter = await nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: process.env.SMTP_PORT,
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASSWORD
+                },
+                debug: true,
+                secure: true
             });
-        });
-      
-    } catch(err) {
-        return err;
-    }
+    
+            const template = new EmailTemplate(filePath);
+            await template.render(body, async (err, result) => {
+                const { html, subject } = result;
+                const mailOptions = {
+                    from: process.env.FROM_EMAIL,
+                    to: toEmail,
+                    replyTo: process.env.FROM_EMAIL,
+                    subject: subject,
+                    html: html,
+                  };
+                await transporter.sendMail(mailOptions, (error, response) => {
+                    if (error) {
+                        console.log('Mail Sending Error', error);
+                        resolve(false);
+                    } else {
+                        console.log('Mail Sent Successfully', response);
+                        resolve(true);
+                    }
+                });
+            });
+          
+        } catch(err) {
+            return err;
+        }
+    })
+}
+
+async function sendPostCreationEmail(post, type = '') {
+    const filePath = basePath + 'email-template/productCreate';
+    var productLink = process.env.FRONT_END_URL + `(main:dashboard/${post.type}-details/${post._id})`;
+    const payLoad = {
+        AUTHORNAME: post.createdBy.name,
+        PRODUCTNAME: post.name,
+        PRODUCTLINK: productLink,
+        TYPE: type ? type : string.capitalize(post.type)
+    };
+    await sendEmail(post.createdBy.email, filePath, payLoad); 
 }
 
 async function insertManyIntoPurchasedUnit(units) {
@@ -87,5 +105,6 @@ module.exports = {
     checkIfUserIsAdmin,
     insertManyIntoTags,
     sendEmail,
-    insertManyIntoPurchasedUnit
+    insertManyIntoPurchasedUnit,
+    sendPostCreationEmail
 }

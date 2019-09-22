@@ -25,6 +25,7 @@ async function addGoal(_, { goal }, { headers, db, decodedToken }) {
                 console.log(p)
 
                 p.populate('createdBy').populate('tags').execPopulate().then(populatedGoal => {
+                    helper.sendPostCreationEmail(populatedGoal);
                     return resolve(populatedGoal);
                 })
                 // return resolve([a]);
