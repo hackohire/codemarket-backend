@@ -7,8 +7,198 @@ const Testing = require('../models/testing')();
 const Design = require('../models/design')();
 const Howtodoc = require('../models/how-to-doc')();
 const Goal = require('../models/goal')();
+const Post = require('../models/post')();
+const helper = require('../helpers/helper');
+const Like = require('./../models/like')();
 let conn;
 
+
+async function addPost(_, { post }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            if (post.tags && post.tags.length) {
+                post.tags = await helper.insertManyIntoTags(post.tags);
+            }
+
+
+            const int = await new Post(post);
+            await int.save(post).then(async p => {
+                console.log(p)
+
+                p.populate('createdBy').populate('tags').execPopulate().then(populatedPost => {
+                    helper.sendPostCreationEmail(populatedPost);
+                    return resolve(populatedPost);
+                });
+
+            });
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function getPostsByUserIdAndType(_, { userId, status, postType }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Post.find({ 'createdBy': userId, status: status ? status : { $ne: null}, type: postType}).populate('createdBy').populate('tags').exec((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res);
+            });
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function getPostById(_, { postId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Post.findById(postId).populate('createdBy').populate('tags').exec(async (err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                const likeCount = await Like.count({referenceId: postId})
+
+                res['likeCount'] = likeCount;
+
+                return resolve(res);
+            });
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Post.find({status: 'Published', type: postType}).populate('createdBy').populate('tags').exec((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res);
+            });
+
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function updatePost(_, { post }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            if (post.tags && post.tags.length) {
+                post.tags = await helper.insertManyIntoTags(post.tags);
+            }
+
+
+            await Post.findByIdAndUpdate(post._id, post, {new: true}, (err, res) => {
+                if (err) {
+                    return reject(err)
+                }
+
+                res.populate('createdBy').populate('tags').execPopulate().then((d) => {
+                    return resolve(d);
+                });
+            });
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function deletePost(_, { postId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            Post.deleteOne({_id: postId}, ((err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res.deletedCount);
+                })
+            );
+
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
 
 async function getAllPosts(_, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
@@ -25,35 +215,38 @@ async function getAllPosts(_, { headers, db, decodedToken }) {
             let posts = [];
 
             /** Fetching all the Published Products */
-            posts = await Product.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            posts = await Post.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
 
-            /** Fetching all the Published help-requests and concating it with posts */
-            const helpRequests = await HelpRequest.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            posts = posts.concat(helpRequests);
+            // /** Fetching all the Published Products */
+            // posts = await Product.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
 
-            /** Fetching all the Published interviews and concating it with posts */
-            const interviews = await Interview.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            posts = posts.concat(interviews);
+            // /** Fetching all the Published help-requests and concating it with posts */
+            // const helpRequests = await HelpRequest.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            // posts = posts.concat(helpRequests);
 
-            /** Fetching all the Published requirement and concating it with posts */
-            const requirements = await Requirement.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            posts = posts.concat(requirements);
+            // /** Fetching all the Published interviews and concating it with posts */
+            // const interviews = await Interview.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            // posts = posts.concat(interviews);
 
-            /** Fetching all the Published how-to-doc and concating it with posts */
-            const howtodocs = await Howtodoc.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            posts = posts.concat(howtodocs);
+            // /** Fetching all the Published requirement and concating it with posts */
+            // const requirements = await Requirement.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            // posts = posts.concat(requirements);
 
-            /** Fetching all the Published testing and concating it with posts */
-            const testings = await Testing.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            posts = posts.concat(testings);
+            // /** Fetching all the Published how-to-doc and concating it with posts */
+            // const howtodocs = await Howtodoc.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            // posts = posts.concat(howtodocs);
 
-            /** Fetching all the Published designs and concating it with posts */
-            const designs = await Design.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            posts = posts.concat(designs);
+            // /** Fetching all the Published testing and concating it with posts */
+            // const testings = await Testing.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            // posts = posts.concat(testings);
 
-            /** Fetching all the Published goals and concating it with posts */
-            const goals = await Goal.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            posts = posts.concat(goals);
+            // /** Fetching all the Published designs and concating it with posts */
+            // const designs = await Design.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            // posts = posts.concat(designs);
+
+            // /** Fetching all the Published goals and concating it with posts */
+            // const goals = await Goal.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            // posts = posts.concat(goals);
 
             /** Resolving Promise with all the Published posts in the platform */
             return await resolve(posts);
@@ -75,5 +268,12 @@ async function getAllPosts(_, { headers, db, decodedToken }) {
 
 
 module.exports = {
-    getAllPosts
+    getAllPosts,
+
+    addPost,
+    getPostsByUserIdAndType,
+    getPostById,
+    getPostsByType,
+    updatePost,
+    deletePost
 }
