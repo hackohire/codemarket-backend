@@ -2,13 +2,7 @@ const connectToMongoDB = require('../helpers/db');
 const helper = require('../helpers/helper');
 const Comment = require('./../models/comment')();
 const Product = require('./../models/product')();
-const Query = require('./../models/help')();
-const Requirement = require('./../models/requirement')();
-const Interview = require('./../models/interview')();
-const Testing = require('./../models/testing')();
-const Design = require('./../models/design')();
-const Howtodoc = require('./../models/how-to-doc')();
-const Goal = require('./../models/goal')();
+const Post = require('./../models/post')();
 let conn;
 
 async function addComment(_, { comment }, { headers, db, decodedToken, context }) {
@@ -55,19 +49,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             if (commentObj.type === 'product') {
                 data = await Product.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
             } else if (commentObj.type === 'help-request') {
-                data = await Query.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
-            } else if (commentObj.type === 'interview') {
-                data = await Interview.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
-            } else if (commentObj.type === 'requirement') {
-                data = await Requirement.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
-            } else if (commentObj.type === 'testing') {
-                data = await Testing.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
-            } else if (commentObj.type === 'design') {
-                data = await Design.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
-            } else if (commentObj.type === 'howtodoc') {
-                data = await Howtodoc.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
-            } else if (commentObj.type === 'goal') {
-                data = await Goal.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
+                data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
             }
 
             commentLink = process.env.FRONT_END_URL + `(main:dashboard/${commentObj.type}-details/${commentObj.referenceId})`;
