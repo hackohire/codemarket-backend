@@ -70,7 +70,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                 data = await Goal.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
             }
 
-            commentLink = process.env.FRONT_END_URL + `(main:dashboard/${commentObj.type}-details/' + commentObj.referenceId +')`;
+            commentLink = process.env.FRONT_END_URL + `(main:dashboard/${commentObj.type}-details/${commentObj.referenceId})`;
 
             // if (com.type === 'requirement') {
             //     data = await Requirement.findOne({ _id: com.referenceId }).populate('createdBy').exec();
