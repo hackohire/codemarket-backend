@@ -45,14 +45,14 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                 })
             }
             var data;
-            var commentLink
+            var postLink;
             if (commentObj.type === 'product') {
                 data = await Product.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
-            } else if (commentObj.type === 'help-request') {
+            } else {
                 data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
             }
 
-            commentLink = process.env.FRONT_END_URL + `(main:dashboard/${commentObj.type}-details/${commentObj.referenceId})`;
+            postLink = process.env.FRONT_END_URL + `(main:dashboard/${commentObj.type}-details/${commentObj.referenceId})?type=${commentObj.type}&postId=${commentObj.referenceId}`;
 
             // if (com.type === 'requirement') {
             //     data = await Requirement.findOne({ _id: com.referenceId }).populate('createdBy').exec();
@@ -61,12 +61,12 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             const filePathToCommentor = basePath + 'email-template/commentCreateToCommentor';
             const payLoadToAuthor = {
                 NAME: data.createdBy.name,
-                LINK: commentLink,
+                LINK: postLink,
                 COMMENTOR_NAME: commentObj.createdBy.name
             };
             const payLoadToCommentor = {
                 NAME: commentObj.createdBy.name,
-                LINK: commentLink
+                LINK: postLink
             };
             await helper.sendEmail(data.createdBy.email, filePathToAuthor, payLoadToAuthor);
             await helper.sendEmail(commentObj.createdBy.email, filePathToCommentor, payLoadToCommentor);
