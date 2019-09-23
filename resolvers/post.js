@@ -215,10 +215,11 @@ async function getAllPosts(_, { headers, db, decodedToken }) {
             let posts = [];
 
             /** Fetching all the Published Products */
-            posts = await Post.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            const products = await Product.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
 
-            // /** Fetching all the Published Products */
-            // posts = await Product.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            /** Fetching all the Published Posts */
+            posts = await Post.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            posts = posts.concat(products);
 
             // /** Fetching all the Published help-requests and concating it with posts */
             // const helpRequests = await HelpRequest.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
