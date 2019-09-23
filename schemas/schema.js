@@ -102,76 +102,6 @@ input TagInput {
   _id: ID
 }
 
-type Requirement {
-  _id: ID
-  name: String
-  type: String
-  description: [descriptionBlocks]
-  shortDescription: String
-  featuredImage: String
-  createdBy: User
-  price: Int
-  categories: [String]
-  demo_url: String
-  status: Status
-  createdAt: String
-  updatedAt: String
-  tags: [Tag]
-  support: Support
-  likeCount: Int
-}
-
-input RequirementInput {
-  _id: ID
-  name: String
-  type: String
-  description: [InputdescriptionBlock]
-  shortDescription: String
-  featuredImage: String
-  createdBy: ID
-  price: Int
-  categories: [String]
-  demo_url: String
-  status: Status
-  tags: [TagInput]
-  support: SupportInput
-}
-
-type Interview {
-  _id: ID
-  name: String
-  type: String
-  description: [descriptionBlocks]
-  shortDescription: String
-  featuredImage: String
-  createdBy: User
-  price: Int
-  categories: [String]
-  demo_url: String
-  status: Status
-  createdAt: String
-  updatedAt: String
-  tags: [Tag]
-  support: Support
-  likeCount: Int
-}
-
-input InterviewInput {
-  _id: ID
-  name: String
-  type: String
-  description: [InputdescriptionBlock]
-  shortDescription: String
-  featuredImage: String
-  createdBy: ID
-  price: Int
-  categories: [String]
-  demo_url: String
-  status: Status
-  tags: [TagInput]
-  support: SupportInput
-}
-
 type Snippet {
   language: String
   r: Int
@@ -214,48 +144,6 @@ enum Roles {
   Admin
 }
 
-type HelpQuery {
-  name: String
-  type: String
-  description: [descriptionBlocks]
-  price: Int
-  _id: ID
-  createdBy: User
-  createdAt: String
-  updatedAt: String
-  status: Status
-  categories: [String]
-  demo_url: String
-  documentation_url: String
-  video_url: String
-  snippets: [Snippet]
-  shortDescription: String
-  tags: [Tag]
-  support: Support
-  likeCount: Int
-}
-
-input HelpQueryInput {
-  name: String
-  type: String
-  description: [InputdescriptionBlock]
-  price: Int
-  _id: ID
-  createdBy: String
-  createdAt: String
-  updatedAt: String
-  status: Status
-  categories: [String]
-  demo_url: String
-  documentation_url: String
-  video_url: String
-  snippets: [SnippetInput]
-  shortDescription: String
-  tags: [TagInput]
-  support: SupportInput
-}
-
-
 input InputdescriptionBlock {
   type: String
   data: InputdescriptionBlocks
@@ -289,11 +177,6 @@ input InputdescriptionBlocks {
   width : Int
   height : Int
 }
-
-
-
-
-
 
 union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock
 
@@ -422,20 +305,6 @@ type Query {
   getCommentsByReferenceId(referenceId: String): [Comment]
   deleteComment(commentId: String): String
 
-  getAllHelpRequests: [HelpQuery]
-  getHelpRequestsByUserId(userId: String, status: String): [HelpQuery]
-  getHelpRequestById(helpRequestId: String): HelpQuery
-
-
-  getAllInterviews: [Interview]
-  getInterviewsByUserId(userId: String, status: String): [Interview]
-  getInterviewById(interviewId: String): Interview
-
-
-  getAllRequirements: [Requirement]
-  getRequirementsByUserId(userId: String, status: String): [Requirement]
-  getRequirementById(requirementId: String): Requirement
-
   searchCategories(keyWord: String): [Tag]
 }
 
@@ -448,17 +317,6 @@ type Mutation {
   addComment(comment: CommentInput): Comment
   updateComment(commentId: String, text: [InputdescriptionBlock]): Comment
 
-  addQuery(helpQuery: HelpQueryInput): HelpQuery
-  updateHelpRequest(helpRequest: HelpQueryInput): HelpQuery
-  deleteHelpRequest(helpRequestId: String): Boolean
-
-  addInterview(interview: InterviewInput): Interview
-  updateInterview(interview: InterviewInput): Interview
-  deleteInterview(interviewId: String): Boolean
-
-  addRequirement(requirement: RequirementInput): Requirement
-  updateRequirement(requirement: RequirementInput): Requirement
-  deleteRequirement(requirementId: String): Boolean
 }
 `
 

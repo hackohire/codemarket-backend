@@ -1,11 +1,8 @@
 const graphQlUserSchema = require('./user');
-const graphQlPurchaseSchema = require('./purchase')
-const graphQlCartSchema = require('./cart')
-const graphQlTestingSchema = require('./testing');
-const graphQlDesignSchema = require('./design');
-const graphQlGoalSchema = require('./goal');
+const graphQlPurchaseSchema = require('./purchase');
+const graphQlCartSchema = require('./cart');
 const graphQlLikeSchema = require('./like');
-const graphQlHowToDocSchema = require('./how-to-doc');
+const graphQlPostSchema = require('./post');
 const schema = require('./schema');
 
 const schemaArray = [
@@ -13,11 +10,8 @@ const schemaArray = [
     graphQlUserSchema,
     graphQlPurchaseSchema,
     graphQlCartSchema,
-    graphQlTestingSchema,
-    graphQlHowToDocSchema,
-    graphQlDesignSchema,
-    graphQlGoalSchema,
-    graphQlLikeSchema
+    graphQlLikeSchema,
+    graphQlPostSchema
 ];
 
 module.exports = schemaArray;
