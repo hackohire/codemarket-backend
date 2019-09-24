@@ -6,6 +6,7 @@ const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
 const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost } = require('./post');
+const { addMembershipSubscription, getMembershipSubscriptionsByUserId } = require('./paypal-subscription');
 
 module.exports = {
   Query: {
@@ -35,7 +36,9 @@ module.exports = {
 
     getCartItemsList,
 
-    checkIfUserLikedAndLikeCount
+    checkIfUserLikedAndLikeCount,
+
+    getMembershipSubscriptionsByUserId
 
   },
   Mutation: {
@@ -60,7 +63,9 @@ module.exports = {
     addToCart,
     removeItemFromCart,
 
-    like
+    like,
+
+    addMembershipSubscription
 
   },
 

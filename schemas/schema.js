@@ -289,6 +289,35 @@ input URLInput {
   url: String
 }
 
+type Address {
+  address_line_1: String
+  address_line_2: String
+  admin_area_2: String
+  admin_area_1: String
+  postal_code: String
+  country_code: String
+}
+
+input AddressInput {
+  address_line_1: String
+  address_line_2: String
+  admin_area_2: String
+  admin_area_1: String
+  postal_code: String
+  country_code: String
+}
+
+type Name {
+  given_name: String
+  surname: String
+  full_name: String
+}
+
+input NameInput {
+  given_name: String
+  surname: String
+  full_name: String
+}
 
 
 type Query {
