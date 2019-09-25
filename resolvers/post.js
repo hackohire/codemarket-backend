@@ -30,12 +30,12 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
 
 
             const int = await new Post(post);
-            await int.save(post).then(async p => {
+            await int.save(post).then(async (p) => {
                 console.log(p)
 
-                p.populate('createdBy').populate('tags').execPopulate().then(populatedPost => {
-                    helper.sendPostCreationEmail(populatedPost);
-                    return resolve(populatedPost);
+                p.populate('createdBy').populate('tags').execPopulate().then(async populatedPost => {
+                    await helper.sendPostCreationEmail(populatedPost);
+                    resolve(populatedPost);
                 });
 
             });

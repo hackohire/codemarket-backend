@@ -29,8 +29,8 @@ async function addProduct(_, { product }, { headers, db, decodedToken }) {
             const savedProduct = await prod.save(product);
             savedProduct.populate('createdBy').populate('tags').execPopulate().then(async (sd) => {
                 console.log(sd);
-                helper.sendPostCreationEmail(sd, 'Bugfix');
-                return resolve(sd)
+                await helper.sendPostCreationEmail(sd, 'Bugfix');
+                resolve(sd)
             });
 
         } catch (e) {
