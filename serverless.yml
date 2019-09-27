@@ -5,6 +5,8 @@ provider:
   runtime: nodejs8.10
   region: ap-south-1
   stage: dev
+  websocketsApiName: codemarket-videochat-socket
+  websocketsApiRouteSelectionExpression: $request.body.action
   environment:
     MONGODB_URL: ${file(env.yml):${self:provider.stage}.MONGODB_URL}
     MONGODB_DBNAME: ${file(env.yml):${self:provider.stage}.MONGODB_DBNAME}
@@ -20,6 +22,7 @@ provider:
     SMTP_USER: ${file(env.yml):${self:provider.stage}.SMTP_USER}
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
+    SOCKET_URL: ${file(env.yml):${self:provider.stage}.SOCKET_URL}
 functions:
   graphql:
     handler: handler.graphqlHandler
@@ -40,6 +43,35 @@ functions:
           path: hello
           method: GET
           cors: true
+
+  socketConnectionHandler:
+    handler: websocket.socketConnectionHandler
+    events:
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+      - websocket:
+          route: $default
+  
+  onOffer:
+    handler: websocket.onOffer
+    events:
+      - websocket:
+          route: onOffer
+
+  setUserOnline:
+    handler: websocket.setUserOnline
+    events:
+      - websocket:
+          route: setUserOnline
+
+  calling:
+    handler: websocket.calling
+    events:
+      - websocket:
+          route: calling
+
 
 resources:
   Resources:
