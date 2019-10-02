@@ -4,8 +4,9 @@ const { Schema } = mongoose;
 
 const likeSchema = new Schema(
     {
+        /**  Id of a product | help-request | requirement | interview | goal | design | howtodoc | testing | event */
         referenceId: {
-            type: Schema.Types.ObjectId // Id of a product / help-request / requirement / interview / how-to-do / testing / design
+            type: Schema.Types.ObjectId
         },
         userId: {
             type: Schema.Types.ObjectId,
@@ -14,7 +15,7 @@ const likeSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ['user', 'product', 'help-request', 'requirement', 'interview', 'testing', 'design', 'howtodoc', 'goal'],
+            enum: ['user', 'product', 'help-request', 'requirement', 'interview', 'testing', 'design', 'howtodoc', 'goal', 'event'],
         },
     },
     {

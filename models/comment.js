@@ -8,8 +8,10 @@ const commentSchema = new Schema(
             type: Schema.Types.ObjectId,
             default: null
         },
+
+        /**  Id of a product | help-request | requirement | interview | goal | design | howtodoc | testing | event */
         referenceId: {
-            type: Schema.Types.ObjectId // Id of a product / help-request / requirement / interview
+            type: Schema.Types.ObjectId
         },
         children: [{
             type: Schema.Types.ObjectId,
