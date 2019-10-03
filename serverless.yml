@@ -23,6 +23,7 @@ provider:
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
     SOCKET_URL: ${file(env.yml):${self:provider.stage}.SOCKET_URL}
+    STRIPE_SECRET_KEY: ${file(env.yml):${self:provider.stage}.STRIPE_SECRET_KEY}
 functions:
   graphql:
     handler: handler.graphqlHandler
@@ -71,6 +72,22 @@ functions:
     events:
       - websocket:
           route: calling
+
+  checkoutSessionCompleted:
+    handler: subscription.checkoutSessionCompleted
+    events:
+      - http:
+          path: checkoutSessionCompleted
+          method: POST
+          cors: true
+
+  createCheckoutSession:
+    handler: subscription.createCheckoutSession
+    events:
+      - http:
+          path: createCheckoutSession
+          method: POST
+          cors: true
 
 
 resources:
