@@ -45,6 +45,30 @@ functions:
           method: GET
           cors: true
 
+  checkoutSessionCompleted:
+    handler: handler.checkoutSessionCompleted
+    events:
+      - http:
+          path: checkoutSessionCompleted
+          method: POST
+          cors: true
+
+  createCheckoutSession:
+    handler: handler.createCheckoutSession
+    events:
+      - http:
+          path: createCheckoutSession
+          method: POST
+          cors: true
+
+  getCheckoutSession:
+    handler: handler.getCheckoutSession
+    events:
+      - http:
+          path: getCheckoutSession
+          method: POST
+          cors: true
+
   socketConnectionHandler:
     handler: websocket.socketConnectionHandler
     events:
@@ -72,22 +96,6 @@ functions:
     events:
       - websocket:
           route: calling
-
-  checkoutSessionCompleted:
-    handler: subscription.checkoutSessionCompleted
-    events:
-      - http:
-          path: checkoutSessionCompleted
-          method: POST
-          cors: true
-
-  createCheckoutSession:
-    handler: subscription.createCheckoutSession
-    events:
-      - http:
-          path: createCheckoutSession
-          method: POST
-          cors: true
 
 
 resources:
