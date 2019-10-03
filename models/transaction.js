@@ -1,42 +1,10 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-
-const linkSchema = new Schema(
-    {
-        href: String,
-        method: String,
-        rel: String,
-        title: String
-    }
-);
-
-const payerSchema = new Schema(
-    {
-        address: {
-            country_code: String,
-        },
-        email_address: String,
-        name: {
-            given_name: String,
-            surname: String
-        },
-        payer_id: String,
-    }
-)
-
 const transactionSchema = new Schema(
     {
-        create_time: String,
-        update_time: String,
         purchase_id: String, // Paypal PurchaseId
-        intent: String,
-        links: [{
-            type: linkSchema
-        }],
-        payer: {
-            type: payerSchema
-        },
+
 
 
         purchasedBy: {
@@ -49,7 +17,7 @@ const transactionSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "purchasedItem",
         }],
- 
+        sessionId: String,
         // documentation_url: String,
         // video_url: String,
         status: String,

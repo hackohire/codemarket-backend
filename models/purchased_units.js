@@ -2,33 +2,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 
-const linkSchema = new Schema(
-    {
-        href: String,
-        method: String,
-        rel: String,
-        title: String
-    }
-);
-
-const amountSchema = new Schema(
-    {
-        value: String,
-        currency_code: String
-    }
-);
-
-const payeeSchema = new Schema(
-    {
-        email_id: String,
-        merchant_id: String
-    }
-);
-
-
 const purchasedItemSchema = new Schema(
     {
-        description: String,
+        name: String,
+        sessionId: String,
         reference_id: {
             type: Schema.Types.ObjectId, // Bugfix Id
             ref: "product",
@@ -43,19 +20,7 @@ const purchasedItemSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "transaction"
         },
-        soft_descriptor: String,
-        amount: {
-            type: amountSchema
-        },
-        payee: {
-            type: payeeSchema
-        },
-        shipping: Object,
-        
-        payments: {
-            captures: []
-        },
-
+        amount: Number,
         status: String,
     },
     {
