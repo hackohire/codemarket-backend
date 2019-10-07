@@ -69,6 +69,22 @@ functions:
           method: POST
           cors: true
 
+  createStripeUser:
+    handler: handler.createStripeUser
+    events:
+      - http:
+          path: createStripeUser
+          method: POST
+          cors: true
+
+  attachCardAndCreateSubscription:
+    handler: handler.attachCardAndCreateSubscription
+    events:
+      - http:
+          path: attachCardAndCreateSubscription
+          method: POST
+          cors: true
+
   socketConnectionHandler:
     handler: websocket.socketConnectionHandler
     events:
