@@ -3,7 +3,7 @@ const graphQlPurchaseSchema = require('./purchase');
 const graphQlCartSchema = require('./cart');
 const graphQlLikeSchema = require('./like');
 const graphQlPostSchema = require('./post');
-const getMembershipSubscriptionByUserId = require('./paypal-susbscription');
+const graphQlSubscriptionSchema = require('./subscription');
 const schema = require('./schema');
 
 const schemaArray = [
@@ -13,7 +13,7 @@ const schemaArray = [
     graphQlCartSchema,
     graphQlLikeSchema,
     graphQlPostSchema,
-    getMembershipSubscriptionByUserId
+    graphQlSubscriptionSchema
 ];
 
 module.exports = schemaArray;
