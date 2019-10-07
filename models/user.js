@@ -32,7 +32,8 @@ const userSchema = new Schema(
             enum: ['Developer', 'Admin', 'User'],
             default: ['User'],
 
-        }
+        },
+        stripeId: String
     },
     {
         timestamps: true,

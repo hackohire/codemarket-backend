@@ -19,6 +19,7 @@ type User {
     createdAt: String
     currentJobDetails: CurrentJobDetails
     likeCount: Int
+    stripeId: ID
   }
   
   input UserInput {
@@ -37,6 +38,7 @@ type User {
     roles: [String]
     createdAt: String
     currentJobDetails: CurrentJobDetailsInput
+    stripeId: ID
   }
 
   input CurrentJobDetailsInput {
