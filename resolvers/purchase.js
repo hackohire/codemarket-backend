@@ -3,6 +3,8 @@ const Unit = require('../models/purchased_units')();
 const Transaction = require('../models/transaction')();
 const helper = require('../helpers/helper');
 const Cart = require('./../models/cart')();
+const Subscription = require('../models/subscription')();
+
 let conn;
 
 async function addTransaction(_, { transaction }, { headers, db, decodedToken }) {
@@ -22,6 +24,12 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
                 transaction.purchase_units = await helper.insertManyIntoPurchasedUnit(transaction.purchase_units);
             }
 
+            if (transaction && transaction.subscription) {
+                const sub = new Subscription(transaction.subscription)
+                const insertedSub = await sub.save();
+                transaction.subscription = insertedSub._id;
+            }
+
 
             // Creating a Transaction Model
             const h = await new Transaction(transaction);
@@ -33,6 +41,11 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
                     console.log(removedCount);
                 }
 
+                if (p.subscription) {
+                    p.populate('subscription').populate('purchasedBy').execPopulate().then(async (populatedTransaction) => {
+                        return resolve(populatedTransaction);
+                    })
+                } else {
                 // Populating "purchase_units" and and the product and inside the product "createdBy" & "tags" field
                 p.populate({path: 'purchase_units', populate: {path: 'reference_id', populate: [{path: 'createdBy'}, {path: 'tags'}]}}).populate('purchasedBy').execPopulate().then(async (populatedTransaction) => {
                     
@@ -57,8 +70,9 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
                         await helper.sendEmail(creatorEmail, sellertPath, payLoadToAuthor);
                     }
                 
-                    return resolve(populatedTransaction.purchase_units);
+                    return resolve({ purchasedUnits: populatedTransaction.purchase_units });
                 })
+                }
             });
 
 

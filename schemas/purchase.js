@@ -41,6 +41,10 @@ const graphQlPurchaseSchema = `
         sessionId: String
     }
 
+    type AddTransactionResponse {
+        purchasedUnits: [PurchasedUnit]
+    }
+
 
     extend type Query {
         getPurchasedUnitsByUserId(userId: String): [PurchasedUnit]
@@ -48,7 +52,7 @@ const graphQlPurchaseSchema = `
 
 
     extend type Mutation {
-        addTransaction(transaction: TransactionInput): [PurchasedUnit]
+        addTransaction(transaction: TransactionInput): AddTransactionResponse
     }
 `
 

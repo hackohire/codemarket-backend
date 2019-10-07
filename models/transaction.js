@@ -3,10 +3,11 @@ const { Schema } = mongoose;
 
 const transactionSchema = new Schema(
     {
-        purchase_id: String, // Paypal PurchaseId
-
-
-
+        purchase_id: String,
+        subscription: {
+            type: Schema.Types.ObjectId,
+            ref: "subscription",
+        },
         purchasedBy: {
             type: Schema.Types.ObjectId,
             ref: "user",
