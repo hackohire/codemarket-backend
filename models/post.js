@@ -10,7 +10,7 @@ const postSchema = new Schema(
         shortDescription: String,
         type: {
             type: String,
-            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event'],
+            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill'],
         },
         featuredImage: String,
         createdBy: {
