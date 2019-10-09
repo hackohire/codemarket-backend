@@ -17,8 +17,14 @@ const graphQlPostSchema = `
         comments: [Comment]
         support: Support
         likeCount: Int
+
+        dateRange: [String]
+        address: String
+        eventType: String
+        validSubscription: Boolean
+        usersAttending: [User]
     }
-    
+
     input PostInput {
         _id: ID
         name: String
@@ -34,6 +40,14 @@ const graphQlPostSchema = `
         tags: [TagInput]
         comments: [CommentInput]
         support: SupportInput
+        dateRange: [String]
+        address: String
+        eventType: String
+    }
+
+    type RsvpEventResponse {
+        validSubscription: Boolean
+        usersAttending: [User]
     }
     
     extend type Query {
@@ -44,7 +58,9 @@ const graphQlPostSchema = `
     extend type Mutation {
         addPost(post: PostInput): Post
         updatePost(post: PostInput): Post
-        deletePost(postId: String): Boolean        
+        deletePost(postId: String): Boolean
+        
+        rsvpEvent(userId: String, eventId: String): RsvpEventResponse
     }
 `
 

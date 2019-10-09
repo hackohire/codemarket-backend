@@ -28,7 +28,16 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "tag",
         }],
-        support: support
+        support: support,
+
+        /** Event Specific Fields */
+        dateRange: [String],
+        address: String,
+        eventType: String,
+        usersAttending: [{
+                type: Schema.Types.ObjectId,
+                ref: "user",
+            }]
     },
     {
         timestamps: true,
