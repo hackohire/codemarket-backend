@@ -237,9 +237,9 @@ const attachCardAndCreateSubscription = async (event, context) => {
             if (body.trial_period_days) {
                 subscriptionDetails.trial_period_days = body.trial_period_days
             }
-
             const sub = await stripe.subscriptions.create(subscriptionDetails);
 
+            sub.metadata.userId = ObjectID(subscriptionDetails.metadata.userId);
             /** Store Subscription in stripe-subscriptions collection */
             await conn.collection('stripe_subscriptions').insertOne(sub);
 
