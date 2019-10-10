@@ -54,6 +54,8 @@ const graphQlPostSchema = `
         getPostsByType(postType: String): [Post]
         getPostsByUserIdAndType(userId: String, status: String, postType: String): [Post]
         getPostById(postId: String): Post
+
+        myRSVP(userId: String): [Post]
     }
     extend type Mutation {
         addPost(post: PostInput): Post

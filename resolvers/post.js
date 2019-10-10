@@ -10,6 +10,10 @@ const Product = require('../models/product')();
 const Post = require('../models/post')();
 const helper = require('../helpers/helper');
 const Like = require('./../models/like')();
+const User = require('./../models/user')();
+const Subscription = require('../models/subscription')();
+var moment = require('moment');
+var ObjectID = require('mongodb').ObjectID;
 let conn;
 
 
@@ -46,7 +50,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
             return reject(e);
         }
     });
-}
+};
 
 async function getPostsByUserIdAndType(_, { userId, status, postType }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
@@ -59,7 +63,7 @@ async function getPostsByUserIdAndType(_, { userId, status, postType }, { header
                 console.log('Using existing mongoose connection.');
             }
 
-            Post.find({ 'createdBy': userId, status: status ? status : { $ne: null}, type: postType}).populate('createdBy').populate('tags').exec((err, res) => {
+            Post.find({ 'createdBy': userId, status: status ? status : { $ne: null }, type: postType }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -86,18 +90,20 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Post.findById(postId).populate('createdBy').populate('tags').exec(async (err, res) => {
+            Post.findById(postId)
+                .populate({ path: 'usersAttending', select: 'name avatar' })
+                .populate('createdBy').populate('tags').exec(async (err, res) => {
 
-                if (err) {
-                    return reject(err)
-                }
+                    if (err) {
+                        return reject(err)
+                    }
 
-                const likeCount = await Like.count({referenceId: postId})
+                    const likeCount = await Like.count({ referenceId: postId })
 
-                res['likeCount'] = likeCount;
+                    res['likeCount'] = likeCount;
 
-                return resolve(res);
-            });
+                    return resolve(res);
+                });
 
 
         } catch (e) {
@@ -118,7 +124,7 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Post.find({status: 'Published', type: postType}).populate('createdBy').populate('tags').exec((err, res) => {
+            Post.find({ status: 'Published', type: postType }).populate('createdBy').populate('tags').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -152,7 +158,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
             }
 
 
-            await Post.findByIdAndUpdate(post._id, post, {new: true}, (err, res) => {
+            await Post.findByIdAndUpdate(post._id, post, { new: true }, (err, res) => {
                 if (err) {
                     return reject(err)
                 }
@@ -162,6 +168,65 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                 });
             });
 
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function rsvpEvent(_, { userId, eventId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            const sub = await Subscription.findOne({ "metadata.userId": { $eq: ObjectID(userId) } });
+            let validSubscription = false;
+            let updatedPostWithAttendees;
+
+            if (sub) {
+                validSubscription = moment(moment()).isBefore(sub.current_period_end * 1000, "YYYY/MM/DD");
+            }
+
+            if (validSubscription) {
+                updatedPostWithAttendees = await Post.findOneAndUpdate({ _id: eventId }, { $push: { usersAttending: userId } }, { new: true })
+                    .populate({ path: 'usersAttending' }).exec();
+            }
+
+            if (updatedPostWithAttendees) {
+                return resolve({ usersAttending: updatedPostWithAttendees.usersAttending, validSubscription });
+            } else {
+                return resolve({ validSubscription })
+            }
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function myRSVP(_, { userId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            const myRSVPEvents = await Post.find({type: 'event', 'usersAttending': { $in: [userId] } })
+                .populate({ path: 'createdBy' }).exec();
+
+            return resolve(myRSVPEvents)
 
         } catch (e) {
             console.log(e);
@@ -181,14 +246,14 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Post.deleteOne({_id: postId}, ((err, res) => {
+            Post.deleteOne({ _id: postId }, ((err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
 
                 return resolve(res.deletedCount);
-                })
+            })
             );
 
 
@@ -276,5 +341,8 @@ module.exports = {
     getPostById,
     getPostsByType,
     updatePost,
-    deletePost
+    deletePost,
+
+    rsvpEvent,
+    myRSVP
 }
