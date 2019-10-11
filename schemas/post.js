@@ -61,8 +61,9 @@ const graphQlPostSchema = `
         addPost(post: PostInput): Post
         updatePost(post: PostInput): Post
         deletePost(postId: String): Boolean
-        
+
         rsvpEvent(userId: String, eventId: String): RsvpEventResponse
+        cancelRSVP(userId: String, eventId: String): Post
     }
 `
 
