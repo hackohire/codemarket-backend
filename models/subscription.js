@@ -25,7 +25,11 @@ const SubscriptionSchema = new Schema(
         status: String,
         subscriptionUsers: [{
             name: String,
-            email: String
+            email: String,
+            invitationAccepted: {
+                type: Boolean,
+                default: false
+            }
         }]
     },
     {
