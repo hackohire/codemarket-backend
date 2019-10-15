@@ -55,6 +55,7 @@ async function sendEmail(toEmail, filePath, body) {
 
             const template = new EmailTemplate(filePath);
             await template.render(body, async (err, result) => {
+                console.log('Error HTML Email Template Rendering', err)
                 const { html, subject } = result;
                 const mailOptions = {
                     from: process.env.FROM_EMAIL,
