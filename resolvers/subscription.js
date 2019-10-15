@@ -70,7 +70,73 @@ async function getMembershipSubscriptionsByUserId(_, { userId }, { headers, db, 
     });
 }
 
+/** Lambda Function to send the invitation to the users, which adds the users into subscription and also send invitation email to each users. */
+async function inviteMembersToSubscription(_, { subscriptionId, users }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            const subscription = await Subscription.findOneAndUpdate({ _id: subscriptionId }, { $set: { subscriptionUsers: users } }, { new: true })
+                .populate({ path: 'metadata.userId' }).exec();
+
+            if (subscription && subscription.subscriptionUsers && subscription.subscriptionUsers.length) {
+                subscription.subscriptionUsers.forEach(async (u) => {
+                    /** Send Email for Invitation */
+                    const filePath = basePath + 'email-template/subscriptionInvitation';
+                    var invitationLink = process.env.FRONT_END_URL + `(main:dashboard)?subscriptionId=${subscriptionId}&email=${u.email}`;
+                    // var attendee = subscription.subscriptionUsers.find(u => u.email === email);
+                    const payLoad = {
+                        INVITEE: u.name,
+                        BUYER: subscription.metadata.userId.name,
+                        INVITATION_LINK: invitationLink,
+                    };
+                    await helper.sendEmail(u.email, filePath, payLoad);
+                })
+            }
+            return await resolve(subscription);
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+/** Lambda Function to accept the invitation which was sent while adding the user to the subscription by the buyer */
+async function acceptInvitation(_, { subscriptionId, email }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            const subscription = await Subscription.findOneAndUpdate({ _id: subscriptionId, 'subscriptionUsers.email': email }, { $set: { 'subscriptionUsers.$.invitationAccepted': true } }, { new: true })
+                .populate({ path: 'metadata.userId' }).exec();
+
+            return resolve(subscription);
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+
 module.exports = {
     addMembershipSubscription,
-    getMembershipSubscriptionsByUserId
+    getMembershipSubscriptionsByUserId,
+    inviteMembersToSubscription,
+    acceptInvitation
 }

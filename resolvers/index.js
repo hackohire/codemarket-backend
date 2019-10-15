@@ -5,8 +5,9 @@ const { searchCategories } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, rsvpEvent, myRSVP, cancelRSVP } = require('./post');
-const { addMembershipSubscription, getMembershipSubscriptionsByUserId } = require('./subscription');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost } = require('./post');
+const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
+const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation } = require('./subscription');
 
 module.exports = {
   Query: {
@@ -68,6 +69,8 @@ module.exports = {
     like,
 
     addMembershipSubscription,
+    inviteMembersToSubscription,
+    acceptInvitation,
 
     rsvpEvent,
 

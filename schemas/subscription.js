@@ -58,11 +58,13 @@ const graphQlSubscriptionSchema = `
     type SubscriptionUsers {
         name: String
         email: String
+        invitationAccepted: Boolean
     }
 
     input SubscriptionUsersInput {
         name: String
         email: String
+        invitationAccepted: Boolean
     }
 
     extend type Query {
@@ -72,6 +74,8 @@ const graphQlSubscriptionSchema = `
 
     extend type Mutation {
         addMembershipSubscription(subscription: SubscriptionInput): Subscription
+        inviteMembersToSubscription(subscriptionId: String, users: [SubscriptionUsersInput]): Subscription
+        acceptInvitation(subscriptionId: String, email: String): Subscription
     }
 `
 
