@@ -18,8 +18,15 @@ async function rsvpEvent(_, { userId, eventId }, { headers, db, decodedToken }) 
                 console.log('Using existing mongoose connection.');
             }
 
+            console.log(decodedToken);
+
             /** Find if user has subscription */
-            const sub = await Subscription.findOne({ "metadata.userId": { $eq: ObjectID(userId) } });
+            const sub = await Subscription.findOne({
+                $or: [
+                    { "metadata.userId": { $eq: ObjectID(userId)}, status: { $ne: 'canceled' }},
+                    { 'subscriptionUsers.email': decodedToken.email, status: { $ne: 'canceled' }}
+                ]
+            });
             let validSubscription = false;
             let updatedPostWithAttendees;
 
