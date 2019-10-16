@@ -7,7 +7,7 @@ const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
 const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost } = require('./post');
 const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
-const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation } = require('./subscription');
+const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 
 module.exports = {
   Query: {
@@ -70,6 +70,7 @@ module.exports = {
 
     addMembershipSubscription,
     inviteMembersToSubscription,
+    cancelSubscription,
     acceptInvitation,
 
     rsvpEvent,

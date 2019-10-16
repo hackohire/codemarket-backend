@@ -6,7 +6,7 @@ const SubscriptionSchema = new Schema(
     {
         customer: String,
         amount: Number,
-        id: String,
+        id: String, /** Stripe Subscription ID */
         start_date: Number,
         current_period_start: Number,
         current_period_end: Number,

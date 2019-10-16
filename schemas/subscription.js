@@ -14,6 +14,7 @@ const graphQlSubscriptionSchema = `
         plan: Plan
         metadata: Metadata
         quantity: Int
+        status: String
         subscriptionUsers: [SubscriptionUsers]
     }
 
@@ -75,6 +76,7 @@ const graphQlSubscriptionSchema = `
     extend type Mutation {
         addMembershipSubscription(subscription: SubscriptionInput): Subscription
         inviteMembersToSubscription(subscriptionId: String, users: [SubscriptionUsersInput]): Subscription
+        cancelSubscription(subscriptionId: String): Subscription
         acceptInvitation(subscriptionId: String, email: String): Subscription
     }
 `

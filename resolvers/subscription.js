@@ -1,6 +1,8 @@
 const connectToMongoDB = require('../helpers/db');
 const Subscription = require('../models/subscription')();
 const helper = require('../helpers/helper');
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+var ObjectID = require('mongodb').ObjectID;
 let conn;
 
 async function addMembershipSubscription(_, { subscription }, { headers, db, decodedToken }) {
@@ -57,7 +59,12 @@ async function getMembershipSubscriptionsByUserId(_, { userId }, { headers, db, 
             }
 
             // Populating Bugfix from the reference_id and the categories and the author of the bugfix
-            const subscriptions = await Subscription.find({})
+            const subscriptions = await Subscription.find({
+                $or: [
+                    { "metadata.userId": { $eq: ObjectID(userId)}, status: { $ne: 'canceled' }},
+                    { 'subscriptionUsers.email': decodedToken.email, status: { $ne: 'canceled' }}
+                ]
+            })
                 .populate({ path: 'metadata.userId' }).exec()
 
             return resolve(subscriptions);
@@ -133,10 +140,37 @@ async function acceptInvitation(_, { subscriptionId, email }, { headers, db, dec
     });
 }
 
+const cancelSubscription = async (_, { subscriptionId }, { headers, db, decodedToken }) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            let cancelledSubscription = await stripe.subscriptions.del(subscriptionId);
+
+            if (cancelledSubscription) {
+                cancelledSubscription = await Subscription.findOneAndUpdate({id: subscriptionId}, cancelledSubscription, {new: true}).exec();
+            }
+
+            return resolve(cancelledSubscription);
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    })
+}
+
 
 module.exports = {
     addMembershipSubscription,
     getMembershipSubscriptionsByUserId,
     inviteMembersToSubscription,
-    acceptInvitation
+    acceptInvitation,
+    cancelSubscription
 }
