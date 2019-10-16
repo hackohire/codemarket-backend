@@ -46,11 +46,8 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             }
             var data;
             var postLink;
-            if (commentObj.type === 'product') {
-                data = await Product.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
-            } else {
-                data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
-            }
+
+            data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
 
             postLink = process.env.FRONT_END_URL + `(main:dashboard/${commentObj.type}-details/${commentObj.referenceId})?type=${commentObj.type}&postId=${commentObj.referenceId}`;
 

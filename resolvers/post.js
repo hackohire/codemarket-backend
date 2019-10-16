@@ -38,7 +38,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                 console.log(p)
 
                 p.populate('createdBy').populate('tags').execPopulate().then(async populatedPost => {
-                    await helper.sendPostCreationEmail(populatedPost);
+                    await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
                     resolve(populatedPost);
                 });
 
@@ -223,11 +223,11 @@ async function getAllPosts(_, { headers, db, decodedToken }) {
             let posts = [];
 
             /** Fetching all the Published Products */
-            const products = await Product.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
+            // const products = await Product.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
 
             /** Fetching all the Published Posts */
             posts = await Post.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            posts = posts.concat(products);
+            // posts = posts.concat(products);
 
             // /** Fetching all the Published help-requests and concating it with posts */
             // const helpRequests = await HelpRequest.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();

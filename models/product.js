@@ -2,24 +2,6 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const support  = require('./support');
 
-const priceAndFiles = new Schema(
-    {
-        fileName: String,
-        file: String,
-        price: Number
-    }
-);
-
-const snippet = new Schema(
-    {
-        language: String,
-        r: Number,
-        second_best: {},
-        top: {},
-        value: String
-    }
-);
-
 const productSchema = new Schema(
     {
         name: String,
@@ -36,7 +18,6 @@ const productSchema = new Schema(
             ref: "user",
             // required: true
         },
-        priceAndFiles: [priceAndFiles],
         price: Number,
         categories: [],
         demo_url: String,
@@ -47,7 +28,6 @@ const productSchema = new Schema(
             enum: ['Created',  'Drafted', 'Published', 'Unpublished', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
             default: 'Drafted'
         },
-        snippets: [snippet],
         tags: [{
             type: Schema.Types.ObjectId,
             ref: "tag",

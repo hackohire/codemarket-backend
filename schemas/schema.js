@@ -326,8 +326,6 @@ type Query {
   getAllPosts: [Product]
 
   getAllProducts: [Product]
-  getProductsByUserId(userId: String, status: String): [Product]
-  getProductById(productId: String): Product
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]
 
   getComments(commentId: String): Comment
@@ -338,15 +336,15 @@ type Query {
 }
 
 type Mutation {
-
-  addProduct(product: ProductInput): Product
-  updateProduct(product: ProductInput): Product
-  deleteProduct(productId: String): Boolean
-
   addComment(comment: CommentInput): Comment
   updateComment(commentId: String, text: [InputdescriptionBlock]): Comment
-
 }
 `
 
-module.exports = gql(schema)
+module.exports = gql(schema);
+
+// getProductById(productId: String): Product
+// getProductsByUserId(userId: String, status: String): [Product]
+// addProduct(product: ProductInput): Product
+// updateProduct(product: ProductInput): Product
+// deleteProduct(productId: String): Boolean

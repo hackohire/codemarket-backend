@@ -1,5 +1,5 @@
 const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
-const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById, getListOfUsersWhoPurchased } = require('./product');
+const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment');
 const { searchCategories } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
@@ -19,8 +19,8 @@ module.exports = {
     getAllPosts,
 
     getAllProducts,
-    getProductsByUserId,
-    getProductById,
+    // getProductsByUserId,
+    // getProductById,
     getListOfUsersWhoPurchased,
 
     getComments,
@@ -49,9 +49,9 @@ module.exports = {
     updateUser,
     authorize,
 
-    addProduct,
-    updateProduct,
-    deleteProduct,
+    // addProduct,
+    // updateProduct,
+    // deleteProduct,
 
 
     addComment,
