@@ -204,7 +204,7 @@ const createStripeUser = async (event, context) => {
     })
 }
 
-// Attach Vard to a User
+// Attach Card to a User
 const attachCardAndCreateSubscription = async (event, context) => {
     return new Promise(async (resolve, reject) => {
         try {
