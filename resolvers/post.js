@@ -208,9 +208,12 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
     });
 }
 
-async function getAllPosts(_, { headers, db, decodedToken }) {
+async function getAllPosts(_, { pageOptions }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
+
+            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
+            let sort = {[sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 1};
 
             if (!db) {
                 console.log('Creating new mongoose connection.');
@@ -222,43 +225,14 @@ async function getAllPosts(_, { headers, db, decodedToken }) {
             /** Taking Empty Posts array */
             let posts = [];
 
-            /** Fetching all the Published Products */
-            // const products = await Product.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-
             /** Fetching all the Published Posts */
-            posts = await Post.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            // posts = posts.concat(products);
+            posts = await Post.find({ status: 'Published' }).populate('createdBy').populate('tags')
+            .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+            .limit(pageOptions.limit)
+            .sort(sort)
+            .exec();
 
-            // /** Fetching all the Published help-requests and concating it with posts */
-            // const helpRequests = await HelpRequest.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            // posts = posts.concat(helpRequests);
-
-            // /** Fetching all the Published interviews and concating it with posts */
-            // const interviews = await Interview.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            // posts = posts.concat(interviews);
-
-            // /** Fetching all the Published requirement and concating it with posts */
-            // const requirements = await Requirement.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            // posts = posts.concat(requirements);
-
-            // /** Fetching all the Published how-to-doc and concating it with posts */
-            // const howtodocs = await Howtodoc.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            // posts = posts.concat(howtodocs);
-
-            // /** Fetching all the Published testing and concating it with posts */
-            // const testings = await Testing.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            // posts = posts.concat(testings);
-
-            // /** Fetching all the Published designs and concating it with posts */
-            // const designs = await Design.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            // posts = posts.concat(designs);
-
-            // /** Fetching all the Published goals and concating it with posts */
-            // const goals = await Goal.find({ status: 'Published' }).populate('createdBy').populate('tags').exec();
-            // posts = posts.concat(goals);
-
-            /** Resolving Promise with all the Published posts in the platform */
-            return await resolve(posts);
+            return await resolve({posts, total: await Post.estimatedDocumentCount().exec()});
 
 
 

@@ -319,11 +319,27 @@ input NameInput {
   full_name: String
 }
 
+input PageOptionsInput {
+  pageNumber: Int
+  limit: Int
+  sort: SortInput
+}
+
+input SortInput {
+  field: String
+  order: String
+}
+
+type getAllPostsResponse {
+  posts: [Product]
+  total: Int
+}
+
 
 type Query {
   hello: String
 
-  getAllPosts: [Product]
+  getAllPosts(pageOptions: PageOptionsInput): getAllPostsResponse
 
   getAllProducts: [Product]
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]
