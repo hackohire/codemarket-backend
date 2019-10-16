@@ -6,6 +6,7 @@ const SubscriptionSchema = new Schema(
     {
         customer: String,
         amount: Number,
+        id: String,
         start_date: Number,
         current_period_start: Number,
         current_period_end: Number,
@@ -33,7 +34,7 @@ const SubscriptionSchema = new Schema(
         }]
     },
     {
-        id: true,
+        // id: true,
         timestamps: true
     }
 )
