@@ -3,6 +3,8 @@ const auth = require('./../helpers/auth');
 const User = require('./../models/user')();
 var array = require('lodash/array');
 const Like = require('./../models/like')();
+var ObjectID = require('mongodb').ObjectID;
+const Subscription = require('../models/subscription')();
 
 let conn;
 
@@ -120,7 +122,7 @@ async function authorize(_, { applicationId }, { headers, db, decodedToken }) {
 
             // let options = { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false };
 
-            await User.findOne({email: user.email}, (err, res) => {
+            await User.findOne({email: user.email}, async (err, res) => {
                 if(err) {
                     reject(err);
                 }
@@ -131,13 +133,15 @@ async function authorize(_, { applicationId }, { headers, db, decodedToken }) {
                     res.roles = array.union(user.roles, res.roles);
                     res.email = user.email;
                     // res.applications = array.union([applicationId], res.applications.map(x => x.toString()));
-                    res.save(res, (err, res) => {
-                        if(err) reject(err);
-
-                        if(res) {
-                            resolve(res); 
-                        }
+                    const uResponse = await res.save(res);
+                    const subscriptions = await Subscription.find({
+                        $or: [
+                            { "metadata.userId": { $eq: ObjectID(uResponse._id)}, status: { $ne: 'canceled' }},
+                            { 'subscriptionUsers.email': decodedToken.email, status: { $ne: 'canceled' }}
+                        ]
                     })
+                    uResponse['subscription'] = subscriptions
+                    resolve(uResponse);
                 } else {
                     user = new User(user);
                     user.save(user).then(u => {

@@ -19,6 +19,7 @@ const SubscriptionSchema = new Schema(
         },
         quantity: Number,
         plan: new Schema({
+            id: String,
             active: Boolean,
             amount: Number,
             nickname: String

@@ -20,6 +20,7 @@ type User {
     currentJobDetails: CurrentJobDetails
     likeCount: Int
     stripeId: ID
+    subscription: [Subscription]
   }
   
   input UserInput {
