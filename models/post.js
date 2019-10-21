@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const support  = require('./support');
+const support = require('./support');
 
 
 const postSchema = new Schema(
     {
         name: String,
-        description: [],
+        description: [Schema.Types.Mixed],
         shortDescription: String,
         type: {
             type: String,
@@ -35,15 +35,28 @@ const postSchema = new Schema(
         address: String,
         eventType: String,
         usersAttending: [{
-                type: Schema.Types.ObjectId,
-                ref: "user",
-            }]
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }]
     },
     {
         timestamps: true,
-        id: true
+        id: true,
     },
 );
+
+postSchema.on('index', function (err) {
+    if (err) {
+        console.error('User index error: %s', err);
+    } else {
+        console.info('User indexing complete');
+    }
+});
+
+// postSchema.index({'name': 'text', 'type': 'text', 'description.data.text': 'text' }, {
+//     "language_override": "javascript"
+// });
+
 
 
 

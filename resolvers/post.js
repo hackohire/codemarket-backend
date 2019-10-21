@@ -213,7 +213,7 @@ async function getAllPosts(_, { pageOptions }, { headers, db, decodedToken }) {
         try {
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
-            let sort = {[sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 1};
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 1 };
 
             if (!db) {
                 console.log('Creating new mongoose connection.');
@@ -227,12 +227,64 @@ async function getAllPosts(_, { pageOptions }, { headers, db, decodedToken }) {
 
             /** Fetching all the Published Posts */
             posts = await Post.find({ status: 'Published' }).populate('createdBy').populate('tags')
-            .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-            .limit(pageOptions.limit)
-            .sort(sort)
-            .exec();
+                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                .limit(pageOptions.limit)
+                .sort(sort)
+                .exec();
 
-            return await resolve({posts, total: await Post.estimatedDocumentCount().exec()});
+            return await resolve({ posts, total: await Post.estimatedDocumentCount().exec() });
+
+
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+async function fullSearch(_, { searchString }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            /** Taking Empty Posts array */
+            let posts = [];
+
+            /** Fetching all the Posts containing the search string */
+            var regex = new RegExp(searchString, 'i');
+
+
+
+            posts = await Post.find({
+
+                $or: [
+                    {
+                        name: { $regex: regex }
+                    },
+                    {
+                        type: { $regex: regex }
+                    },
+                    {
+                        'description.data.text': { $regex: regex }
+                    },
+                ],
+
+
+
+            }).populate('createdBy').populate('tags')
+                .exec();
+            // posts = await Post.find({ $text: { $search : searchString }}).populate('createdBy').populate('tags')
+            // .exec();
+
+            return await resolve(posts);
 
 
 
@@ -252,6 +304,7 @@ async function getAllPosts(_, { pageOptions }, { headers, db, decodedToken }) {
 
 module.exports = {
     getAllPosts,
+    fullSearch,
 
     addPost,
     getPostsByUserIdAndType,

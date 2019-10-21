@@ -54,6 +54,7 @@ const graphQlPostSchema = `
         getPostsByType(postType: String): [Post]
         getPostsByUserIdAndType(userId: String, status: String, postType: String): [Post]
         getPostById(postId: String): Post
+        fullSearch(searchString: String): [Post]
 
         myRSVP(userId: String): [Post]
     }
