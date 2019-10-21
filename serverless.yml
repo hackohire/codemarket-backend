@@ -4,7 +4,7 @@ provider:
   name: aws
   runtime: nodejs8.10
   region: ap-south-1
-  stage: ${opt:stage, 'prod'}
+  stage: ${opt:stage, 'dev'}
   websocketsApiName: codemarket-videochat-socket
   websocketsApiRouteSelectionExpression: $request.body.action
   environment:
