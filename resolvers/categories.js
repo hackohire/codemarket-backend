@@ -2,7 +2,8 @@ const Category = require('../models/tag')();
 const connectToMongoDB = require('../helpers/db');
 let conn;
 
-async function searchCategories(_, { keyWord }, { headers, db, decodedToken }) {
+/** Search Tag or Cities */
+async function findFromCollection(_, { keyWord, searchCollection }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -10,12 +11,13 @@ async function searchCategories(_, { keyWord }, { headers, db, decodedToken }) {
                 console.log('Creating new mongoose connection.');
                 conn = await connectToMongoDB();
             } else {
+                conn = db;
                 console.log('Using existing mongoose connection.');
             }
 
 
             var regex = new RegExp(keyWord, 'i');
-            const cat = await Category.find({ name: { $regex: regex } }).exec();
+            const cat = await conn.collection(searchCollection).find({ name: { $regex: regex } }).toArray();
 
             return resolve(cat);
 
@@ -30,5 +32,5 @@ async function searchCategories(_, { keyWord }, { headers, db, decodedToken }) {
 }
 
 module.exports = {
-    searchCategories
+    findFromCollection
 }

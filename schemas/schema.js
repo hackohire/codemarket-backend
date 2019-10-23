@@ -348,7 +348,7 @@ type Query {
   getCommentsByReferenceId(referenceId: String): [Comment]
   deleteComment(commentId: String): String
 
-  searchCategories(keyWord: String): [Tag]
+  findFromCollection(keyWord: String, searchCollection: String): [Tag]
 }
 
 type Mutation {
