@@ -1,38 +1,32 @@
 const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
 const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment');
-const { searchCategories } = require('./categories');
+const { findFromCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
 const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch } = require('./post');
+const { addCompany, updateCompany, getAllCompanies, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, } = require('./company');
 const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 
 module.exports = {
   Query: {
     hello: () => 'Hello world!',
-    getUsers,
-    getUsersAndBugFixesCount,
-    getUserById,
+    getUsers, getUsersAndBugFixesCount, getUserById,
 
     getAllPosts,
     fullSearch,
 
-    getAllProducts,
+    getAllProducts, getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
-    getListOfUsersWhoPurchased,
 
-    getComments,
-    getCommentsByReferenceId,
-    deleteComment,
+    getComments, getCommentsByReferenceId, deleteComment,
 
-    getPostsByUserIdAndType,
-    getPostById,
-    getPostsByType,
+    getPostsByUserIdAndType, getPostById, getPostsByType,
 
-    searchCategories,
+    findFromCollection,
 
     getPurchasedUnitsByUserId,
 
@@ -42,7 +36,9 @@ module.exports = {
 
     getMembershipSubscriptionsByUserId,
 
-    myRSVP
+    myRSVP,
+
+    getAllCompanies, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType,
 
   },
   Mutation: {
@@ -76,7 +72,9 @@ module.exports = {
 
     rsvpEvent,
 
-    cancelRSVP
+    cancelRSVP,
+
+    addCompany, updateCompany, deleteCompany
 
   },
 
