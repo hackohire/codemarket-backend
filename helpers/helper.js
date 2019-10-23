@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 var auth = require('./auth');
 const Tag = require('../models/tag')();
+const City = require('../models/city')();
 const Unit = require('../models/purchased_units')();
 const { EmailTemplate } = require('email-templates-v2');
 var string = require('lodash/string');
@@ -37,6 +38,23 @@ async function insertManyIntoTags(tags) {
         });
     })
     return tagsAdded;
+}
+
+// This method adds the cities only without Id, and then returns the array of ID of added cities with the id of tags we get from argument
+async function insertManyIntoCities(cities) {
+    console.log(cities);
+    const citiesWithIds = cities.filter(p => p._id).map(p => p._id);
+    const citiesWithoutIds = cities.filter(p => !p._id);
+
+    const citiesAdded = new Promise((resolve, reject) => {
+        City.insertMany(citiesWithoutIds, { ordered: false, rawResult: true }).then((d) => {
+            console.log(d)
+            const addedCities = d && d.ops && d.ops.length ? d.ops.map(id => id._id) : []
+            const returnCities = addedCities.concat(citiesWithIds);
+            resolve(returnCities.length ? returnCities : []);
+        });
+    })
+    return citiesAdded;
 }
 
 async function sendEmail(toEmail, filePath, body) {
@@ -138,6 +156,7 @@ async function sendMessageToWebsocketClient(event, connectionId, postData, conn)
 module.exports = {
     checkIfUserIsAdmin,
     insertManyIntoTags,
+    insertManyIntoCities,
     sendEmail,
     insertManyIntoPurchasedUnit,
     sendPostCreationEmail,
