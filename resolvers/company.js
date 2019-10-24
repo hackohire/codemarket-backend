@@ -22,7 +22,7 @@ async function addCompany(_, { company }, { headers, db, decodedToken }) {
 
             const int = await new Company(company);
             
-            const checkIfExists = await Company.find({ $text: { $search : company.name }}).populate('createdBy').populate('tags').exec();
+            const checkIfExists = await Company.find({ $text: { $search : company.name }}).populate('createdBy').populate('cities').exec();
 
             if (checkIfExists.length) {
                 console.log(checkIfExists);
@@ -56,9 +56,9 @@ async function updateCompany(_, { company }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            const checkIfExists = await Company.find({ $text: { $search : company.name }}).populate('createdBy').populate('tags').exec();
+            const checkIfExists = await Company.find({ $text: { $search : company.name }}).populate('createdBy').populate('cities').exec();
 
-            if (checkIfExists.length) {
+            if (checkIfExists.length && checkIfExists[0].id !== company._id) {
                 console.log(checkIfExists);
                 throw new Error('AlreadyExists');
             } else {
@@ -173,12 +173,9 @@ async function getCompaniesByType(_, { companyType }, { headers, db, decodedToke
     });
 }
 
-async function getAllCompanies(_, { pageOptions }, { headers, db, decodedToken }) {
+async function getAllCompanies(_, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
-
-            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
-            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc'};
 
             if (!db) {
                 console.log('Creating new mongoose connection.');
@@ -187,14 +184,12 @@ async function getAllCompanies(_, { pageOptions }, { headers, db, decodedToken }
                 console.log('Using existing mongoose connection.');
             }
 
-            /** Taking Empty Companys array */
+            /** Taking Empty Companies array */
             let companies = [];
 
-            /** Fetching all the Published Companys */
-            companies = await Company.find({ status: 'Published' }).populate('createdBy').populate('tags')
-                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-                .limit(pageOptions.limit)
-                .sort(sort)
+            /** Fetching all the Published Companies */
+            companies = await Company.find({}).populate('createdBy').populate('cities')
+                .sort({name: 1})
                 .exec();
 
             return await resolve(companies);
