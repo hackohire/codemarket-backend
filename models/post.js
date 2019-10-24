@@ -10,7 +10,7 @@ const postSchema = new Schema(
         shortDescription: String,
         type: {
             type: String,
-            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill'],
+            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job'],
         },
         featuredImage: String,
         createdBy: {
@@ -37,7 +37,19 @@ const postSchema = new Schema(
         usersAttending: [{
             type: Schema.Types.ObjectId,
             ref: "user",
-        }]
+        }],
+
+        /** Dreamjob Specific Fields */
+        cities: [{
+            type: Schema.Types.ObjectId,
+            ref: "city",
+        }],
+        company: {
+            type: Schema.Types.ObjectId,
+            ref: "company",
+        },
+        salaryRangeFrom: Number,
+        salaryRangeTo: Number
     },
     {
         timestamps: true,

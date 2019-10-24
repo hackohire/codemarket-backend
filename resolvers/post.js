@@ -11,6 +11,7 @@ const Post = require('../models/post')();
 const helper = require('../helpers/helper');
 const Like = require('./../models/like')();
 const User = require('./../models/user')();
+const Tag = require('./../models/tag')();
 const Subscription = require('../models/subscription')();
 var moment = require('moment');
 var ObjectID = require('mongodb').ObjectID;
@@ -32,12 +33,20 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                 post.tags = await helper.insertManyIntoTags(post.tags);
             }
 
+            if (post.cities && post.cities.length) {
+                post.cities = await helper.insertManyIntoCities(post.cities);
+            }
+
 
             const int = await new Post(post);
             await int.save(post).then(async (p) => {
                 console.log(p)
 
-                p.populate('createdBy').populate('tags').execPopulate().then(async populatedPost => {
+                p.populate('createdBy')
+                .populate('tags')
+                .populate('cities')
+                .populate('company')
+                .execPopulate().then(async populatedPost => {
                     await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
                     resolve(populatedPost);
                 });
@@ -63,7 +72,12 @@ async function getPostsByUserIdAndType(_, { userId, status, postType }, { header
                 console.log('Using existing mongoose connection.');
             }
 
-            Post.find({ 'createdBy': userId, status: status ? status : { $ne: null }, type: postType }).populate('createdBy').populate('tags').exec((err, res) => {
+            Post.find({ 'createdBy': userId, status: status ? status : { $ne: null }, type: postType })
+            .populate('createdBy')
+            .populate('tags')
+            .populate('company')
+            .populate('cities')
+            .exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -92,7 +106,11 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
 
             Post.findById(postId)
                 .populate({ path: 'usersAttending', select: 'name avatar' })
-                .populate('createdBy').populate('tags').exec(async (err, res) => {
+                .populate('company')
+                .populate('cities')
+                .populate('createdBy')
+                .populate('tags')
+                .exec(async (err, res) => {
 
                     if (err) {
                         return reject(err)
@@ -124,7 +142,12 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Post.find({ status: 'Published', type: postType }).populate('createdBy').populate('tags').exec((err, res) => {
+            Post.find({ status: 'Published', type: postType })
+            .populate('createdBy')
+            .populate('tags')
+            .populate('company')
+            .populate('cities')
+            .exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -157,13 +180,20 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                 post.tags = await helper.insertManyIntoTags(post.tags);
             }
 
+            if (post.cities && post.cities.length) {
+                post.cities = await helper.insertManyIntoCities(post.cities);
+            }
 
             await Post.findByIdAndUpdate(post._id, post, { new: true }, (err, res) => {
                 if (err) {
                     return reject(err)
                 }
 
-                res.populate('createdBy').populate('tags').execPopulate().then((d) => {
+                res
+                    .populate('createdBy')
+                    .populate('company')
+                    .populate('tags')
+                    .populate('cities').execPopulate().then((d) => {
                     return resolve(d);
                 });
             });
@@ -213,7 +243,7 @@ async function getAllPosts(_, { pageOptions }, { headers, db, decodedToken }) {
         try {
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
-            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 1 };
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc'};
 
             if (!db) {
                 console.log('Creating new mongoose connection.');
@@ -252,6 +282,7 @@ async function fullSearch(_, { searchString }, { headers, db, decodedToken }) {
                 console.log('Creating new mongoose connection.');
                 conn = await connectToMongoDB();
             } else {
+                conn = db;
                 console.log('Using existing mongoose connection.');
             }
 
@@ -261,26 +292,38 @@ async function fullSearch(_, { searchString }, { headers, db, decodedToken }) {
             /** Fetching all the Posts containing the search string */
             var regex = new RegExp(searchString, 'i');
 
+            posts = await Post.aggregate([
+                {
+                     $lookup:
+                         {
+                             from: 'tags',
+                             localField: 'tags',
+                             foreignField: '_id',
+                             as: 'tags'
+                         }
+                 },
+                 {$match: {$or: [{ name: { $regex: regex}}, { "description.data.text": { $regex: regex}}, { type: { $regex: regex}}, {"tags.name": { $regex: regex}}]}},
+                //  {$lookup: {
 
+                //  }}
 
-            posts = await Post.find({
+            ]).exec();
 
-                $or: [
-                    {
-                        name: { $regex: regex }
-                    },
-                    {
-                        type: { $regex: regex }
-                    },
-                    {
-                        'description.data.text': { $regex: regex }
-                    },
-                ],
+            // posts = await Post.find({
 
+            //     $or: [
+            //         {
+            //             name: { $regex: regex }
+            //         },
+            //         {
+            //             type: { $regex: regex }
+            //         },
+            //         {
+            //             'description.data.text': { $regex: regex }
+            //         },
+            //     ],
 
-
-            }).populate('createdBy').populate('tags')
-                .exec();
+            // }).populate('createdBy').populate('tags').exec();
             // posts = await Post.find({ $text: { $search : searchString }}).populate('createdBy').populate('tags')
             // .exec();
 

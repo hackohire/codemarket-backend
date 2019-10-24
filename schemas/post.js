@@ -23,6 +23,11 @@ const graphQlPostSchema = `
         eventType: String
         validSubscription: Boolean
         usersAttending: [User]
+
+        cities: [City]
+        company: Company
+        salaryRangeFrom: Int
+        salaryRangeTo: Int
     }
 
     input PostInput {
@@ -43,6 +48,11 @@ const graphQlPostSchema = `
         dateRange: [String]
         address: String
         eventType: String
+
+        cities: [CityInput]
+        company: ID
+        salaryRangeFrom: Int
+        salaryRangeTo: Int
     }
 
     type RsvpEventResponse {
