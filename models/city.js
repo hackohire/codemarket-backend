@@ -13,9 +13,9 @@ const citySchema = new Schema(
 
 module.exports = () => {
     try {
-        return mongoose.model('tag');
+        return mongoose.model('city');
     } catch (e) {
-        return mongoose.model('tag', citySchema);
+        return mongoose.model('city', citySchema);
     }
 
 };
