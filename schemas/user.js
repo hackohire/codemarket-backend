@@ -3,7 +3,7 @@ const { gql } = require('apollo-server-lambda');
 
 const graphQlUserSchema = `
 type User {
-    _id: ID!
+    _id: ID
     name: String
     email: String
     sub: String
