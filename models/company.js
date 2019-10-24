@@ -22,7 +22,7 @@ const companySchema = new Schema(
         },
         cities: [{
             type: Schema.Types.ObjectId,
-            ref: "tag",
+            ref: "city",
         }],
         howCanYouHelp: [Schema.Types.Mixed],
     },
