@@ -1,7 +1,9 @@
 const connectToMongoDB = require('../helpers/db');
 const Company = require('../models/company')();
+const Post = require('../models/post')();
 const helper = require('../helpers/helper');
 const Like = require('./../models/like')();
+var array = require('lodash/array');
 let conn;
 
 async function addCompany(_, { company }, { headers, db, decodedToken }) {
@@ -236,6 +238,34 @@ async function deleteCompany(_, { companyId }, { headers, db, decodedToken }) {
     });
 }
 
+/** This Lambda Function is to fetch the list of users, who has selected the company while creating the dreamjob */
+
+async function getListOfUsersInACompany(_, { companyId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            let users = await Post.find({type: 'dream-job', company: companyId}).populate('createdBy').exec();
+
+            users = users && users.length ? users.map(u => u.createdBy) : [];
+            users = array.uniqBy(users, 'id')
+
+            return resolve(users);
+
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 
 
 
@@ -253,4 +283,5 @@ module.exports = {
     getCompanyById,
     getCompaniesByType,
     deleteCompany,
+    getListOfUsersInACompany
 }
