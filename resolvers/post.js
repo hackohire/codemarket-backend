@@ -262,7 +262,7 @@ async function getAllPosts(_, { pageOptions }, { headers, db, decodedToken }) {
                 .sort(sort)
                 .exec();
 
-            return await resolve({ posts, total: await Post.estimatedDocumentCount().exec() });
+            return await resolve({ posts, total: await Post.countDocuments({ status: 'Published' }).exec() });
 
 
 
