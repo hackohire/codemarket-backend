@@ -6,7 +6,7 @@ const cartItemSchema = new Schema(
     {
         referenceId: {
             type: Schema.Types.ObjectId, // Id of a product
-            ref: 'product'
+            ref: 'post'
         },
         itemType: String,
         user: {
