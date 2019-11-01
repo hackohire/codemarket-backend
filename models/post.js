@@ -49,7 +49,8 @@ const postSchema = new Schema(
             ref: "company",
         },
         salaryRangeFrom: Number,
-        salaryRangeTo: Number
+        salaryRangeTo: Number,
+        jobProfile: String
     },
     {
         timestamps: true,

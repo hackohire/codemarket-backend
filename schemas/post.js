@@ -28,6 +28,7 @@ const graphQlPostSchema = `
         company: Company
         salaryRangeFrom: Int
         salaryRangeTo: Int
+        jobProfile: String
     }
 
     input PostInput {
@@ -53,6 +54,7 @@ const graphQlPostSchema = `
         company: ID
         salaryRangeFrom: Int
         salaryRangeTo: Int
+        jobProfile: String
     }
 
     type RsvpEventResponse {
