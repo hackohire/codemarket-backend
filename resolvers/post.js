@@ -10,6 +10,7 @@ const Product = require('../models/product')();
 const Post = require('../models/post')();
 const helper = require('../helpers/helper');
 const Like = require('./../models/like')();
+const Unit = require('./../models/purchased_units')();
 const User = require('./../models/user')();
 const Tag = require('./../models/tag')();
 const Subscription = require('../models/subscription')();
@@ -43,13 +44,13 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                 console.log(p)
 
                 p.populate('createdBy')
-                .populate('tags')
-                .populate('cities')
-                .populate('company')
-                .execPopulate().then(async populatedPost => {
-                    await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
-                    resolve(populatedPost);
-                });
+                    .populate('tags')
+                    .populate('cities')
+                    .populate('company')
+                    .execPopulate().then(async populatedPost => {
+                        await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
+                        resolve(populatedPost);
+                    });
 
             });
 
@@ -73,18 +74,18 @@ async function getPostsByUserIdAndType(_, { userId, status, postType }, { header
             }
 
             Post.find({ 'createdBy': userId, status: status ? status : { $ne: null }, type: postType })
-            .populate('createdBy')
-            .populate('tags')
-            .populate('company')
-            .populate('cities')
-            .exec((err, res) => {
+                .populate('createdBy')
+                .populate('tags')
+                .populate('company')
+                .populate('cities')
+                .exec((err, res) => {
 
-                if (err) {
-                    return reject(err)
-                }
+                    if (err) {
+                        return reject(err)
+                    }
 
-                return resolve(res);
-            });
+                    return resolve(res);
+                });
 
         } catch (e) {
             console.log(e);
@@ -116,6 +117,32 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                         return reject(err)
                     }
 
+                    if (res.type === 'product') {
+                        /** List of users who purchased the bugfix */
+                        let usersWhoPurchased = [];
+
+                        /** Find the unitsSold by reference_id stored as productId while purchase and populate userwho purchased */
+                        const unitsSold = await Unit.find({ reference_id: postId })
+                            .select('purchasedBy createdAt')
+                            .populate({ path: 'purchasedBy', select: 'name avatar' })
+                            .exec();
+
+                        /** If there is more than 0 units */
+                        if (unitsSold && unitsSold.length) {
+
+                            /** Map the array into the fileds "name", "_id", "createdAt" & "avatar" */
+                            usersWhoPurchased = unitsSold.map((u) => {
+                                let userWhoPurchased = {};
+                                userWhoPurchased = u.purchasedBy;
+                                userWhoPurchased.createdAt = u.createdAt;
+                                return userWhoPurchased;
+                            });
+                        }
+
+                        /** attach "purchasedBy" with the response */
+                        res['purchasedBy'] = usersWhoPurchased;
+                    }
+
                     const likeCount = await Like.count({ referenceId: postId })
 
                     res['likeCount'] = likeCount;
@@ -143,18 +170,18 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
             }
 
             Post.find({ status: 'Published', type: postType })
-            .populate('createdBy')
-            .populate('tags')
-            .populate('company')
-            .populate('cities')
-            .exec((err, res) => {
+                .populate('createdBy')
+                .populate('tags')
+                .populate('company')
+                .populate('cities')
+                .exec((err, res) => {
 
-                if (err) {
-                    return reject(err)
-                }
+                    if (err) {
+                        return reject(err)
+                    }
 
-                return resolve(res);
-            });
+                    return resolve(res);
+                });
 
 
 
@@ -194,8 +221,8 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                     .populate('company')
                     .populate('tags')
                     .populate('cities').execPopulate().then((d) => {
-                    return resolve(d);
-                });
+                        return resolve(d);
+                    });
             });
 
 
@@ -243,7 +270,7 @@ async function getAllPosts(_, { pageOptions }, { headers, db, decodedToken }) {
         try {
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
-            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc'};
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
 
             if (!db) {
                 console.log('Creating new mongoose connection.');
@@ -294,15 +321,15 @@ async function fullSearch(_, { searchString }, { headers, db, decodedToken }) {
 
             posts = await Post.aggregate([
                 {
-                     $lookup:
-                         {
-                             from: 'tags',
-                             localField: 'tags',
-                             foreignField: '_id',
-                             as: 'tags'
-                         }
-                 },
-                 {$match: {$or: [{ name: { $regex: regex}}, { "description.data.text": { $regex: regex}}, { type: { $regex: regex}}, {"tags.name": { $regex: regex}}]}},
+                    $lookup:
+                    {
+                        from: 'tags',
+                        localField: 'tags',
+                        foreignField: '_id',
+                        as: 'tags'
+                    }
+                },
+                { $match: { $or: [{ name: { $regex: regex } }, { "description.data.text": { $regex: regex } }, { type: { $regex: regex } }, { "tags.name": { $regex: regex } }] } },
                 //  {$lookup: {
 
                 //  }}

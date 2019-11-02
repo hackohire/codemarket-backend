@@ -29,6 +29,8 @@ const graphQlPostSchema = `
         salaryRangeFrom: Int
         salaryRangeTo: Int
         jobProfile: String
+
+        purchasedBy: [PurchasedBy]
     }
 
     input PostInput {
