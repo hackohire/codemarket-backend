@@ -8,7 +8,7 @@ const purchasedItemSchema = new Schema(
         sessionId: String,
         reference_id: {
             type: Schema.Types.ObjectId, // Bugfix Id
-            ref: "product",
+            ref: "post",
             required: true
         },
         purchasedBy: {
