@@ -30,14 +30,21 @@ const commentSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job'],
+            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job', 'company', 'local-business', 'startup', 'non-profit'],
         },
         status: {
             type: String,
             enum: ['Created', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted', 'Published', 'Unpublished', 'Resolved'],
             default: 'Created'
         },
-        text: []
+        text: [],
+
+        /** Fileds Related to the comments in specific block in the post */
+        blockSpecificComment: {
+            type: Boolean,
+            default: false
+        },
+        blockId: Schema.Types.ObjectId
     },
     {
         timestamps: true,

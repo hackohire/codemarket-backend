@@ -6,7 +6,10 @@ const support = require('./support');
 const postSchema = new Schema(
     {
         name: String,
-        description: [Schema.Types.Mixed],
+        description: [new Schema({
+            type: String,
+            data: Schema.Types.Mixed,
+        })],
         shortDescription: String,
         type: {
             type: String,

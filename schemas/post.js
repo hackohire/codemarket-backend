@@ -46,6 +46,8 @@ const graphQlPostSchema = `
         status: Status
         addedToCart: Boolean
         tags: [TagInput]
+        createdAt: String
+        updatedAt: String
         comments: [CommentInput]
         support: SupportInput
         dateRange: [String]

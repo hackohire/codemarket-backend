@@ -77,6 +77,9 @@ type Comment {
   parentId: ID
   createdBy: User
   createdAt: String
+
+  blockSpecificComment: Boolean
+  blockId: ID
 }
 
 input CommentInput {
@@ -90,6 +93,9 @@ input CommentInput {
   text: [InputdescriptionBlock]
   createdBy: ID
   createdAt: String
+
+  blockSpecificComment: Boolean
+  blockId: ID
 }
 
 type Tag {
@@ -147,6 +153,7 @@ enum Roles {
 input InputdescriptionBlock {
   type: String
   data: InputdescriptionBlocks
+  _id: ID
 }
 
 input InputdescriptionBlocks {
@@ -183,6 +190,7 @@ union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock 
 type CodeBlock {
   type: String
   data: Code
+  _id: ID
 }
 
 type Code {
@@ -193,6 +201,7 @@ type Code {
 type ImageBlock {
   type: String
   data: Image
+  _id: ID
 }
 
 type Image {
@@ -206,6 +215,7 @@ type Image {
 type ListBlock {
   type: String
   data: List
+  _id: ID
 }
 
 type List {
@@ -216,6 +226,7 @@ type List {
 type ParagraphBlock {
   type: String
   data: Paragraph
+  _id: ID
 }
 
 type Paragraph {
@@ -226,6 +237,7 @@ type Paragraph {
 type HeaderBlock {
   type: String
   data: Header
+  _id: ID
 }
 
 type Header {
@@ -236,6 +248,7 @@ type Header {
 type QuoteBlock {
   type: String
   data: Quote
+  _id: ID
 }
 
 type Quote {
@@ -247,6 +260,7 @@ type Quote {
 type TableBlock {
   type: String
   data: Table
+  _id: ID
 }
 
 type Table {
@@ -256,6 +270,7 @@ type Table {
 type WarningBlock {
   type: String
   data: Warning
+  _id: ID
 }
 
 type Warning {
@@ -266,6 +281,7 @@ type Warning {
 type EmbedBlock {
   type: String
   data: Embed
+  _id: ID
 }
 
 type Embed {

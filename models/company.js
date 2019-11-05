@@ -24,7 +24,10 @@ const companySchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "city",
         }],
-        howCanYouHelp: [Schema.Types.Mixed],
+        howCanYouHelp: [new Schema({
+            type: String,
+            data: Schema.Types.Mixed,
+        })],
     },
     {
         timestamps: true,
