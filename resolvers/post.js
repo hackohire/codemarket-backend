@@ -211,7 +211,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                 post.cities = await helper.insertManyIntoCities(post.cities);
             }
 
-            await Post.findByIdAndUpdate(post._id, post, { new: true }, (err, res) => {
+            await Post.findOneAndUpdate({_id: post._id}, post, { new: true, useFindAndModify: false }, (err, res) => {
                 if (err) {
                     return reject(err)
                 }
@@ -283,7 +283,9 @@ async function getAllPosts(_, { pageOptions }, { headers, db, decodedToken }) {
             let posts = [];
 
             /** Fetching all the Published Posts */
-            posts = await Post.find({ status: 'Published' }).populate('createdBy').populate('tags')
+            posts = await Post.find({ 
+                status: 'Published'
+            }).populate('createdBy').populate('tags')
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
                 .limit(pageOptions.limit)
                 .sort(sort)
