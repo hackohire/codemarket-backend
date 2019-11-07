@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
 const support = require('./support');
-var slug = require('mongoose-slug-updater');
-
+const slug = require('mongoose-slug-updater');
 mongoose.plugin(slug, {truncate: 0});
 
+const { Schema } = mongoose;
 
 const postSchema = new Schema(
     {
@@ -57,7 +56,7 @@ const postSchema = new Schema(
         salaryRangeFrom: Number,
         salaryRangeTo: Number,
         jobProfile: String,
-        slug: { type: String, slug: ['name', '_id', ] }
+        slug: { type: String, slug: ['name', '_id'] }
     },
     {
         timestamps: true,
