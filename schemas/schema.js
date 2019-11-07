@@ -10,20 +10,16 @@ type Product {
   shortDescription: String
   featuredImage: String
   createdBy: User
-  priceAndFiles: [PriceAndFiles]
   price: Int
   categories: [String]
-  demo_url: String
-  documentation_url: String
-  video_url: String
   status: Status
   createdAt: String
   updatedAt: String
-  snippets: [Snippet]
   tags: [Tag]
   comments: [Comment]
   support: Support
   likeCount: Int
+  slug: String
 
   purchasedBy: [PurchasedBy]
 }
@@ -40,21 +36,16 @@ input ProductInput {
   name: String
   type: String
   description: [InputdescriptionBlock]
-  shortDescription: String
   featuredImage: String
   createdBy: ID
-  priceAndFiles: [PriceAndFilesInput]
   price: Int
   categories: [String]
-  demo_url: String
-  documentation_url: String
-  video_url: String
   status: Status
-  snippets: [SnippetInput]
   addedToCart: Boolean
   tags: [TagInput]
   comments: [CommentInput]
   support: SupportInput
+  slug: String
 }
 
 type Support {

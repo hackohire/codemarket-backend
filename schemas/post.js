@@ -17,6 +17,7 @@ const graphQlPostSchema = `
         comments: [Comment]
         support: Support
         likeCount: Int
+        slug: String
 
         dateRange: [String]
         address: String
@@ -48,6 +49,7 @@ const graphQlPostSchema = `
         tags: [TagInput]
         createdAt: String
         updatedAt: String
+        slug: String
         comments: [CommentInput]
         support: SupportInput
         dateRange: [String]

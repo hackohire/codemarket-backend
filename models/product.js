@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const support  = require('./support');
 
+var slug = require('mongoose-slug-updater');
+
+mongoose.plugin(slug, {truncate: 0});
+
 const productSchema = new Schema(
     {
         name: String,
@@ -39,7 +43,8 @@ const productSchema = new Schema(
         comments: [{
             type: Schema.Types.ObjectId,
             ref: "comment", 
-        }]
+        }],
+        slug: { type: String, slug: ['name', '_id'] }
         // addedToCart: Boolean
     },
     {
