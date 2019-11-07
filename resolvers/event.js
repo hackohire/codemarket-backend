@@ -45,7 +45,7 @@ async function rsvpEvent(_, { userId, eventId }, { headers, db, decodedToken }) 
             if (updatedPostWithAttendees) {
                 /** Send Email on Successful RSVP */
                 const filePath = basePath + 'email-template/rsvpSuccessful';
-                var eventLink = process.env.FRONT_END_URL + `(main:dashboard/${updatedPostWithAttendees.type}-details/${updatedPostWithAttendees._id})?type=${updatedPostWithAttendees.type}&postId=${updatedPostWithAttendees._id}`;
+                var eventLink = process.env.FRONT_END_URL + `(main:dashboard/${updatedPostWithAttendees.type === 'product' ? 'product' : 'post'}/${updatedPostWithAttendees.slug})?type=${updatedPostWithAttendees.type}`;
                 var attendee = updatedPostWithAttendees.usersAttending.find(u => u.id === userId);
                 const payLoad = {
                     ATTENDEE: attendee.name,
