@@ -5,8 +5,8 @@ provider:
   runtime: nodejs8.10
   region: ap-south-1
   stage: ${opt:stage, 'dev'}
-  websocketsApiName: codemarket-videochat-socket
-  websocketsApiRouteSelectionExpression: $request.body.action
+  # websocketsApiName: codemarket-videochat-socket
+  # websocketsApiRouteSelectionExpression: $request.body.action
   environment:
     MONGODB_URL: ${file(env.yml):${self:provider.stage}.MONGODB_URL}
     MONGODB_DBNAME: ${file(env.yml):${self:provider.stage}.MONGODB_DBNAME}
@@ -85,33 +85,33 @@ functions:
           method: POST
           cors: true
 
-  socketConnectionHandler:
-    handler: websocket.socketConnectionHandler
-    events:
-      - websocket:
-          route: $connect
-      - websocket:
-          route: $disconnect
-      - websocket:
-          route: $default
+  # socketConnectionHandler:
+  #   handler: websocket.socketConnectionHandler
+  #   events:
+  #     - websocket:
+  #         route: $connect
+  #     - websocket:
+  #         route: $disconnect
+  #     - websocket:
+  #         route: $default
   
-  onOffer:
-    handler: websocket.onOffer
-    events:
-      - websocket:
-          route: onOffer
+  # onOffer:
+  #   handler: websocket.onOffer
+  #   events:
+  #     - websocket:
+  #         route: onOffer
 
-  setUserOnline:
-    handler: websocket.setUserOnline
-    events:
-      - websocket:
-          route: setUserOnline
+  # setUserOnline:
+  #   handler: websocket.setUserOnline
+  #   events:
+  #     - websocket:
+  #         route: setUserOnline
 
-  calling:
-    handler: websocket.calling
-    events:
-      - websocket:
-          route: calling
+  # calling:
+  #   handler: websocket.calling
+  #   events:
+  #     - websocket:
+  #         route: calling
 
 
 resources:
@@ -145,10 +145,3 @@ plugins:
 custom:
   serverless-offline:
     port: 3200
-#   customDomain:
-#     domainName: sarkazein7.tech
-#     stage: prod
-#     basePath: ''
-#     certificateName: '*.sarkazein7.tech'
-#     createRoute53Record: true
-#     endpointType: 'regional'
