@@ -13,7 +13,6 @@
   "license": "ISC",
   "devDependencies": {
     "eslint": "^5.16.0",
-    "mongoose-slug-updater": "^3.1.4",
     "serverless": "^1.53.0",
     "serverless-domain-manager": "^3.2.6",
     "serverless-offline": "^5.11.0"
@@ -34,6 +33,7 @@
     "mongoose": "^5.5.14",
     "nodemailer": "^6.3.0",
     "stripe": "^7.1.0",
-    "uuid-apikey": "^1.4.3"
+    "uuid-apikey": "^1.4.3",
+    "mongoose-slug-updater": "^3.1.4"
   }
 }
