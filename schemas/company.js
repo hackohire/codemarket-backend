@@ -12,6 +12,8 @@ const graphQlCompanySchema = `
         createdAt: String
         updatedAt: String
         cities: [City]
+        ideas: [descriptionBlocks]
+        questions: [descriptionBlocks]
     }
 
     input CompanyInput {
@@ -20,6 +22,8 @@ const graphQlCompanySchema = `
         title: String
         type: String
         howCanYouHelp: [InputdescriptionBlock]
+        ideas: [InputdescriptionBlock]
+        questions: [InputdescriptionBlock]
         createdBy: ID
         status: Status
         cities: [CityInput]
@@ -38,7 +42,6 @@ const graphQlCompanySchema = `
     }
 
     extend type Query {
-        getAllCompanies: [Company]
         getCompaniesByType(companyType: String): [Company]
         getCompaniesByUserIdAndType(userId: String, companyType: String): [Company]
         getCompanyById(companyId: String): Company

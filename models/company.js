@@ -9,7 +9,7 @@ const companySchema = new Schema(
         title: String,
         type: {
             type: String,
-            enum: ['non-profit', 'local-business', 'startup'],
+            enum: ['non-profit', 'local-business', 'startup', 'smb', 'school', 'government'],
         },
         createdBy: {
             type: Schema.Types.ObjectId,
@@ -25,6 +25,14 @@ const companySchema = new Schema(
             ref: "city",
         }],
         howCanYouHelp: [new Schema({
+            type: String,
+            data: Schema.Types.Mixed,
+        })],
+        questions: [new Schema({
+            type: String,
+            data: Schema.Types.Mixed,
+        })],
+        ideas: [new Schema({
             type: String,
             data: Schema.Types.Mixed,
         })],

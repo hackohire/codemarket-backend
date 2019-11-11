@@ -98,7 +98,7 @@ async function getCompaniesByUserIdAndType(_, { userId, companyType }, { headers
                 console.log('Using existing mongoose connection.');
             }
 
-            Company.find({ 'createdBy': userId, type: companyType }).populate('createdBy').populate('cities').exec((err, res) => {
+            Company.find({ 'createdBy': userId, type: companyType ? companyType : { $ne: null } }).populate('createdBy').populate('cities').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -157,7 +157,7 @@ async function getCompaniesByType(_, { companyType }, { headers, db, decodedToke
                 console.log('Using existing mongoose connection.');
             }
 
-            Company.find({ type: companyType }).populate('createdBy').populate('cities').exec((err, res) => {
+            Company.find({ type: companyType ? companyType : { $ne: null } }).populate('createdBy').populate('cities').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -165,37 +165,6 @@ async function getCompaniesByType(_, { companyType }, { headers, db, decodedToke
 
                 return resolve(res);
             });
-
-
-
-        } catch (e) {
-            console.log(e);
-            return reject(e);
-        }
-    });
-}
-
-async function getAllCompanies(_, { headers, db, decodedToken }) {
-    return new Promise(async (resolve, reject) => {
-        try {
-
-            if (!db) {
-                console.log('Creating new mongoose connection.');
-                conn = await connectToMongoDB();
-            } else {
-                console.log('Using existing mongoose connection.');
-            }
-
-            /** Taking Empty Companies array */
-            let companies = [];
-
-            /** Fetching all the Published Companies */
-            companies = await Company.find({}).populate('createdBy').populate('cities')
-                .sort({name: 1})
-                .exec();
-
-            return await resolve(companies);
-
 
 
 
@@ -278,7 +247,6 @@ module.exports = {
     addCompany,
     updateCompany,
 
-    getAllCompanies,
     getCompaniesByUserIdAndType,
     getCompanyById,
     getCompaniesByType,

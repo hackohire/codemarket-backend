@@ -47,23 +47,26 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             var data;
             var postLink;
 
-            data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
+            /** Send Email Only if comment type is post */
+            if (commentObj.type === 'post') {
+                data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
 
-            postLink = process.env.FRONT_END_URL + `(main:dashboard/${commentObj.type === 'product' ? 'product' : 'post'}/${data.slug})?type=${commentObj.type}`;
-
-            const filePathToAuthor = basePath + 'email-template/commentCreateToAuthor';
-            const filePathToCommentor = basePath + 'email-template/commentCreateToCommentor';
-            const payLoadToAuthor = {
-                NAME: data.createdBy.name,
-                LINK: postLink,
-                COMMENTOR_NAME: commentObj.createdBy.name
-            };
-            const payLoadToCommentor = {
-                NAME: commentObj.createdBy.name,
-                LINK: postLink
-            };
-            await helper.sendEmail(data.createdBy.email, filePathToAuthor, payLoadToAuthor);
-            await helper.sendEmail(commentObj.createdBy.email, filePathToCommentor, payLoadToCommentor);
+                postLink = process.env.FRONT_END_URL + `(main:dashboard/${commentObj.type === 'product' ? 'product' : 'post'}/${data.slug})?type=${commentObj.type}`;
+    
+                const filePathToAuthor = basePath + 'email-template/commentCreateToAuthor';
+                const filePathToCommentor = basePath + 'email-template/commentCreateToCommentor';
+                const payLoadToAuthor = {
+                    NAME: data.createdBy.name,
+                    LINK: postLink,
+                    COMMENTOR_NAME: commentObj.createdBy.name
+                };
+                const payLoadToCommentor = {
+                    NAME: commentObj.createdBy.name,
+                    LINK: postLink
+                };
+                await helper.sendEmail(data.createdBy.email, filePathToAuthor, payLoadToAuthor);
+                await helper.sendEmail(commentObj.createdBy.email, filePathToCommentor, payLoadToCommentor);
+            }
             resolve(commentObj);
         } catch (e) {
             console.log(e);
