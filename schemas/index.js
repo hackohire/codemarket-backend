@@ -5,6 +5,7 @@ const graphQlLikeSchema = require('./like');
 const graphQlPostSchema = require('./post');
 const graphQlSubscriptionSchema = require('./subscription');
 const graphQlCompanySchema = require('./company');
+const graphQlBookingSchema = require('./booking');
 const schema = require('./schema');
 
 const schemaArray = [
@@ -15,7 +16,8 @@ const schemaArray = [
     graphQlLikeSchema,
     graphQlPostSchema,
     graphQlCompanySchema,
-    graphQlSubscriptionSchema
+    graphQlSubscriptionSchema,
+    graphQlBookingSchema
 ];
 
 module.exports = schemaArray;

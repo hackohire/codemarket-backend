@@ -8,6 +8,7 @@ const { like, checkIfUserLikedAndLikeCount } = require('./like');
 const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch } = require('./post');
 const { addCompany, updateCompany, getAllCompanies, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany} = require('./company');
 const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
+const { scheduleCall, getBookingList } = require('./booking');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 
 module.exports = {
@@ -40,6 +41,7 @@ module.exports = {
 
     getAllCompanies, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, getListOfUsersInACompany,
 
+    getBookingList
   },
   Mutation: {
     createUser,
@@ -74,7 +76,9 @@ module.exports = {
 
     cancelRSVP,
 
-    addCompany, updateCompany, deleteCompany
+    addCompany, updateCompany, deleteCompany,
+
+    scheduleCall
 
   },
 
