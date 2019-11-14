@@ -20,6 +20,7 @@ const graphQlPostSchema = `
         slug: String
 
         dateRange: [String]
+        location: Location
         address: String
         eventType: String
         validSubscription: Boolean
@@ -53,6 +54,7 @@ const graphQlPostSchema = `
         comments: [CommentInput]
         support: SupportInput
         dateRange: [String]
+        location: LocationInput
         address: String
         eventType: String
 
@@ -61,6 +63,20 @@ const graphQlPostSchema = `
         salaryRangeFrom: Int
         salaryRangeTo: Int
         jobProfile: String
+    }
+
+    type Location {
+        latitude: Float
+        longitude: Float
+        address: String
+        additionalLocationDetails: String
+    }
+
+    input LocationInput {
+        latitude: Float
+        longitude: Float
+        address: String
+        additionalLocationDetails: String
     }
 
     type RsvpEventResponse {

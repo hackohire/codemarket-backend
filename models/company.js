@@ -36,6 +36,12 @@ const companySchema = new Schema(
             type: String,
             data: Schema.Types.Mixed,
         })],
+        location: new Schema({
+            latitude: Number,
+            longitude: Number,
+            address: String,
+            additionalLocationDetails: String
+        }),
     },
     {
         timestamps: true,

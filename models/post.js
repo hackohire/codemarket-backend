@@ -38,6 +38,12 @@ const postSchema = new Schema(
         /** Event Specific Fields */
         dateRange: [String],
         address: String,
+        location: new Schema({
+            latitude: Number,
+            longitude: Number,
+            address: String,
+            additionalLocationDetails: String
+        }),
         eventType: String,
         usersAttending: [{
             type: Schema.Types.ObjectId,
