@@ -12,7 +12,6 @@ const postSchema = new Schema(
             type: String,
             data: Schema.Types.Mixed,
         })],
-        shortDescription: String,
         type: {
             type: String,
             enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job'],

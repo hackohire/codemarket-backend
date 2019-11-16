@@ -1,6 +1,7 @@
 const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
 const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment');
+const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
 const { findFromCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
@@ -41,7 +42,9 @@ module.exports = {
 
     getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, getListOfUsersInACompany,
 
-    getBookingList
+    getBookingList,
+
+    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer
   },
   Mutation: {
     createUser,
@@ -78,7 +81,9 @@ module.exports = {
 
     addCompany, updateCompany, deleteCompany,
 
-    scheduleCall
+    scheduleCall,
+
+    addQuestionOrAnswer, updateQuestionOrAnswer,
 
   },
 

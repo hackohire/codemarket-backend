@@ -6,6 +6,7 @@ const graphQlPostSchema = require('./post');
 const graphQlSubscriptionSchema = require('./subscription');
 const graphQlCompanySchema = require('./company');
 const graphQlBookingSchema = require('./booking');
+const graphQlQuestionAndAnswerSchema = require('./q&a');
 const schema = require('./schema');
 
 const schemaArray = [
@@ -17,6 +18,7 @@ const schemaArray = [
     graphQlPostSchema,
     graphQlCompanySchema,
     graphQlSubscriptionSchema,
+    graphQlQuestionAndAnswerSchema,
     graphQlBookingSchema
 ];
 
