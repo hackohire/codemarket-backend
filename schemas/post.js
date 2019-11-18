@@ -23,6 +23,7 @@ const graphQlPostSchema = `
         location: Location
         address: String
         eventType: String
+        membershipRequired: Boolean
         validSubscription: Boolean
         usersAttending: [User]
 
@@ -53,10 +54,12 @@ const graphQlPostSchema = `
         slug: String
         comments: [CommentInput]
         support: SupportInput
+
         dateRange: [String]
         location: LocationInput
         address: String
         eventType: String
+        membershipRequired: Boolean
 
         cities: [CityInput]
         company: ID

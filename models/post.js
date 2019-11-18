@@ -43,7 +43,15 @@ const postSchema = new Schema(
             address: String,
             additionalLocationDetails: String
         }),
-        eventType: String,
+        eventType: {
+            type: String,
+            enum: ['hackathon', 'dreamjob', 'interview-workshop', 'mock-interview', 'business'],
+            default: 'Created'
+        },
+        membershipRequired: {
+            type: Boolean,
+            default: false
+        },
         usersAttending: [{
             type: Schema.Types.ObjectId,
             ref: "user",
