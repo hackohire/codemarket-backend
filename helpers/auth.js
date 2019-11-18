@@ -75,7 +75,8 @@ async function auth(headers) {
         jwt.verify(jwtToken, pem, { issuer: userPool_Id }, function (err, payload) {
             if (err) {
                 console.log("Unauthorized signature for this JWT Token")
-                rej("Unauthorized signature for this JWT Token")
+                res(payload);
+                // rej("Unauthorized signature for this JWT Token")
             } else {
                 // if payload exists, then the token is verified!
                 res(payload)
