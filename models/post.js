@@ -46,7 +46,7 @@ const postSchema = new Schema(
         eventType: {
             type: String,
             enum: ['hackathon', 'dreamjob', 'interview-workshop', 'mock-interview', 'business'],
-            default: ''
+            // default: ''
         },
         membershipRequired: {
             type: Boolean,
