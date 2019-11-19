@@ -182,11 +182,11 @@ const createStripeUser = async (event, context) => {
             });
 
             const user = await conn.collection('users')
-            .findOneAndUpdate(
-                { _id: ObjectID(body.loggedInUserId) },
-                { $set: { stripeId: customer.id } },
-                { returnOriginal: false }
-            );
+                .findOneAndUpdate(
+                    { _id: ObjectID(body.loggedInUserId) },
+                    { $set: { stripeId: customer.id } },
+                    { returnOriginal: false }
+                );
 
             return resolve({
                 statusCode: 200,
@@ -234,6 +234,10 @@ const attachCardAndCreateSubscription = async (event, context) => {
                 metadata: body.metadata
             };
 
+            if (body.coupon) {
+                subscriptionDetails.coupon = body.coupon.toUpperCase();
+            }
+
             if (body.trial_period_days) {
                 subscriptionDetails.trial_period_days = body.trial_period_days
             }
@@ -247,7 +251,7 @@ const attachCardAndCreateSubscription = async (event, context) => {
             const filePath = basePath + 'email-template/successfulSubscription';
             const payLoad = {
                 AUTHORNAME: body.name,
-                PLAN_NAME: sub.plan.nickname 
+                PLAN_NAME: sub.plan.nickname
             };
             await helper.sendEmail(body.metadata.email, filePath, payLoad);
 
@@ -267,6 +271,48 @@ const attachCardAndCreateSubscription = async (event, context) => {
     })
 }
 
+const getCouponByName = async (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            /** parse body */
+            let body;
+            try {
+                body = JSON.parse(event.body);
+            } catch (e) {
+                body = {};
+            }
+
+            // let conn = await connectToMongoDB();
+
+            const couponCode = body.couponCode.toUpperCase();
+
+            stripe.coupons.retrieve(
+                couponCode,
+                function (err, coupon) {
+
+                    if (err) {
+                        return reject(err);
+                    } else {
+                        return resolve({
+                            statusCode: 200,
+                            headers: {
+                                'Access-Control-Allow-Origin': '*',
+                                'Access-Control-Allow-Credentials': true,
+                            },
+                            body: JSON.stringify({ coupon })
+                        });
+                    }
+                }
+            );
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    })
+}
+
 
 
 module.exports = {
@@ -275,5 +321,6 @@ module.exports = {
     createCheckoutSession,
     getCheckoutSession,
     createStripeUser,
-    attachCardAndCreateSubscription
+    attachCardAndCreateSubscription,
+    getCouponByName
 };

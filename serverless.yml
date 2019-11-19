@@ -85,6 +85,14 @@ functions:
           method: POST
           cors: true
 
+  getCouponByName:
+    handler: handler.getCouponByName
+    events:
+      - http:
+          path: getCouponByName
+          method: POST
+          cors: true
+
   # socketConnectionHandler:
   #   handler: websocket.socketConnectionHandler
   #   events:
