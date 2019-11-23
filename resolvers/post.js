@@ -348,7 +348,7 @@ async function getAllPosts(_, { pageOptions, type }, { headers, db, decodedToken
             //     .sort(sort)
             //     .exec();
 
-            return await resolve({ posts, total: await Post.countDocuments({ status: 'Published' }).exec() });
+            return await resolve({ posts, total: await Post.countDocuments({ status: 'Published', type: type ? type : { $ne: null } }).exec() });
 
 
 
