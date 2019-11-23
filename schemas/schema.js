@@ -346,7 +346,7 @@ type getAllPostsResponse {
 type Query {
   hello: String
 
-  getAllPosts(pageOptions: PageOptionsInput): getAllPostsResponse
+  getAllPosts(pageOptions: PageOptionsInput, type: String): getAllPostsResponse
 
   getAllProducts: [Product]
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]

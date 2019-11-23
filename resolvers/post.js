@@ -265,7 +265,7 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
     });
 }
 
-async function getAllPosts(_, { pageOptions }, { headers, db, decodedToken }) {
+async function getAllPosts(_, { pageOptions, type }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -282,14 +282,71 @@ async function getAllPosts(_, { pageOptions }, { headers, db, decodedToken }) {
             /** Taking Empty Posts array */
             let posts = [];
 
+            posts = await Post.aggregate([
+                { $match: {status: 'Published', type: type ? type : { $ne: null }}},
+                {
+                    $lookup: {
+                        from: 'comments',
+                        localField: '_id',
+                        foreignField: 'referenceId',
+                        as: 'comments'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'likes',
+                        localField: 'createdBy',
+                        foreignField: 'userId',
+                        as: 'likes'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'createdBy',
+                        foreignField: '_id',
+                        as: 'createdBy'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'tags',
+                        localField: 'tags',
+                        foreignField: '_id',
+                        as: 'tags'
+                    }
+                },
+                {
+                    $project: {
+                        name: 1,
+                        type: 1,
+                        description: 1,
+                        slug: 1,
+                        createdBy: {$arrayElemAt: [ '$createdBy', 0 ]},
+                        tags: 1,
+                        likeCount: {$size: '$likes'},
+                        comments: '$comments',
+                        createdAt: 1
+                        // likeCount: { $size: '$likes' }
+                    }
+                }
+
+            ])
+            .sort(sort)
+            .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+            .limit(pageOptions.limit)
+            .exec();
+
+            console.log(posts);
+
             /** Fetching all the Published Posts */
-            posts = await Post.find({ 
-                status: 'Published'
-            }).populate('createdBy').populate('tags')
-                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-                .limit(pageOptions.limit)
-                .sort(sort)
-                .exec();
+            // posts = await Post.find({ 
+            //     status: 'Published'
+            // }).populate('createdBy').populate('tags')
+            //     .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+            //     .limit(pageOptions.limit)
+            //     .sort(sort)
+            //     .exec();
 
             return await resolve({ posts, total: await Post.countDocuments({ status: 'Published' }).exec() });
 
