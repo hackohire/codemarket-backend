@@ -4,9 +4,8 @@ const graphQlCompanySchema = `
     type Company {
         _id: ID
         name: String
-        title: String
         type: String
-        howCanYouHelp: [descriptionBlocks]
+        description: [descriptionBlocks]
         createdBy: User
         status: Status
         createdAt: String
@@ -20,9 +19,8 @@ const graphQlCompanySchema = `
     input CompanyInput {
         _id: ID
         name: String
-        title: String
         type: String
-        howCanYouHelp: [InputdescriptionBlock]
+        description: [InputdescriptionBlock]
         ideas: [InputdescriptionBlock]
         questions: [InputdescriptionBlock]
         createdBy: ID
