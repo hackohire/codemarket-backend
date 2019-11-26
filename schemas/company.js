@@ -14,6 +14,7 @@ const graphQlCompanySchema = `
         ideas: [descriptionBlocks]
         questions: [descriptionBlocks]
         location: Location
+        cover: String
     }
 
     input CompanyInput {
@@ -27,6 +28,7 @@ const graphQlCompanySchema = `
         status: Status
         cities: [CityInput]
         location: LocationInput
+        cover: String
     }
 
     type City {

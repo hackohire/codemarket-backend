@@ -6,6 +6,7 @@ const support = require('./support');
 const companySchema = new Schema(
     {
         name: String,
+        cover: String,
         type: {
             type: String,
             enum: ['non-profit', 'local-business', 'startup', 'smb', 'school', 'government'],
@@ -48,9 +49,9 @@ const companySchema = new Schema(
     },
 );
 
-companySchema.index({'name': 'text', }, {
-    "language_override": "javascript"
-});
+// companySchema.index({'name': 'text', }, {
+//     "language_override": "javascript"
+// });
 
 module.exports = () => {
     try {
