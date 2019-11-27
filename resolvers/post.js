@@ -11,11 +11,11 @@ const Post = require('../models/post')();
 const helper = require('../helpers/helper');
 const Like = require('./../models/like')();
 const Unit = require('./../models/purchased_units')();
-const User = require('./../models/user')();
-const Tag = require('./../models/tag')();
-const Subscription = require('../models/subscription')();
-var moment = require('moment');
-var ObjectID = require('mongodb').ObjectID;
+// const User = require('./../models/user')();
+// const Tag = require('./../models/tag')();
+// const Subscription = require('../models/subscription')();
+// var moment = require('moment');
+// var ObjectID = require('mongodb').ObjectID;
 let conn;
 
 

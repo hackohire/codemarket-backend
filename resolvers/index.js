@@ -1,4 +1,4 @@
-const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
+const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById, getMyProfileInfo } = require('./user');
 const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment');
 const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
@@ -15,7 +15,7 @@ const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMem
 module.exports = {
   Query: {
     hello: () => 'Hello world!',
-    getUsers, getUsersAndBugFixesCount, getUserById,
+    getUsers, getUsersAndBugFixesCount, getUserById, getMyProfileInfo,
 
     getAllPosts,
     fullSearch,

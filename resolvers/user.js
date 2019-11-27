@@ -1,10 +1,11 @@
 const connectToMongoDB = require('./../helpers/db');
-const auth = require('./../helpers/auth');
 const User = require('./../models/user')();
+const Post = require('./../models/post')();
 var array = require('lodash/array');
 const Like = require('./../models/like')();
 var ObjectID = require('mongodb').ObjectID;
 const Subscription = require('../models/subscription')();
+const helper = require('../helpers/helper');
 
 let conn;
 
@@ -87,8 +88,24 @@ async function updateUser(_, { user }, { headers, db }) {
                 console.log('Using existing mongoose connection.');
             }
 
+            if (user.businessAreaInterests && user.businessAreaInterests.length) {
+                user.businessAreaInterests = await helper.insertManyIntoTags(user.businessAreaInterests);
+            }
+
+            if (user.leadershipAreaInterests && user.leadershipAreaInterests.length) {
+                user.leadershipAreaInterests = await helper.insertManyIntoTags(user.leadershipAreaInterests);
+            }
+
+            if (user.socialImpactInterests && user.socialImpactInterests.length) {
+                user.socialImpactInterests = await helper.insertManyIntoTags(user.socialImpactInterests);
+            }
+
             // const userToBeSaved = await new User(user);
-            await User.findByIdAndUpdate(user._id, user, {new:true}).then(userCreated => {
+            await User.findByIdAndUpdate(user._id, user, {new:true})
+            .populate('businessAreaInterests')
+            .populate('leadershipAreaInterests')
+            .populate('socialImpactInterests')
+            .then(userCreated => {
                 console.log(userCreated)
                 return resolve(userCreated);
             });
@@ -235,6 +252,40 @@ async function getUserById(_, { userId }, { headers, db, decodedToken }) {
     });
 }
 
+async function getMyProfileInfo(_, { userId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // const decodedToken = await auth.auth(headers);
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+
+            const dreamJob = await Post.find({createdBy: userId, type: 'dream-job'}).exec();
+
+            const user = await User.findOne({_id: userId})
+            .populate('businessAreaInterests')
+            .populate('leadershipAreaInterests')
+            .populate('socialImpactInterests')
+            .exec();
+            
+            return await resolve({
+                dreamJob,
+                businessAreaInterests: user.businessAreaInterests,
+                leadershipAreaInterests: user.leadershipAreaInterests,
+                socialImpactInterests: user.socialImpactInterests
+            })
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+
 
 
 module.exports = {
@@ -243,5 +294,6 @@ module.exports = {
     updateUser,
     authorize,
     getUsersAndBugFixesCount,
-    getUserById
+    getUserById,
+    getMyProfileInfo
 };

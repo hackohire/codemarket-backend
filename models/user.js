@@ -33,6 +33,21 @@ const userSchema = new Schema(
             default: ['User'],
 
         },
+        businessAreaInterests: [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+            default: []
+        }],
+        leadershipAreaInterests:  [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+            default: []
+        }],
+        socialImpactInterests: [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+            default: []
+        }],
         stripeId: String
     },
     {
