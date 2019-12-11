@@ -15,8 +15,7 @@
     "eslint": "^5.16.0",
     "serverless": "^1.53.0",
     "serverless-domain-manager": "^3.2.6",
-    "serverless-offline": "^5.11.0",
-    "url-metadata": "^2.4.0"
+    "serverless-offline": "^5.11.0"
   },
   "dependencies": {
     "amazon-cognito-identity-js": "^3.0.13",
@@ -35,6 +34,7 @@
     "nodemailer": "^6.3.0",
     "stripe": "^7.1.0",
     "uuid-apikey": "^1.4.3",
-    "mongoose-slug-updater": "^3.1.4"
+    "mongoose-slug-updater": "^3.1.4",
+    "url-metadata": "^2.4.0"
   }
 }
