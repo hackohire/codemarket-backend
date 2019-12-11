@@ -7,6 +7,7 @@ const Cart = require('./models/cart')();
 const helper = require('./helpers/helper');
 var ObjectID = require('mongodb').ObjectID;
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const urlMetadata = require('url-metadata');
 
 global.basePath = __dirname + '/';
 
@@ -313,6 +314,47 @@ const getCouponByName = async (event, context) => {
     })
 }
 
+/** Function to fetch the meta data of the webpage basedon thegiven link */
+const fetchLinkMeta = async (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            const url = event.queryStringParameters.url;
+
+            urlMetadata(url).then(
+                function (metadata) { // success handler
+                    console.log(metadata);
+                    const meta = {
+                        description: metadata['og:description'],
+                        domain: metadata.source,
+                        image: {
+                            url: metadata.image
+                        },
+                        title: metadata.title,
+                        url: metadata.url
+
+                    }
+                    return resolve({
+                        statusCode: 200,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Credentials': true,
+                        },
+                        body: JSON.stringify({meta, success: 1})
+                    });
+                },
+                function (error) { // failure handler
+                    console.log(error);
+                    return reject(error);
+                })
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    })
+}
+
 
 
 module.exports = {
@@ -322,5 +364,6 @@ module.exports = {
     getCheckoutSession,
     createStripeUser,
     attachCardAndCreateSubscription,
-    getCouponByName
+    getCouponByName,
+    fetchLinkMeta
 };

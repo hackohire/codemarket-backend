@@ -119,6 +119,9 @@ module.exports = {
         case 'embed':
           return 'EmbedBlock'
 
+        case 'linkTool':
+          return 'LinkToolBlock'
+
         default:
           console.log('default case')
           return null;

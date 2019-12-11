@@ -93,6 +93,14 @@ functions:
           method: POST
           cors: true
 
+  fetchLinkMeta:
+    handler: handler.fetchLinkMeta
+    events:
+      - http:
+          path: fetchLinkMeta
+          method: GET
+          cors: true
+
   # socketConnectionHandler:
   #   handler: websocket.socketConnectionHandler
   #   events:

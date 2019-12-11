@@ -15,7 +15,8 @@
     "eslint": "^5.16.0",
     "serverless": "^1.53.0",
     "serverless-domain-manager": "^3.2.6",
-    "serverless-offline": "^5.11.0"
+    "serverless-offline": "^5.11.0",
+    "url-metadata": "^2.4.0"
   },
   "dependencies": {
     "amazon-cognito-identity-js": "^3.0.13",

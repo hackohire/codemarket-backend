@@ -174,9 +174,12 @@ input InputdescriptionBlocks {
   embed : String
   width : Int
   height : Int
+
+  link: String
+  meta: MetaInput
 }
 
-union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock
+union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock
 
 type CodeBlock {
   type: String
@@ -284,9 +287,32 @@ type Embed {
   caption : String
 }
 
+type LinkToolBlock {
+  type: String
+  data: LinkTool
+  _id: ID
+}
 
+type LinkTool {
+  link: String
+  meta: Meta
+}
 
+type Meta {
+  title: String
+  description: String
+  domain: String
+  url: String
+  image:  URL
+}
 
+input MetaInput {
+  title: String
+  description: String
+  domain: String
+  url: String
+  image:  URLInput
+}
 
 type URL {
   url: String
