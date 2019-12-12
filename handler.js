@@ -338,6 +338,7 @@ const fetchLinkMeta = async (event, context) => {
                         statusCode: 200,
                         headers: {
                             'Access-Control-Allow-Origin': '*',
+                            'Content-Type': 'application/json',
                             'Access-Control-Allow-Credentials': true,
                         },
                         body: JSON.stringify({meta, success: 1})
