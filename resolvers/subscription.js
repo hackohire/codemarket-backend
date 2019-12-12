@@ -96,7 +96,7 @@ async function inviteMembersToSubscription(_, { subscriptionId, users }, { heade
                 subscription.subscriptionUsers.forEach(async (u) => {
                     /** Send Email for Invitation */
                     const filePath = basePath + 'email-template/subscriptionInvitation';
-                    var invitationLink = process.env.FRONT_END_URL + `(main:dashboard)?subscriptionId=${subscriptionId}&email=${u.email}`;
+                    var invitationLink = process.env.FRONT_END_URL + `dashboard?subscriptionId=${subscriptionId}&email=${u.email}`;
                     // var attendee = subscription.subscriptionUsers.find(u => u.email === email);
                     const payLoad = {
                         INVITEE: u.name,
