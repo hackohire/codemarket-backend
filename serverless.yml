@@ -99,7 +99,17 @@ functions:
       - http:
           path: fetchLinkMeta
           method: GET
-          cors: true
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - x-requested-with
+            allowCredentials: false  
 
   # socketConnectionHandler:
   #   handler: websocket.socketConnectionHandler
