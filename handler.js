@@ -8,6 +8,8 @@ const helper = require('./helpers/helper');
 var ObjectID = require('mongodb').ObjectID;
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const urlMetadata = require('url-metadata');
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 global.basePath = __dirname + '/';
 
@@ -341,13 +343,50 @@ const fetchLinkMeta = async (event, context) => {
                             'Content-Type': 'application/json',
                             'Access-Control-Allow-Credentials': true,
                         },
-                        body: JSON.stringify({meta, success: 1})
+                        body: JSON.stringify({ meta, success: 1 })
                     });
                 },
                 function (error) { // failure handler
                     console.log(error);
                     return reject(error);
                 })
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    })
+}
+
+/** Function to fetch the HTML Content of the webpage based on the given link */
+const fetchArticleByLink = async (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            const url = event.queryStringParameters.url;
+
+            /** Fetch the data from the URL */
+            const result = await axios.get(url);
+            const h = result.data;
+
+            /** Create a Dummy DOM for using Jquery to parse HTML */
+            this.$ = cheerio.load(h);
+
+            /** Parse article tag with class @class meteredContent This works only for medium.com */
+            const html = this.$('article[class*=meteredContent]')
+            .map((i, section) => this.$(section).html())
+            .get()
+            .join('<hr/>');
+
+            return resolve({
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Credentials': true,
+                },
+                body: JSON.stringify(html)
+            });
 
         } catch (e) {
             console.log(e);
@@ -366,5 +405,6 @@ module.exports = {
     createStripeUser,
     attachCardAndCreateSubscription,
     getCouponByName,
-    fetchLinkMeta
+    fetchLinkMeta,
+    fetchArticleByLink
 };

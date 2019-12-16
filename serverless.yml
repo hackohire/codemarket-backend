@@ -111,6 +111,25 @@ functions:
               - x-requested-with
             allowCredentials: false  
 
+
+  fetchArticleByLink:
+    handler: handler.fetchArticleByLink
+    events:
+      - http:
+          path: fetchArticleByLink
+          method: GET
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - x-requested-with
+            allowCredentials: false  
+
   # socketConnectionHandler:
   #   handler: websocket.socketConnectionHandler
   #   events:
