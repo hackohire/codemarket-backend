@@ -51,7 +51,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             if (commentObj.type === 'post') {
                 data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').exec();
 
-                postLink = process.env.FRONT_END_URL + `dashboard/${commentObj.type === 'product' ? 'product' : 'post'}/${data.slug}?type=${commentObj.type}`;
+                postLink = process.env.FRONT_END_URL + `dashboard/${commentObj.type === 'product' ? 'product' : 'post'}/${data.slug}?type=${data.type}`;
     
                 const filePathToAuthor = basePath + 'email-template/commentCreateToAuthor';
                 const filePathToCommentor = basePath + 'email-template/commentCreateToCommentor';
