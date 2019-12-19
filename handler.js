@@ -10,6 +10,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const sanitizeHtml = require('sanitize-html');
 
 global.basePath = __dirname + '/';
 
@@ -373,10 +374,61 @@ const fetchArticleByLink = async (event, context) => {
             this.$ = cheerio.load(h);
 
             /** Parse article tag with class @class meteredContent This works only for medium.com */
-            const html = this.$('article[class*=meteredContent]')
-            .map((i, section) => this.$(section).html())
-            .get()
-            .join('<hr/>');
+            let articleHtml = await this.$('article')
+                .map((i, section) => this.$(section).html())
+                .get()
+                .join('<hr/>');
+
+            articleHtml = await sanitizeHtml(articleHtml, {
+                allowedTags: sanitizeHtml.defaults.allowedTags.concat(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'figcaption', 'img', 'iframe', 'script',]),
+                allowedAttributes: {
+                    iframe: ['*'],
+                    img: ['*'],
+                    a: ['*'],
+                    div: ['*'],
+                    h3: ['*'],
+                    script: ['*'],
+                    blockquote: ['*']
+                },
+                transformTags: {
+                    // 'iframe': (tagName, attribs) => {
+                    //     // attribs['href'] = attribs['src'];
+                    //     return {
+                    //         tagName: 'p',
+                    //         attribs
+                    //     }
+                    // },
+                    'figcaption': (tagName, attribs) => {
+                        attribs['class'] ="cdx-input image-tool__caption";
+                        attribs['contenteditable'] = true;
+                        attribs['data-placeholder']= 'Caption';
+                        return {
+                            tagName: 'div',
+                            attribs
+                        }
+                    },
+                    'strong': (tagName, attribs) => {
+                        return {
+                            tagName: 'b',
+                            attribs: attribs
+                        }
+                    },
+                    'em': (tagName, attribs) => {
+                        return {
+                            tagName: 'i',
+                            attribs: attribs
+                        }
+                    }
+                },
+                exclusiveFilter: function (frame) {
+                    if (frame.tag === 'noscript' ||
+                        (frame.tag === 'img' && !frame.attribs['src']) ||
+                        (frame.tag === 'img' && frame.attribs['src'] && frame.attribs['src'].includes('/max/60/'))) {
+                        return true;
+                    }
+                    return false;
+                }
+            });
 
             return resolve({
                 statusCode: 200,
@@ -385,7 +437,7 @@ const fetchArticleByLink = async (event, context) => {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Credentials': true,
                 },
-                body: JSON.stringify(html)
+                body: JSON.stringify(articleHtml)
             });
 
         } catch (e) {
