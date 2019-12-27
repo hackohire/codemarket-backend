@@ -1,4 +1,4 @@
-service: codemarketapi
+service: billionessapi
 
 provider:
   name: aws
