@@ -319,6 +319,8 @@ custom:
       inMemory: true
       migrate: true
       noStart: false
+      sharedDb: true
+    
   dynamodbStream:
     host: localhost
     port: 8000
