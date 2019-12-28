@@ -3,6 +3,7 @@ const Subscription = require('../models/subscription')();
 const helper = require('../helpers/helper');
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 var ObjectID = require('mongodb').ObjectID;
+const auth = require('../helpers/auth');
 let conn;
 
 async function addMembershipSubscription(_, { subscription }, { headers, db, decodedToken }) {

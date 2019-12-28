@@ -4,13 +4,15 @@ const helper = require('../helpers/helper');
 const Subscription = require('../models/subscription')();
 var moment = require('moment');
 var ObjectID = require('mongodb').ObjectID;
+const auth = require('../helpers/auth');
 let conn;
 
 
-async function rsvpEvent(_, { userId, eventId }, { headers, db, decodedToken }) {
+async function rsvpEvent(_, { userId, eventId }, { event, db }) {
     return new Promise(async (resolve, reject) => {
         try {
 
+            let u = auth.auth(event.headers);
             if (!db) {
                 console.log('Creating new mongoose connection.');
                 conn = await connectToMongoDB();
@@ -18,13 +20,11 @@ async function rsvpEvent(_, { userId, eventId }, { headers, db, decodedToken }) 
                 console.log('Using existing mongoose connection.');
             }
 
-            console.log(decodedToken);
-
             /** Find if user has subscription */
             const sub = await Subscription.findOne({
                 $or: [
                     { "metadata.userId": { $eq: ObjectID(userId)}, status: { $ne: 'canceled' }},
-                    { 'subscriptionUsers.email': decodedToken.email, status: { $ne: 'canceled' }}
+                    { 'subscriptionUsers.email': u.email, status: { $ne: 'canceled' }}
                 ]
             });
             let validSubscription = false;
