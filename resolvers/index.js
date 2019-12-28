@@ -11,7 +11,8 @@ const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, 
 const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
-
+const { withFilter } = require('aws-lambda-graphql');
+const { pubSub } = require('../helpers/pubsub');
 module.exports = {
   Query: {
     hello: () => 'Hello world!',
@@ -86,7 +87,59 @@ module.exports = {
     addQuestionOrAnswer, updateQuestionOrAnswer,
 
   },
+  Subscription: {
+    onCommentAdded: {
+      resolve: (rootValue) => {
+        // root value is the payload from sendMessage mutation
+        return rootValue;
+      },
+      subscribe: withFilter(
+        pubSub.subscribe('COMMENT_ADDED'),
+        (rootValue, args) => {
+          // this can be async too :)
+          if (args.postId === rootValue.referenceId) {
+            return true;
+          }
 
+          // return args.type === rootValue.type;
+        },
+      ),
+    },
+    onCommentUpdated: {
+      resolve: (rootValue) => {
+        // root value is the payload from sendMessage mutation
+        return rootValue;
+      },
+      subscribe: withFilter(
+        pubSub.subscribe('COMMENT_UPDATED'),
+        (rootValue, args) => {
+          // this can be async too :)
+          if (args.postId === rootValue.referenceId) {
+            return true;
+          }
+
+          // return args.type === rootValue.type;
+        },
+      ),
+    },
+    onCommentDeleted: {
+      resolve: (rootValue) => {
+        // root value is the payload from sendMessage mutation
+        return rootValue;
+      },
+      subscribe: withFilter(
+        pubSub.subscribe('COMMENT_DELETED'),
+        (rootValue, args) => {
+          // this can be async too :)
+          if (args.postId == rootValue.referenceId) {
+            return true;
+          }
+
+          return false;
+        },
+      ),
+    }
+  },
   descriptionBlocks: {
     __resolveType(block, context, info) {
 

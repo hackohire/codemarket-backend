@@ -388,6 +388,12 @@ type Mutation {
   addComment(comment: CommentInput): Comment
   updateComment(commentId: String, text: [InputdescriptionBlock]): Comment
 }
+
+type Subscription {
+  onCommentAdded(postId: String): Comment
+  onCommentUpdated(postId: String): Comment
+  onCommentDeleted(postId: String): Comment
+}
 `
 
 module.exports = gql(schema);

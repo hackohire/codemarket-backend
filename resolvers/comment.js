@@ -3,6 +3,7 @@ const helper = require('../helpers/helper');
 const Comment = require('./../models/comment')();
 const Product = require('./../models/product')();
 const Post = require('./../models/post')();
+const { pubSub } = require('../helpers/pubsub');
 let conn;
 
 async function addComment(_, { comment }, { headers, db, decodedToken, context }) {
@@ -46,6 +47,10 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             }
             var data;
             var postLink;
+
+            // const payload = { id: Math.random(), commentObj, type: 'COMMENT_ADDED'};
+
+            await pubSub.publish('COMMENT_ADDED', commentObj);
 
             /** Send Email Only if comment type is post */
             if (commentObj.type === 'post') {
@@ -144,6 +149,7 @@ async function deleteComment(_, { commentId }, { headers, db, decodedToken }) {
 
             let c = await Comment.findByIdAndUpdate(commentId, { status: 'Deleted' }).exec();
 
+            await pubSub.publish('COMMENT_DELETED', c);
             return resolve(c._id);
         } catch (e) {
             console.log(e);
@@ -166,6 +172,8 @@ async function updateComment(_, { commentId, text }, { headers, db, decodedToken
 
 
             let c = await Comment.findByIdAndUpdate(commentId, { text: text }, { new: true }).exec();
+
+            await pubSub.publish('COMMENT_UPDATED', c);
 
             return resolve(c);
         } catch (e) {

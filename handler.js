@@ -1,8 +1,8 @@
-const { ApolloServer } = require('apollo-server-lambda');
+// const { ApolloServer } = require('apollo-server-lambda');
 const typeDefs = require('./schemas');
 const resolvers = require('./resolvers');
 const connectToMongoDB = require('./helpers/db');
-const auth = require('./helpers/auth');
+// const auth = require('./helpers/auth');
 const Cart = require('./models/cart')();
 const helper = require('./helpers/helper');
 var ObjectID = require('mongodb').ObjectID;
@@ -10,32 +10,110 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
-
 global.basePath = __dirname + '/';
+// const { makeExecutableSchema } = require('graphql-tools');
 
-const server = new ApolloServer({
-    cors: true,
-    typeDefs,
-    resolvers,
-    context: async ({ event, context }) => ({
-        callbackWaitsForEmptyEventLoop: false,
-        headers: event.headers,
-        functionName: context.functionName,
-        event,
-        context,
-        decodedToken: event.headers && event.headers.Authorization ? await auth.auth(event.headers) : null,
-        db: await connectToMongoDB()
-    }),
-    introspection: true,
-    playground: true,
+const {
+    DynamoDBEventProcessor,
+    DynamoDBConnectionManager,
+    DynamoDBSubscriptionManager,
+    Server,
+} = require('aws-lambda-graphql');
+const AWS = require('aws-sdk');
+
+AWS.config.update({
+  secretAccessKey: process.env.AWS_SECRETKEY,
+  accessKeyId: process.env.AWS_ACCESSKEY_ID,
+  region: 'ap-south-1'
 });
 
-const graphqlHandler = server.createHandler({
-    cors: {
-        origin: '*',
-        credentials: true,
-    },
-})
+/** serverless offline support */
+const dynamoDbClient = new AWS.DynamoDB.DocumentClient({
+    ...(process.env.IS_OFFLINE
+        ? {
+            endpoint: 'http://localhost:8000',
+        }
+        : {}),
+});
+
+const subscriptionManager = new DynamoDBSubscriptionManager({ dynamoDbClient });
+const connectionManager = new DynamoDBConnectionManager({
+    // this one is weird but we don't care because you'll use it only if you want to use serverless-offline
+    // why is it like that? because we are extracting api gateway endpoint from received events
+    // but serverless offline has wrong stage and domainName values in event provided to websocket handler
+    // so we need to override the endpoint manually
+    // please do not use it otherwise because we need correct endpoint, if you use it similarly as dynamoDBClient above
+    // you'll end up with errors
+    apiGatewayManager: process.env.IS_OFFLINE
+        ? new AWS.ApiGatewayManagementApi({
+            endpoint: 'http://localhost:3001',
+        })
+        : undefined,
+    dynamoDbClient,
+    subscriptions: subscriptionManager,
+});
+
+/** Server, from which, websocket, http, and event handler can get created */
+const server = new Server({
+    connectionManager,
+    eventProcessor: new DynamoDBEventProcessor(),
+    resolvers,
+    subscriptionManager,
+    typeDefs,
+});
+
+// const schema = makeExecutableSchema({
+//     typeDefs,
+//     resolvers,
+// })
+
+// const server = new ApolloServer({
+//     cors: true,
+//     schema,
+//     context: async ({ event, context }) => {
+//         // detect event type
+//         if (event.Records != null) {
+//             // event is DynamoDB stream event
+//             return eventProcessor(event, context, null);
+//         }
+//         else if (
+//             (event.requestContext != null) &&
+//             (event.requestContext.routeKey != null)
+//         ) {
+//             // event is web socket event from api gateway v2
+//             return wsHandler(event, context);
+//         }
+
+//         else {
+//             // event is http event from api gateway v1
+//             event['decodedToken'] = event.headers && event.headers.Authorization ? await auth.auth(event.headers) : null;
+//             context['callbackWaitsForEmptyEventLoop'] = false;
+//             return httpHandler(event, context, null);
+//         }
+
+//         // return {
+//         //     callbackWaitsForEmptyEventLoop: false,
+//         //     headers: event.headers,
+//         //     functionName: context.functionName,
+//         //     event,
+//         //     context,
+//         //     decodedToken: event.headers && event.headers.Authorization ? await auth.auth(event.headers) : null,
+//         //     db: await connectToMongoDB()
+//         // }
+//     },
+//     introspection: true,
+//     playground: true,
+// });
+
+  
+
+// const graphqlHandler = server.createHandler({
+//     cors: {
+//         origin: '*',
+//         credentials: true,
+//     },
+// })
+
 
 const checkoutSessionCompleted = async (event, context) => {
     return new Promise(async (resolve, reject) => {
@@ -373,7 +451,7 @@ const fetchArticleByLink = (event, context) => {
                 const result = await axios.get(url);
                 const h = result.data;
                 articleHtml = await parser.parseMediumArticle(h);
-            } else if(url.match(meetupRegex)) {
+            } else if (url.match(meetupRegex)) {
                 const result = await axios.get(url);
                 const h = result.data;
                 articleHtml = await parser.parseMeetupEvent(h);
@@ -386,7 +464,7 @@ const fetchArticleByLink = (event, context) => {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Credentials': true,
                 },
-                body: JSON.stringify({contentHtml: articleHtml})
+                body: JSON.stringify({ contentHtml: articleHtml })
             });
         } catch (e) {
             console.log(e);
@@ -398,7 +476,15 @@ const fetchArticleByLink = (event, context) => {
 
 
 module.exports = {
-    graphqlHandler,
+    // graphqlHandler,
+    handler: server.createHttpHandler({
+            cors: {
+                origin: '*',
+                credentials: true,
+            },
+    }),
+    handleWebSocket: server.createWebSocketHandler(),
+    handleDynamoDBStream: server.createEventHandler(),
     checkoutSessionCompleted,
     createCheckoutSession,
     getCheckoutSession,
