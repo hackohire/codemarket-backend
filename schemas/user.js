@@ -20,7 +20,7 @@ type User {
     currentJobDetails: CurrentJobDetails
     likeCount: Int
     stripeId: ID
-    subscription: [Subscription]
+    subscription: [SubscriptionSchema]
     businessAreaInterests: [Tag]
     leadershipAreaInterests: [Tag]
     socialImpactInterests: [Tag]

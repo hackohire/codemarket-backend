@@ -3,7 +3,7 @@ const { gql } = require('apollo-server-lambda');
 
 const graphQlSubscriptionSchema = `
 
-    type Subscription {
+    type SubscriptionSchema {
         _id: ID
         id: ID
         customer: String
@@ -69,15 +69,15 @@ const graphQlSubscriptionSchema = `
     }
 
     extend type Query {
-        getMembershipSubscriptionsByUserId(userId: String): [Subscription]
+        getMembershipSubscriptionsByUserId(userId: String): [SubscriptionSchema]
     }
 
 
     extend type Mutation {
-        addMembershipSubscription(subscription: SubscriptionInput): Subscription
-        inviteMembersToSubscription(subscriptionId: String, users: [SubscriptionUsersInput]): Subscription
-        cancelSubscription(subscriptionId: String): Subscription
-        acceptInvitation(subscriptionId: String, email: String): Subscription
+        addMembershipSubscription(subscription: SubscriptionInput): SubscriptionSchema
+        inviteMembersToSubscription(subscriptionId: String, users: [SubscriptionUsersInput]): SubscriptionSchema
+        cancelSubscription(subscriptionId: String): SubscriptionSchema
+        acceptInvitation(subscriptionId: String, email: String): SubscriptionSchema
     }
 `
 
