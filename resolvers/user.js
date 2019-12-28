@@ -6,6 +6,7 @@ const Like = require('./../models/like')();
 var ObjectID = require('mongodb').ObjectID;
 const Subscription = require('../models/subscription')();
 const helper = require('../helpers/helper');
+const auth = require('../helpers/auth');
 
 let conn;
 
@@ -118,17 +119,18 @@ async function updateUser(_, { user }, { headers, db }) {
     });
 }
 
-async function authorize(_, { applicationId }, { headers, db, decodedToken }) {
+async function authorize(_, { applicationId }, { event, context, headers, db, }) {
     return new Promise(async (resolve, reject) => {
         try {
+
+            let u = auth.auth(event.headers);
             let user = {
-                'email': decodedToken.email,
-                'name': decodedToken.name,
+                'email': u.email,
+                'name': u.name,
                 'roles': ['User'],
                 'applications': [applicationId]
             }
 
-            // const decodedToken = await auth.auth(headers);
             if (!db) {
                 console.log('Creating new mongoose connection.');
                 conn = await connectToMongoDB();
@@ -139,35 +141,22 @@ async function authorize(_, { applicationId }, { headers, db, decodedToken }) {
 
             // let options = { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false };
 
-            await User.findOne({email: user.email}, async (err, res) => {
-                if(err) {
-                    reject(err);
-                }
+            let userFound = await User.findOne({email: u.email})
 
-                if(res) {
-                    // console.log(res.applications);
-                    res.name = user.name;
-                    res.roles = array.union(user.roles, res.roles);
-                    res.email = user.email;
-                    // res.applications = array.union([applicationId], res.applications.map(x => x.toString()));
-                    const uResponse = await res.save(res);
-                    const subscriptions = await Subscription.find({
-                        $or: [
-                            { "metadata.userId": { $eq: ObjectID(uResponse._id)}, status: { $ne: 'canceled' }},
-                            { 'subscriptionUsers.email': decodedToken.email, status: { $ne: 'canceled' }}
-                        ]
-                    })
-                    uResponse['subscription'] = subscriptions
-                    resolve(uResponse);
-                } else {
-                    user = new User(user);
-                    user.save(user).then(u => {
-                        if(u) {
-                            resolve(u);
-                        }
-                    })
-                }
-            })
+            if (userFound) {
+                const subscriptions = await Subscription.find({
+                    $or: [
+                        { "metadata.userId": { $eq: ObjectID(userFound._id)}, status: { $ne: 'canceled' }},
+                        { 'subscriptionUsers.email': u.email, status: { $ne: 'canceled' }}
+                    ]
+                }).exec();
+                userFound['subscription'] = subscriptions;
+            } else {
+                u = new User(user);
+                userFound = u.save(u);
+            }
+
+            resolve(userFound);
             
         } catch (e) {
             console.log(e);
