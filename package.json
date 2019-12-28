@@ -5,7 +5,7 @@
   "main": "env-example.yml",
   "scripts": {
     "start": "sls offline start",
-    "debug": "SET SLS_DEBUG=* && node --inspect %USERPROFILE%\\AppData\\Roaming\\npm\\node_modules\\serverless\\bin\\serverless offline -s dev",
+    "debug": "SET SLS_DEBUG=* && node --inspect %USERPROFILE%\\AppData\\Roaming\\npm\\node_modules\\serverless\\bin\\serverless offline start",
     "deploy": "sls deploy",
     "lint": "eslint ."
   },
@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "amazon-cognito-identity-js": "^3.0.13",
-    "apollo-server-lambda": "^2.6.2",
     "aws-sdk": "^2.493.0",
     "bluebird": "^3.5.5",
     "ejs": "^2.7.1",
@@ -38,6 +37,10 @@
     "url-metadata": "^2.4.0",
     "axios": "^0.18.1",
     "cheerio": "^1.0.0-rc.2",
-    "sanitize-html": "^1.20.0"
+    "sanitize-html": "^1.20.0",
+    "graphql-tools": "^4.0.6",
+    "aws-lambda-graphql": "1.0.0-alpha.0",
+    "serverless-dynamodb-local": "^0.2.38",
+    "serverless-plugin-offline-dynamodb-stream": "^1.0.19"
   }
 }
