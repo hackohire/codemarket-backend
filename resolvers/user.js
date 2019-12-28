@@ -123,7 +123,7 @@ async function authorize(_, { applicationId }, { event, context, headers, db, })
     return new Promise(async (resolve, reject) => {
         try {
 
-            let u = auth.auth(event.headers);
+            let u = await auth.auth(event.headers);
             let user = {
                 'email': u.email,
                 'name': u.name,
@@ -141,9 +141,10 @@ async function authorize(_, { applicationId }, { event, context, headers, db, })
 
             // let options = { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false };
 
-            let userFound = await User.findOne({email: u.email})
+            let userFound = await User.findOne({email: u.email}).exec();
 
             if (userFound) {
+                // const userFound = await userFound.save(userFound);
                 const subscriptions = await Subscription.find({
                     $or: [
                         { "metadata.userId": { $eq: ObjectID(userFound._id)}, status: { $ne: 'canceled' }},
