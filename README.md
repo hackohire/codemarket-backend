@@ -1,4 +1,4 @@
-# writersclub
+# petclub
 
 NodeJS + Serverless + MongoDB + Mongoose + GraphQL
 

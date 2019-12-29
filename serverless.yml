@@ -1,4 +1,4 @@
-service: writersclubapi
+service: petclubapi
 
 provider:
   name: aws
