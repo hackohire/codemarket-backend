@@ -22,9 +22,9 @@ const {
 const AWS = require('aws-sdk');
 
 AWS.config.update({
-  secretAccessKey: process.env.AWS_SECRETKEY,
-  accessKeyId: process.env.AWS_ACCESSKEY_ID,
-  region: 'ap-south-1'
+    secretAccessKey: process.env.AWS_SECRETKEY,
+    accessKeyId: process.env.AWS_ACCESSKEY_ID,
+    region: 'ap-south-1'
 });
 
 /** serverless offline support */
@@ -36,7 +36,11 @@ const dynamoDbClient = new AWS.DynamoDB.DocumentClient({
         : {}),
 });
 
-const subscriptionManager = new DynamoDBSubscriptionManager({ dynamoDbClient });
+const subscriptionManager = new DynamoDBSubscriptionManager({
+    dynamoDbClient,
+    subscriptionsTableName: process.env.SUBSCRIPTIONS,
+    subscriptionOperationsTableName: process.env.SUBSCRIPTION_OPERATIONS
+});
 const connectionManager = new DynamoDBConnectionManager({
     // this one is weird but we don't care because you'll use it only if you want to use serverless-offline
     // why is it like that? because we are extracting api gateway endpoint from received events
@@ -51,6 +55,7 @@ const connectionManager = new DynamoDBConnectionManager({
         : undefined,
     dynamoDbClient,
     subscriptions: subscriptionManager,
+    connectionsTable: process.env.CONNECTIONS
 });
 
 /** Server, from which, websocket, http, and event handler can get created */
@@ -105,7 +110,7 @@ const server = new Server({
 //     playground: true,
 // });
 
-  
+
 
 // const graphqlHandler = server.createHandler({
 //     cors: {
@@ -478,10 +483,10 @@ const fetchArticleByLink = (event, context) => {
 module.exports = {
     // graphqlHandler,
     handler: server.createHttpHandler({
-            cors: {
-                origin: '*',
-                credentials: true,
-            },
+        cors: {
+            origin: '*',
+            credentials: true,
+        },
     }),
     handleWebSocket: server.createWebSocketHandler(),
     handleDynamoDBStream: server.createEventHandler(),

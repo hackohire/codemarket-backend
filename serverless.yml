@@ -25,45 +25,10 @@ provider:
     SOCKET_URL: ${file(env.yml):${self:provider.stage}.SOCKET_URL}
     STRIPE_SECRET_KEY: ${file(env.yml):${self:provider.stage}.STRIPE_SECRET_KEY}
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - execute-api:ManageConnections
-      Resource: 'arn:aws:execute-api:*:*:*/development/POST/@connections/*'
-    - Effect: Allow
-      Action:
-        - dynamodb:DeleteItem
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-      Resource: !GetAtt ConnectionsDynamoDBTable.Arn
-    - Effect: Allow
-      Action:
-        - dynamodb:DescribeStream
-        - dynamodb:GetRecords
-        - dynamodb:GetShardIterator
-        - dynamodb:ListStreams
-      Resource: !GetAtt EventsDynamoDBTable.StreamArn
-    - Effect: Allow
-      Action:
-        - dynamodb:PutItem
-      Resource: !GetAtt EventsDynamoDBTable.Arn
-    - Effect: Allow
-      Action:
-        - dynamodb:BatchWriteItem
-        - dynamodb:DeleteItem
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:Query
-        - dynamodb:Scan
-      Resource: !GetAtt SubscriptionsDynamoDBTable.Arn
-    - Effect: Allow
-      Action:
-        - dynamodb:BatchWriteItem
-        - dynamodb:DeleteItem
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-      Resource: !GetAtt SubscriptionOperationsDynamoDBTable.Arn
+    CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
+    SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
+    EVENTS: ${self:service}-${self:provider.stage}-Events
+    SUBSCRIPTION_OPERATIONS: ${self:service}-${self:provider.stage}-SubscriptionOperations
 
 functions:
   
@@ -248,7 +213,7 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         # see DynamoDBConnectionManager
-        TableName: Connections
+        TableName: ${self:service}-${self:provider.stage}-Connections
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -262,7 +227,7 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         # see DynamoDBSubscriptionManager
-        TableName: Subscriptions
+        TableName: ${self:service}-${self:provider.stage}-Subscriptions
         AttributeDefinitions:
           - AttributeName: event
             AttributeType: S
@@ -279,7 +244,7 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         # see DynamoDBSubscriptionManager
-        TableName: SubscriptionOperations
+        TableName: ${self:service}-${self:provider.stage}-SubscriptionOperations
         AttributeDefinitions:
           - AttributeName: subscriptionId
             AttributeType: S
@@ -292,7 +257,7 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         # see DynamoDBEventStore
-        TableName: Events
+        TableName: ${self:service}-${self:provider.stage}-Events
         KeySchema:
           - AttributeName: id
             KeyType: HASH
@@ -328,7 +293,7 @@ custom:
     region: ap-south-1
     pollForever: true
     streams:
-      - table: Events
+      - table: ${self:service}-${self:provider.stage}-Events
         functions:
           - dynamoDBStreamHandler
 

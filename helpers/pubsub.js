@@ -16,7 +16,7 @@ const dynamoDbClient = new AWS.DynamoDB.DocumentClient({
       : {}),
   });
   
-  const eventStore = new DynamoDBEventStore({ dynamoDbClient });
+  const eventStore = new DynamoDBEventStore({ dynamoDbClient, eventsTable: process.env.EVENTS });
   const pubSub = new PubSub({ eventStore });
 
 module.exports.pubSub = pubSub;
