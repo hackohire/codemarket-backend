@@ -211,7 +211,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                 post.cities = await helper.insertManyIntoCities(post.cities);
             }
 
-            await Post.findOneAndUpdate({_id: post._id}, post, { new: true, useFindAndModify: false }, (err, res) => {
+            await Post.findOneAndUpdate({ _id: post._id }, post, { new: true, useFindAndModify: false }, (err, res) => {
                 if (err) {
                     return reject(err)
                 }
@@ -283,20 +283,37 @@ async function getAllPosts(_, { pageOptions, type }, { headers, db, decodedToken
             let posts = [];
 
             posts = await Post.aggregate([
-                { $match: {status: 'Published', type: type ? type : { $ne: null }}},
+                { $match: { status: 'Published', type: type ? type : { $ne: null } } },
                 {
                     $lookup: {
                         from: 'comments',
-                        localField: '_id',
-                        foreignField: 'referenceId',
+                        // localField: '_id',
+                        // foreignField: 'referenceId',
+                        let: { status: "$status", reference_id: "$_id"},
+                        pipeline: [
+                            {
+                                $match:
+                                {
+                                    $expr:
+                                    {
+                                        $and:
+                                            [
+                                                { $ne: ["$status", "Deleted"] },
+                                                { $eq: ["$$reference_id", "$referenceId"] },
+                                                { $eq: ["$parentId", null] }
+                                            ]
+                                    }
+                                }
+                            }
+                        ],
                         as: 'comments'
                     }
                 },
                 {
                     $lookup: {
                         from: 'likes',
-                        localField: 'createdBy',
-                        foreignField: 'userId',
+                        localField: '_id',
+                        foreignField: 'referenceId',
                         as: 'likes'
                     }
                 },
@@ -322,9 +339,9 @@ async function getAllPosts(_, { pageOptions, type }, { headers, db, decodedToken
                         type: 1,
                         description: 1,
                         slug: 1,
-                        createdBy: {$arrayElemAt: [ '$createdBy', 0 ]},
+                        createdBy: { $arrayElemAt: ['$createdBy', 0] },
                         tags: 1,
-                        likeCount: {$size: '$likes'},
+                        likeCount: { $size: '$likes' },
                         comments: '$comments',
                         createdAt: 1
                         // likeCount: { $size: '$likes' }
@@ -332,10 +349,10 @@ async function getAllPosts(_, { pageOptions, type }, { headers, db, decodedToken
                 }
 
             ])
-            .sort(sort)
-            .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-            .limit(pageOptions.limit)
-            .exec();
+                .sort(sort)
+                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                .limit(pageOptions.limit)
+                .exec();
 
             console.log(posts);
 
