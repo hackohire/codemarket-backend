@@ -30,7 +30,7 @@ const commentSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ['post', 'company'],
+            enum: ['post', 'product', 'company'],
         },
         status: {
             type: String,
