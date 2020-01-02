@@ -138,6 +138,21 @@ module.exports = {
           return false;
         },
       ),
+    },
+    onUserOnline: {
+      resolve: (rootValue) => {
+        // root value is the payload from sendMessage mutation
+        return { onCommentAdded: rootValue.comment, post: rootValue.post };
+      },
+      subscribe: withFilter(
+        pubSub.subscribe('LISTEN_NOTIFICATION'),
+        (rootValue, args) => {
+          if (rootValue.usersCommented.indexOf(args.user._id) > -1) {
+            return true;
+          }
+          return false;
+        },
+      ),
     }
   },
   descriptionBlocks: {

@@ -73,6 +73,11 @@ type User {
     socialImpactInterests: [Tag]
   }
 
+  type SubscriptionEvents {
+    onCommentAdded: Comment
+    post: Post
+  }
+
   extend type Query {
     getUsers(_page: Int _limit: Int): [User!]!
     getUsersAndBugFixesCount: [UserAndBugFixCount]
@@ -84,6 +89,10 @@ type User {
     createUser(user: UserInput!): User
     updateUser(user: UserInput): User
     authorize(applicationId: String): User
+  }
+
+  extend type Subscription {
+    onUserOnline(user: UserInput): SubscriptionEvents
   }
 `
 
