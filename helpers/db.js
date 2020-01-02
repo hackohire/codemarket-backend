@@ -8,7 +8,7 @@ let isConnected;
 let dbObj;
 
 const connectToDatabase = () => {
-  mongoose.set('debug', true);
+  // mongoose.set('debug', true);
   if (isConnected) {
     console.log('Re-using existing database connection', process.env.MONGODB_URL);
     return Promise.resolve(dbObj);
