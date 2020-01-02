@@ -6,6 +6,7 @@ const Post = require('./../models/post')();
 const { pubSub } = require('../helpers/pubsub');
 const uniq = require('lodash/array').uniq;
 const forEach = require('lodash/collection').forEach;
+const Like = require('./../models/like')();
 var ObjectID = require('mongodb').ObjectID;
 let conn;
 
@@ -30,9 +31,9 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
 
                 await pcForChildren.children.push(c._id);
 
-                await pcForChildren.update({children: pcForChildren.children});
+                await pcForChildren.update({ children: pcForChildren.children });
 
-                await c.save().then( async (com) => {
+                await c.save().then(async (com) => {
                     console.log(com);
                     await com.populate('createdBy').populate('children').execPopulate();
                     commentObj = com;
@@ -42,7 +43,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             } else {
                 //  actually insert the parent comment
                 c.parents.push(c._id);
-                await c.save().then( async (com) => {
+                await c.save().then(async (com) => {
                     await com.populate('createdBy').execPopulate();
                     commentObj = com;
                     // resolve(com);
@@ -51,36 +52,38 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             var data;
             var postLink;
 
-            // const payload = { id: Math.random(), commentObj, type: 'COMMENT_ADDED'};
-            let usersCommented =  await Comment.find({referenceId: comment.referenceId, status: { $ne: 'Deleted' }, createdBy: { $ne: comment.createdBy}}).select('createdBy').exec();
-            usersCommented = forEach(usersCommented, function(value, key) {
-                usersCommented[key] = value.createdBy.toString();
-              });
-            usersCommented = uniq(usersCommented);
+            let usersCommented = await Comment.find({ referenceId: comment.referenceId, status: { $ne: 'Deleted' }, createdBy: { $ne: comment.createdBy } }).select('createdBy').exec();
+            let usersLiked = await Like.find({ referenceId: comment.referenceId, userId: { $ne: comment.createdBy } }).select('userId').exec();
 
-            console.log(usersCommented);
+            let usersToBeNotified = usersCommented.concat(usersLiked);
+            usersToBeNotified = forEach(usersToBeNotified, function (value, key) {
+                usersToBeNotified[key] = value.createdBy ? value.createdBy.toString() : value.userId.toString();
+            });
+            usersToBeNotified = uniq(usersToBeNotified);
+
+            console.log(usersToBeNotified);
 
             await pubSub.publish('COMMENT_ADDED', commentObj);
 
             /** Send Email Only if comment type is post */
             if (commentObj.type === 'post' || commentObj.type === 'product') {
                 data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').select('createdBy id name type slug description blockId blockSpecificComment').lean().exec();
-                await pubSub.publish('LISTEN_NOTIFICATION', {comment: commentObj, usersCommented, post: data})
-                // postLink = process.env.FRONT_END_URL + `${commentObj.type === 'product' ? 'product' : 'post'}/${data.slug}?type=${data.type}&commentId=${commentObj._id}`;
-    
-                // const filePathToAuthor = basePath + 'email-template/commentCreateToAuthor';
-                // const filePathToCommentor = basePath + 'email-template/commentCreateToCommentor';
-                // const payLoadToAuthor = {
-                //     NAME: data.createdBy.name,
-                //     LINK: postLink,
-                //     COMMENTOR_NAME: commentObj.createdBy.name
-                // };
-                // const payLoadToCommentor = {
-                //     NAME: commentObj.createdBy.name,
-                //     LINK: postLink
-                // };
-                // await helper.sendEmail(data.createdBy.email, filePathToAuthor, payLoadToAuthor);
-                // await helper.sendEmail(commentObj.createdBy.email, filePathToCommentor, payLoadToCommentor);
+                await pubSub.publish('LISTEN_NOTIFICATION', { comment: commentObj, usersToBeNotified, post: data })
+                postLink = process.env.FRONT_END_URL + `${commentObj.type === 'product' ? 'product' : 'post'}/${data.slug}?type=${data.type}&commentId=${commentObj._id}`;
+
+                const filePathToAuthor = basePath + 'email-template/commentCreateToAuthor';
+                const filePathToCommentor = basePath + 'email-template/commentCreateToCommentor';
+                const payLoadToAuthor = {
+                    NAME: data.createdBy.name,
+                    LINK: postLink,
+                    COMMENTOR_NAME: commentObj.createdBy.name
+                };
+                const payLoadToCommentor = {
+                    NAME: commentObj.createdBy.name,
+                    LINK: postLink
+                };
+                await helper.sendEmail(data.createdBy.email, filePathToAuthor, payLoadToAuthor);
+                await helper.sendEmail(commentObj.createdBy.email, filePathToCommentor, payLoadToCommentor);
             }
             resolve(commentObj);
         } catch (e) {
@@ -103,9 +106,9 @@ async function getCommentsByReferenceId(_, { referenceId }, { headers, db, decod
             }
 
 
-            let subdiscussion = await Comment.find({referenceId: referenceId, parentId: null, status: { $ne: 'Deleted' }})
-            .populate('createdBy')
-            .populate({path: 'children', match: { status: { $ne: 'Deleted' }}, populate: {path: 'createdBy'}}).exec();
+            let subdiscussion = await Comment.find({ referenceId: referenceId, parentId: null, status: { $ne: 'Deleted' } })
+                .populate('createdBy')
+                .populate({ path: 'children', match: { status: { $ne: 'Deleted' } }, populate: { path: 'createdBy' } }).exec();
             // subdiscussion = subdiscussion.sort('full_slug')
             console.log(subdiscussion);
             resolve(subdiscussion);
@@ -132,9 +135,9 @@ async function getComments(_, { commentId }, { headers, db, decodedToken }) {
             }
 
 
-            let subdiscussion = await Comment.find({_id: commentId, status: { $ne: 'Deleted' }})
-            .populate('createdBy')
-            .populate({path: 'children', match: { status: { $ne: 'Deleted' }}, populate: {path: 'children', match: { status: { $ne: 'Deleted' }}}}).exec();
+            let subdiscussion = await Comment.find({ _id: commentId, status: { $ne: 'Deleted' } })
+                .populate('createdBy')
+                .populate({ path: 'children', match: { status: { $ne: 'Deleted' } }, populate: { path: 'children', match: { status: { $ne: 'Deleted' } } } }).exec();
             resolve(subdiscussion);
 
 

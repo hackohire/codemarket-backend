@@ -147,7 +147,7 @@ module.exports = {
       subscribe: withFilter(
         pubSub.subscribe('LISTEN_NOTIFICATION'),
         (rootValue, args) => {
-          if (rootValue.usersCommented.indexOf(args.user._id) > -1) {
+          if (rootValue.usersToBeNotified.indexOf(args.user._id) > -1) {
             return true;
           }
           return false;
