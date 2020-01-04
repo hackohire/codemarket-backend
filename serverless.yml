@@ -1,4 +1,4 @@
-service: codemarketapi
+service: petstarapi
 
 provider:
   name: aws

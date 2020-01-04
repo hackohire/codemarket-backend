@@ -1,4 +1,4 @@
-# codemarket
+# petstar
 
 NodeJS + Serverless + MongoDB + Mongoose + GraphQL
 
