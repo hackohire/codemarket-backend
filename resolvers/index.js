@@ -153,6 +153,23 @@ module.exports = {
           return false;
         },
       ),
+    },
+    onCompanyUpdate: {
+      resolve: (rootValue) => {
+        // root value is the payload from sendMessage mutation
+        return {companyUpdated: rootValue};
+      },
+      subscribe: withFilter(
+        pubSub.subscribe('COMPANY_UPDATED'),
+        (rootValue, args) => {
+          // this can be async too :)
+          if (args.companyId == rootValue._id) {
+            return true;
+          }
+
+          return false;
+        },
+      ),
     }
   },
   descriptionBlocks: {

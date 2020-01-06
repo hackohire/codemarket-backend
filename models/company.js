@@ -42,6 +42,26 @@ const companySchema = new Schema(
             address: String,
             additionalLocationDetails: String
         }),
+        challenges: [
+            new Schema(
+                {
+                    description: [new Schema({
+                        type: String,
+                        data: Schema.Types.Mixed,
+                    })],
+                    challengeType: {
+                        type: String,
+                        enum: ['sales', 'marketing', 'technical', 'business', 'team'],
+                        default: ''
+                    },
+                    default: [],
+                },
+                {
+                    timestamps: true,
+                    id: true,
+                }
+            )
+        ]
     },
     {
         timestamps: true,

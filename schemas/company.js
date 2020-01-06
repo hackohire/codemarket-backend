@@ -15,6 +15,7 @@ const graphQlCompanySchema = `
         questions: [descriptionBlocks]
         location: Location
         cover: String
+        challenges: [Challenge]
     }
 
     input CompanyInput {
@@ -29,18 +30,45 @@ const graphQlCompanySchema = `
         cities: [CityInput]
         location: LocationInput
         cover: String
+        challenges: [ChallengeInput]
+    }
+
+    type Challenge {
+        description: [descriptionBlocks]
+        challengeType: String
+        createdAt: String
+        updatedAt: String
+        _id: ID
+    }
+
+    input ChallengeInput {
+        description: [InputdescriptionBlock]
+        challengeType: String
+        createdAt: String
+        updatedAt: String
+        _id: ID
     }
 
     type City {
         name: String
         country: String
         _id: ID
-      }
+    }
 
     input CityInput {
         name: String
         country: String
         _id: ID
+    }
+
+    type CompanySubscriptionResponse {
+        companyUpdated: Company
+    }
+
+    input UpdateOperation {
+        field: String
+        operation: String
+        challenges: ChallengeInput
     }
 
     extend type Query {
@@ -52,8 +80,12 @@ const graphQlCompanySchema = `
 
     extend type Mutation {
         addCompany(company: CompanyInput): Company
-        updateCompany(company: CompanyInput): Company
+        updateCompany(company: CompanyInput, updateOperation: UpdateOperation): Company
         deleteCompany(companyId: String): Boolean
+    }
+
+    extend type Subscription {
+        onCompanyUpdate(companyId: String): CompanySubscriptionResponse
     }
 `
 

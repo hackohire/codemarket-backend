@@ -4,6 +4,7 @@ const Post = require('../models/post')();
 const helper = require('../helpers/helper');
 const Like = require('./../models/like')();
 var array = require('lodash/array');
+const { pubSub } = require('../helpers/pubsub');
 let conn;
 
 async function addCompany(_, { company }, { headers, db, decodedToken }) {
@@ -23,8 +24,8 @@ async function addCompany(_, { company }, { headers, db, decodedToken }) {
 
 
             const int = await new Company(company);
-            
-            const checkIfExists = await Company.find({ $text: { $search : company.name }}).populate('createdBy').populate('cities').exec();
+
+            const checkIfExists = await Company.find({ $text: { $search: company.name } }).populate('createdBy').populate('cities').exec();
 
             if (checkIfExists.length) {
                 console.log(checkIfExists);
@@ -32,12 +33,12 @@ async function addCompany(_, { company }, { headers, db, decodedToken }) {
             } else {
                 await int.save(company).then(async (p) => {
                     console.log(p)
-    
+
                     p.populate('createdBy').populate('cities').execPopulate().then(async populatedCompany => {
                         // await helper.sendCompanyCreationEmail(populatedCompany, populatedCompany.type === 'product' ? 'Bugfix' : '');
                         resolve(populatedCompany);
                     });
-    
+
                 });
             }
         } catch (e) {
@@ -47,7 +48,7 @@ async function addCompany(_, { company }, { headers, db, decodedToken }) {
     });
 }
 
-async function updateCompany(_, { company }, { headers, db, decodedToken }) {
+async function updateCompany(_, { company, updateOperation }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -58,26 +59,63 @@ async function updateCompany(_, { company }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            const checkIfExists = await Company.find({ $text: { $search : company.name }}).populate('createdBy').populate('cities').exec();
+            const checkIfExists = await Company.find({ $text: { $search: company.name } }).populate('createdBy').populate('cities').exec();
 
             if (checkIfExists.length && checkIfExists[0].id !== company._id) {
                 console.log(checkIfExists);
                 throw new Error('AlreadyExists');
             } else {
-                if (company.cities && company.cities.length) {
-                    company.cities = await helper.insertManyIntoCities(company.cities);
-                }
-    
-    
-                await Company.findByIdAndUpdate(company._id, company, { new: true }, (err, res) => {
-                    if (err) {
-                        return reject(err)
+                let updatedCompany;
+                if (updateOperation && updateOperation.operation) {
+                    let mongooseOperationDoc = {};
+
+                    switch (updateOperation.operation) {
+                        case 'ADD':
+                            mongooseOperationDoc = {
+                                $push: {
+                                    [updateOperation.field]: {
+                                        $each: [updateOperation[updateOperation.field]],
+                                        $position: 0
+                                    }
+                                }
+                            }
+                            updatedCompany = await Company.findByIdAndUpdate(company._id, mongooseOperationDoc, { new: true }).populate('createdBy cities').exec();
+                            break;
+                        case 'DELETE':
+                            mongooseOperationDoc = {
+                                $pull: {
+                                    [updateOperation.field]: {
+                                        _id: updateOperation[updateOperation.field]._id
+                                    }
+                                }
+                            }
+                            updatedCompany = await Company.findByIdAndUpdate(company._id, mongooseOperationDoc, { new: true }).populate('createdBy cities').exec();
+                            break;
+
+                        case 'UPDATE': {
+                            mongooseOperationDoc = {
+                                $set: {
+                                    [`${updateOperation.field}.$[elem].description`]: updateOperation[updateOperation.field].description
+                                }
+                            }
+                            const arrayFilters =  [
+                                    {
+                                        'elem._id': updateOperation[updateOperation.field]._id
+                                    }
+                                ]
+                            
+                            updatedCompany = await Company.findByIdAndUpdate(company._id, mongooseOperationDoc, {arrayFilters, new: true }).populate('createdBy cities').exec();
+                            break;
+                        }
                     }
-    
-                    res.populate('createdBy').populate('cities').execPopulate().then((d) => {
-                        return resolve(d);
-                    });
-                });
+                } else {
+                    if (company.cities && company.cities.length) {
+                        company.cities = await helper.insertManyIntoCities(company.cities);
+                    }
+                    updatedCompany = await Company.findByIdAndUpdate(company._id, company, { new: true }).populate('createdBy cities').execPopulate();
+                }
+                await pubSub.publish('COMPANY_UPDATED', updatedCompany);
+                return resolve(updatedCompany);
             }
 
         } catch (e) {
@@ -127,16 +165,16 @@ async function getCompanyById(_, { companyId }, { headers, db, decodedToken }) {
 
             Company.findById(companyId).populate('createdBy').populate('cities').exec(async (err, res) => {
 
-                    if (err) {
-                        return reject(err)
-                    }
+                if (err) {
+                    return reject(err)
+                }
 
-                    const likeCount = await Like.count({ referenceId: companyId })
+                const likeCount = await Like.count({ referenceId: companyId })
 
-                    res['likeCount'] = likeCount;
+                res['likeCount'] = likeCount;
 
-                    return resolve(res);
-                });
+                return resolve(res);
+            });
 
 
         } catch (e) {
@@ -220,7 +258,7 @@ async function getListOfUsersInACompany(_, { companyId }, { headers, db, decoded
                 console.log('Using existing mongoose connection.');
             }
 
-            let users = await Post.find({type: 'dream-job', company: companyId}).populate('createdBy').exec();
+            let users = await Post.find({ type: 'dream-job', company: companyId }).populate('createdBy').exec();
 
             users = users && users.length ? users.map(u => u.createdBy) : [];
             users = array.uniqBy(users, 'id')
