@@ -39,11 +39,31 @@ functions:
       - http:
           path: graphql
           method: post
-          cors: true
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - x-requested-with
+            allowCredentials: false 
       - http:
           path: graphql
           method: get
-          cors: true
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - x-requested-with
+            allowCredentials: false 
 
   webSocketHandler:
     handler: handler.handleWebSocket
