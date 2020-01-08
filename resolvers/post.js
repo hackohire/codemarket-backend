@@ -344,7 +344,6 @@ async function getAllPosts(_, { pageOptions, type }, { headers, db, decodedToken
                         likeCount: { $size: '$likes' },
                         comments: '$comments',
                         createdAt: 1
-                        // likeCount: { $size: '$likes' }
                     }
                 }
 
