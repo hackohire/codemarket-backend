@@ -160,7 +160,7 @@ async function deleteComment(_, { commentId }, { headers, db, decodedToken }) {
             }
 
 
-            let c = await Comment.findByIdAndUpdate(commentId, { status: 'Deleted' }).exec();
+            let c = await Comment.findByIdAndUpdate(commentId, { status: 'Deleted' }).populate('createdBy').exec();
 
             await pubSub.publish('COMMENT_DELETED', c);
             return resolve(c._id);
@@ -184,7 +184,7 @@ async function updateComment(_, { commentId, text }, { headers, db, decodedToken
             }
 
 
-            let c = await Comment.findByIdAndUpdate(commentId, { text: text }, { new: true }).exec();
+            let c = await Comment.findByIdAndUpdate(commentId, { text: text }, { new: true }).populate('createdBy').exec();
 
             await pubSub.publish('COMMENT_UPDATED', c);
 
