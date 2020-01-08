@@ -9,7 +9,7 @@ const commentSchema = new Schema(
             default: null
         },
 
-        /**  Id of a product | help-request | requirement | interview | goal | design | howtodoc | testing | event */
+        /**  Id of a post | product | company*/
         referenceId: {
             type: Schema.Types.ObjectId
         },
@@ -37,14 +37,20 @@ const commentSchema = new Schema(
             enum: ['Created', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted', 'Published', 'Unpublished', 'Resolved'],
             default: 'Created'
         },
-        text: [],
+        text: [new Schema({
+            type: String,
+            data: Schema.Types.Mixed,
+        })],
 
         /** Fileds Related to the comments in specific block in the post */
         blockSpecificComment: {
             type: Boolean,
             default: false
         },
-        blockId: Schema.Types.ObjectId
+        blockId: Schema.Types.ObjectId,
+
+        /** Field Related to company */
+        postId: Schema.Types.ObjectId /** Company Id */
     },
     {
         timestamps: true,

@@ -71,6 +71,8 @@ type Comment {
 
   blockSpecificComment: Boolean
   blockId: ID
+
+  postId: ID
 }
 
 input CommentInput {
@@ -87,6 +89,8 @@ input CommentInput {
 
   blockSpecificComment: Boolean
   blockId: ID
+
+  postId: ID
 }
 
 type Tag {

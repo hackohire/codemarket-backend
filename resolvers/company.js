@@ -5,6 +5,7 @@ const helper = require('../helpers/helper');
 const Like = require('./../models/like')();
 var array = require('lodash/array');
 const { pubSub } = require('../helpers/pubsub');
+var ObjectID = require('mongodb').ObjectID;
 let conn;
 
 async function addCompany(_, { company }, { headers, db, decodedToken }) {
@@ -48,7 +49,7 @@ async function addCompany(_, { company }, { headers, db, decodedToken }) {
     });
 }
 
-async function updateCompany(_, { company, updateOperation }, { headers, db, decodedToken }) {
+async function updateCompany(_, { company, operation }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -66,48 +67,169 @@ async function updateCompany(_, { company, updateOperation }, { headers, db, dec
                 throw new Error('AlreadyExists');
             } else {
                 let updatedCompany;
-                if (updateOperation && updateOperation.operation) {
+                if (operation && operation.operation) {
                     let mongooseOperationDoc = {};
 
-                    switch (updateOperation.operation) {
+                    /** Switch Case to check if operation is related to company posts */
+                    switch (operation.operation) {
                         case 'ADD':
                             mongooseOperationDoc = {
                                 $push: {
-                                    [updateOperation.field]: {
-                                        $each: [updateOperation[updateOperation.field]],
+                                    posts: {
+                                        $each: [operation.post],
                                         $position: 0
                                     }
                                 }
-                            }
+                            };
                             updatedCompany = await Company.findByIdAndUpdate(company._id, mongooseOperationDoc, { new: true }).populate('createdBy cities').exec();
                             break;
                         case 'DELETE':
                             mongooseOperationDoc = {
                                 $pull: {
-                                    [updateOperation.field]: {
-                                        _id: updateOperation[updateOperation.field]._id
+                                    posts: {
+                                        _id: operation['post']._id
                                     }
                                 }
-                            }
+                            };
                             updatedCompany = await Company.findByIdAndUpdate(company._id, mongooseOperationDoc, { new: true }).populate('createdBy cities').exec();
                             break;
 
                         case 'UPDATE': {
                             mongooseOperationDoc = {
                                 $set: {
-                                    [`${updateOperation.field}.$[elem].description`]: updateOperation[updateOperation.field].description
+                                    [`posts.$[elem].description`]: operation['post'].description
                                 }
-                            }
-                            const arrayFilters =  [
-                                    {
-                                        'elem._id': updateOperation[updateOperation.field]._id
-                                    }
-                                ]
-                            
-                            updatedCompany = await Company.findByIdAndUpdate(company._id, mongooseOperationDoc, {arrayFilters, new: true }).populate('createdBy cities').exec();
+                            };
+                            const arrayFilters = [
+                                {
+                                    'elem._id': operation['post']._id
+                                }
+                            ];
+                            updatedCompany = await Company.findByIdAndUpdate(company._id, mongooseOperationDoc, { arrayFilters, new: true }).populate('createdBy cities').exec();
                             break;
                         }
                     }
+
+                    /** After updating company fetch company data again for comments */
+                    updatedCompany = await Company.aggregate([
+                        { $match: { _id: ObjectID(company._id) } },
+                        { $unwind: { "path": "$posts", "preserveNullAndEmptyArrays": true } },
+                        {
+                            $lookup: {
+                                from: 'comments',
+                                let: { status: "$status", post_id: "$posts._id" },
+                                pipeline: [
+                                {
+                                    $match: {
+                                        $expr: {
+                                            $and: [
+                                                { $ne: ["$status", "Deleted"] },
+                                                { $eq: ["$referenceId", ObjectID(company._id)] },
+                                                { $eq: ["$parentId", null] },
+                                                { $eq: ["$$post_id", "$postId"] }
+                                            ]
+                                        }
+                                    },
+                                },
+                                {
+                                    $lookup: {
+                                        "from": "users",
+                                        "let": { "created_by": "$createdBy" },
+                                        pipeline: [
+                                            { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
+                                        ],
+                                        as: "createdBy"
+                                    }
+                                },
+                                {
+                                    $unwind: {
+                                        "path": "$createdBy",
+                                        "preserveNullAndEmptyArrays": true
+                                    }
+                                },
+        
+                                ],
+                                as: 'comments'
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: 'likes',
+                                localField: '_id',
+                                foreignField: 'referenceId',
+                                as: 'likes'
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: 'users',
+                                localField: 'createdBy',
+                                foreignField: '_id',
+                                as: 'createdBy'
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: 'tags',
+                                localField: 'tags',
+                                foreignField: '_id',
+                                as: 'tags'
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: "$_id",
+                                status: { $first: "$status" },
+                                description: { $first: "$description" },
+                                slug: { $first: "$slug" },
+                                cover: { $first: "$cover" },
+                                cities: { $first: "$cities" },
+                                howCanYouHelp: { $first: "$howCanYouHelp" },
+                                name: { $first: "$name" },
+                                title: { $first: "$title" },
+                                type: { $first: "$type" },
+                                createdBy: { $first: "$createdBy" },
+                                likes: { $first: "$likes" },
+                                tags: { $first: "$tags" },
+                                posts: {
+                                    $push:
+                                    {
+                                        _id: "$posts._id",
+                                        challengeType: "$posts.challengeType",
+                                        postType: "$posts.postType",
+                                        description: "$posts.description",
+                                        comments: "$comments",
+                                        createdAt: "$posts.createdAt",
+                                        updatedAt: "$posts.updatedAt",
+                                    }
+                                },
+                                location: { $first: "$location" },
+                                createdAt: { $first: "$createdAt" },
+                                updatedAt: { $first: "$updatedAt" },
+                            }
+                        },
+                        {
+                            $project: {
+                                name: 1,
+                                type: 1,
+                                description: 1,
+                                slug: 1,
+                                cities: 1,
+                                createdBy: { $arrayElemAt: ['$createdBy', 0] },
+                                likeCount: { $size: '$likes' },
+                                tags: 1,
+                                createdAt: 1,
+                                updatedAt: 1,
+                                location: 1,
+                                posts: 1,
+                                cover: 1,
+                                questions: 1,
+                                ideas: 1,
+                                status: 1,
+                            }
+                        }
+                    ]);
+                    updatedCompany = updatedCompany[0];
                 } else {
                     if (company.cities && company.cities.length) {
                         company.cities = await helper.insertManyIntoCities(company.cities);
@@ -163,18 +285,139 @@ async function getCompanyById(_, { companyId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Company.findById(companyId).populate('createdBy').populate('cities').exec(async (err, res) => {
+            const company = await Company.aggregate([
+                { $match: { _id: ObjectID(companyId) } },
+                { $unwind: { "path": "$posts", "preserveNullAndEmptyArrays": true } },
+                {
+                    $lookup: {
+                        from: 'comments',
+                        let: { status: "$status", post_id: "$posts._id" },
+                        pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $ne: ["$status", "Deleted"] },
+                                        { $eq: ["$referenceId", ObjectID(companyId)] },
+                                        { $eq: ["$parentId", null] },
+                                        { $eq: ["$$post_id", "$postId"] }
+                                    ]
+                                }
+                            },
+                        },
+                        {
+                            $lookup: {
+                                "from": "users",
+                                "let": { "created_by": "$createdBy" },
+                                pipeline: [
+                                    { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
+                                ],
+                                as: "createdBy"
+                            }
+                        },
+                        {
+                            $unwind: {
+                                "path": "$createdBy",
+                                "preserveNullAndEmptyArrays": true
+                            }
+                        },
 
-                if (err) {
-                    return reject(err)
+                        ],
+                        as: 'comments'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'likes',
+                        localField: '_id',
+                        foreignField: 'referenceId',
+                        as: 'likes'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'createdBy',
+                        foreignField: '_id',
+                        as: 'createdBy'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'tags',
+                        localField: 'tags',
+                        foreignField: '_id',
+                        as: 'tags'
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        status: { $first: "$status" },
+                        description: { $first: "$description" },
+                        slug: { $first: "$slug" },
+                        cover: { $first: "$cover" },
+                        cities: { $first: "$cities" },
+                        howCanYouHelp: { $first: "$howCanYouHelp" },
+                        name: { $first: "$name" },
+                        title: { $first: "$title" },
+                        type: { $first: "$type" },
+                        createdBy: { $first: "$createdBy" },
+                        likes: { $first: "$likes" },
+                        tags: { $first: "$tags" },
+                        posts: {
+                            $push:
+                            {
+                                _id: "$posts._id",
+                                challengeType: "$posts.challengeType",
+                                postType: "$posts.postType",
+                                default: "$posts.default",
+                                description: "$posts.description",
+                                comments: "$comments",
+                                createdAt: "$posts.createdAt",
+                                updatedAt: "$posts.updatedAt",
+                            }
+                        },
+                        location: { $first: "$location" },
+                        createdAt: { $first: "$createdAt" },
+                        updatedAt: { $first: "$updatedAt" },
+                    }
+                },
+                {
+                    $project: {
+                        name: 1,
+                        type: 1,
+                        description: 1,
+                        slug: 1,
+                        cities: 1,
+                        createdBy: { $arrayElemAt: ['$createdBy', 0] },
+                        likeCount: { $size: '$likes' },
+                        tags: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        location: 1,
+                        posts: 1,
+                        cover: 1,
+                        questions: 1,
+                        ideas: 1,
+                        status: 1,
+                    }
                 }
+            ])
 
-                const likeCount = await Like.count({ referenceId: companyId })
+            return resolve(company[0]);
+            // Company.findById(companyId).populate('createdBy').populate('cities').exec(async (err, res) => {
 
-                res['likeCount'] = likeCount;
+            //     if (err) {
+            //         return reject(err)
+            //     }
 
-                return resolve(res);
-            });
+            //     const likeCount = await Like.count({ referenceId: companyId })
+
+            //     res['likeCount'] = likeCount;
+
+            //     return resolve(res);
+            // });
 
 
         } catch (e) {

@@ -15,7 +15,8 @@ const graphQlCompanySchema = `
         questions: [descriptionBlocks]
         location: Location
         cover: String
-        challenges: [Challenge]
+        posts: [CompanyPost]
+        comments: [Comment]
     }
 
     input CompanyInput {
@@ -30,23 +31,27 @@ const graphQlCompanySchema = `
         cities: [CityInput]
         location: LocationInput
         cover: String
-        challenges: [ChallengeInput]
+        posts: [CompanyPostInput]
     }
 
-    type Challenge {
+    type CompanyPost {
         description: [descriptionBlocks]
         challengeType: String
+        postType: String
         createdAt: String
         updatedAt: String
         _id: ID
+        comments: [Comment]
     }
 
-    input ChallengeInput {
+    input CompanyPostInput {
         description: [InputdescriptionBlock]
         challengeType: String
+        postType: String
         createdAt: String
         updatedAt: String
         _id: ID
+        comments: [CommentInput]
     }
 
     type City {
@@ -65,10 +70,9 @@ const graphQlCompanySchema = `
         companyUpdated: Company
     }
 
-    input UpdateOperation {
-        field: String
+    input operation {
         operation: String
-        challenges: ChallengeInput
+        post: CompanyPostInput
     }
 
     extend type Query {
@@ -80,7 +84,7 @@ const graphQlCompanySchema = `
 
     extend type Mutation {
         addCompany(company: CompanyInput): Company
-        updateCompany(company: CompanyInput, updateOperation: UpdateOperation): Company
+        updateCompany(company: CompanyInput, operation: operation): Company
         deleteCompany(companyId: String): Boolean
     }
 

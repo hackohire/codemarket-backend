@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const support = require('./support');
 
 
 const companySchema = new Schema(
@@ -42,7 +41,7 @@ const companySchema = new Schema(
             address: String,
             additionalLocationDetails: String
         }),
-        challenges: [
+        posts: [
             new Schema(
                 {
                     description: [new Schema({
@@ -52,6 +51,11 @@ const companySchema = new Schema(
                     challengeType: {
                         type: String,
                         enum: ['sales', 'marketing', 'technical', 'business', 'team'],
+                        default: ''
+                    },
+                    postType: {
+                        type: String,
+                        enum: ['challenge', 'goal', 'mission'],
                         default: ''
                     },
                     default: [],
