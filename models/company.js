@@ -55,7 +55,7 @@ const companySchema = new Schema(
                     },
                     postType: {
                         type: String,
-                        enum: ['challenge', 'goal', 'mission'],
+                        enum: ['challenge', 'goal', 'mission', 'post'],
                         default: ''
                     },
                     default: [],
