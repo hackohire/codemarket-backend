@@ -111,6 +111,20 @@ async function updateCompany(_, { company, operation }, { headers, db, decodedTo
                     { $unwind: { "path": "$posts", "preserveNullAndEmptyArrays": true } },
                     {
                         $lookup: {
+                            from: 'users',
+                            localField: 'posts.createdBy',
+                            foreignField: '_id',
+                            as: "postCreatedBy"
+                        }
+                    },
+                    {
+                        $unwind: {
+                            "path": "$postCreatedBy",
+                            "preserveNullAndEmptyArrays": true
+                        }
+                    },
+                    {
+                        $lookup: {
                             from: 'comments',
                             let: { status: "$status", post_id: "$posts._id" },
                             pipeline: [
@@ -193,6 +207,7 @@ async function updateCompany(_, { company, operation }, { headers, db, decodedTo
                                     challengeType: "$posts.challengeType",
                                     postType: "$posts.postType",
                                     description: "$posts.description",
+                                    createdBy: "$postCreatedBy",
                                     comments: "$comments",
                                     createdAt: "$posts.createdAt",
                                     updatedAt: "$posts.updatedAt",
@@ -291,6 +306,20 @@ async function getCompanyById(_, { companyId }, { headers, db, decodedToken }) {
                 { $unwind: { "path": "$posts", "preserveNullAndEmptyArrays": true } },
                 {
                     $lookup: {
+                        from: 'users',
+                        localField: 'posts.createdBy',
+                        foreignField: '_id',
+                        as: "postCreatedBy"
+                    }
+                },
+                {
+                    $unwind: {
+                        "path": "$postCreatedBy",
+                        "preserveNullAndEmptyArrays": true
+                    }
+                },
+                {
+                    $lookup: {
                         from: 'comments',
                         let: { status: "$status", post_id: "$posts._id" },
                         pipeline: [
@@ -374,6 +403,7 @@ async function getCompanyById(_, { companyId }, { headers, db, decodedToken }) {
                                 postType: "$posts.postType",
                                 default: "$posts.default",
                                 description: "$posts.description",
+                                createdBy: "$postCreatedBy",
                                 comments: "$comments",
                                 createdAt: "$posts.createdAt",
                                 updatedAt: "$posts.updatedAt",

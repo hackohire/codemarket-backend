@@ -58,6 +58,10 @@ const companySchema = new Schema(
                         enum: ['challenge', 'goal', 'mission', 'post'],
                         default: ''
                     },
+                    createdBy: {
+                        type: Schema.Types.ObjectId,
+                        ref: "user",
+                    },
                     default: [],
                 },
                 {

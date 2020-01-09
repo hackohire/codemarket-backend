@@ -40,6 +40,7 @@ const graphQlCompanySchema = `
         postType: String
         createdAt: String
         updatedAt: String
+        createdBy: User
         _id: ID
         comments: [Comment]
     }
@@ -50,6 +51,7 @@ const graphQlCompanySchema = `
         postType: String
         createdAt: String
         updatedAt: String
+        createdBy: ID
         _id: ID
         comments: [CommentInput]
     }
