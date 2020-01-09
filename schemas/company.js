@@ -80,6 +80,7 @@ const graphQlCompanySchema = `
         getCompaniesByUserIdAndType(userId: String, companyType: String): [Company]
         getCompanyById(companyId: String): Company
         getListOfUsersInACompany(companyId: String): [User]
+        getEventsByCompanyId(companyId: String): [Post]
     }
 
     extend type Mutation {
