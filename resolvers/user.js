@@ -254,7 +254,7 @@ async function getMyProfileInfo(_, { userId }, { headers, db, decodedToken }) {
             }
 
 
-            const dreamJob = await Post.find({createdBy: userId, type: 'dream-job'}).exec();
+            const dreamJob = await Post.find({createdBy: userId, type: 'dream-job'}).populate('companies cities').exec();
 
             const user = await User.findOne({_id: userId})
             .populate('businessAreaInterests')

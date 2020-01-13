@@ -29,9 +29,10 @@ const graphQlPostSchema = `
 
         cities: [City]
         company: Company
+        companies: [Company]
         salaryRangeFrom: Int
         salaryRangeTo: Int
-        jobProfile: String
+        jobProfile: [String]
 
         purchasedBy: [PurchasedBy]
     }
@@ -63,9 +64,10 @@ const graphQlPostSchema = `
 
         cities: [CityInput]
         company: ID
+        companies: [ID]
         salaryRangeFrom: Int
         salaryRangeTo: Int
-        jobProfile: String
+        jobProfile: [String]
     }
 
     type Location {

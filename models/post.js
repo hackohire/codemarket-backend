@@ -66,9 +66,13 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "company",
         },
+        companies: [{
+            type: Schema.Types.ObjectId,
+            ref: "company",
+        }],
         salaryRangeFrom: Number,
         salaryRangeTo: Number,
-        jobProfile: String,
+        jobProfile: [String],
         slug: { type: String, slug: ['name', '_id'] }
     },
     {

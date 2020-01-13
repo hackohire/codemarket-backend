@@ -47,6 +47,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('tags')
                     .populate('cities')
                     .populate('company')
+                    .populate('companies')
                     .execPopulate().then(async populatedPost => {
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
                         resolve(populatedPost);
@@ -77,6 +78,7 @@ async function getPostsByUserIdAndType(_, { userId, status, postType }, { header
                 .populate('createdBy')
                 .populate('tags')
                 .populate('company')
+                .populate('companies')
                 .populate('cities')
                 .exec((err, res) => {
 
@@ -108,6 +110,7 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
             Post.findById(postId)
                 .populate({ path: 'usersAttending', select: 'name avatar' })
                 .populate('company')
+                .populate('companies')
                 .populate('cities')
                 .populate('createdBy')
                 .populate('tags')
@@ -173,6 +176,7 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 .populate('createdBy')
                 .populate('tags')
                 .populate('company')
+                .populate('companies')
                 .populate('cities')
                 .exec((err, res) => {
 
@@ -219,6 +223,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                 res
                     .populate('createdBy')
                     .populate('company')
+                    .populate('companies')
                     .populate('tags')
                     .populate('cities').execPopulate().then((d) => {
                         return resolve(d);
