@@ -60,38 +60,42 @@ async function insertManyIntoCities(cities) {
 async function sendEmail(toEmail, filePath, body) {
     return new Promise(async (resolve, reject) => {
         try {
-            const transporter = await nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: process.env.SMTP_PORT,
-                auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASSWORD
-                },
-                debug: true,
-                secure: true
-            });
 
-            const template = new EmailTemplate(filePath);
-            await template.render(body, async (err, result) => {
-                console.log('Error HTML Email Template Rendering', err)
-                const { html, subject } = result;
-                const mailOptions = {
-                    from: process.env.FROM_EMAIL,
-                    to: toEmail,
-                    replyTo: process.env.FROM_EMAIL,
-                    subject: subject,
-                    html: html,
-                };
-                await transporter.sendMail(mailOptions, (error, response) => {
-                    if (error) {
-                        console.log('Mail Sending Error', error);
-                        resolve(false);
-                    } else {
-                        console.log('Mail Sent Successfully', response);
-                        resolve(true);
-                    }
+            if (!process.env.IS_OFFLINE) {
+                const transporter = await nodemailer.createTransport({
+                    host: process.env.SMTP_HOST,
+                    port: process.env.SMTP_PORT,
+                    auth: {
+                        user: process.env.SMTP_USER,
+                        pass: process.env.SMTP_PASSWORD
+                    },
+                    debug: true,
+                    secure: true
                 });
-            });
+                const template = new EmailTemplate(filePath);
+                await template.render(body, async (err, result) => {
+                    console.log('Error HTML Email Template Rendering', err)
+                    const { html, subject } = result;
+                    const mailOptions = {
+                        from: process.env.FROM_EMAIL,
+                        to: toEmail,
+                        replyTo: process.env.FROM_EMAIL,
+                        subject: subject,
+                        html: html,
+                    };
+                    await transporter.sendMail(mailOptions, (error, response) => {
+                        if (error) {
+                            console.log('Mail Sending Error', error);
+                            resolve(false);
+                        } else {
+                            console.log('Mail Sent Successfully', response);
+                            resolve(true);
+                        }
+                    });
+                });
+            } else {
+                resolve(true);
+            }
 
         } catch (err) {
             return err;
