@@ -12,6 +12,30 @@ const allowedAttributes = {
     blockquote: ['*']
 };
 
+const em = (tagName, attribs) => {
+    return {
+        tagName: 'i',
+        attribs: attribs
+    }
+}
+
+const strong = (tagName, attribs) => {
+    return {
+        tagName: 'b',
+        attribs: attribs
+    }
+}
+
+const figcaption = (tagName, attribs) => {
+    attribs['class'] = "cdx-input image-tool__caption";
+    attribs['contenteditable'] = true;
+    attribs['data-placeholder'] = 'Caption';
+    return {
+        tagName: 'div',
+        attribs
+    }
+}
+
 const parseMediumArticle = async (html) => {
 
     /** Create a Dummy DOM for using Jquery to parse HTML */
@@ -27,27 +51,9 @@ const parseMediumArticle = async (html) => {
         allowedTags,
         allowedAttributes,
         transformTags: {
-            'figcaption': (tagName, attribs) => {
-                attribs['class'] = "cdx-input image-tool__caption";
-                attribs['contenteditable'] = true;
-                attribs['data-placeholder'] = 'Caption';
-                return {
-                    tagName: 'div',
-                    attribs
-                }
-            },
-            'strong': (tagName, attribs) => {
-                return {
-                    tagName: 'b',
-                    attribs: attribs
-                }
-            },
-            'em': (tagName, attribs) => {
-                return {
-                    tagName: 'i',
-                    attribs: attribs
-                }
-            }
+            figcaption,
+            strong,
+            em
         },
         exclusiveFilter: function (frame) {
             if (frame.tag === 'br') {
@@ -86,27 +92,9 @@ const parseMeetupEvent = async (html) => {
                     attribs
                 }
             },
-            'figcaption': (attribs) => {
-                attribs['class'] = "cdx-input image-tool__caption";
-                attribs['contenteditable'] = true;
-                attribs['data-placeholder'] = 'Caption';
-                return {
-                    tagName: 'div',
-                    attribs
-                }
-            },
-            'strong': (attribs) => {
-                return {
-                    tagName: 'b',
-                    attribs: attribs
-                }
-            },
-            'em': (attribs) => {
-                return {
-                    tagName: 'i',
-                    attribs: attribs
-                }
-            }
+            figcaption,
+            strong,
+            em
         },
         exclusiveFilter: function (frame) {
             if (
@@ -136,7 +124,32 @@ const parseMeetupEvent = async (html) => {
     });
 }
 
+const parseJob = async (html, selector) => {
+    /** Create a Dummy DOM for using Jquery to parse HTML */
+    this.$ = cheerio.load(html);
+
+    /** Parse article tag with class @class meteredContent This works only for medium.com */
+    let articleHtml = await this.$(selector)
+        .map((i, section) => this.$(section).html())
+        .get()
+        .join('<hr/>');
+
+    return await sanitizeHtml(articleHtml, {
+        allowedTags,
+        allowedAttributes,
+        transformTags: {
+            figcaption,
+            strong,
+            em
+        },
+        exclusiveFilter: function (frame) {
+            return frame.tag == 'br'
+        }
+    });
+}
+
 module.exports = {
     parseMediumArticle,
-    parseMeetupEvent
+    parseMeetupEvent,
+    parseJob
 }

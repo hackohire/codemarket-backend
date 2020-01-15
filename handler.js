@@ -451,6 +451,9 @@ const fetchArticleByLink = (event, context) => {
             let articleHtml = '';
             const mediumRegex = /https?:\/\/medium\.com\/([^/?&]*)\/([^/?&]*)/
             const meetupRegex = /https?:\/\/(?:www\.|(?!www))meetup\.com\/([^/?&]*)\/events\/([^/?&]*)/
+            const indeedRegex = /https?:\/\/(?:www\.|(?!www))indeed\.co\.in\/viewjob\/([^/?&]*)/
+            const githubJobsRegex = /https?:\/\/jobs\.github\.com\/positions\/([^/?&]*)/
+            const linkedInJobsRegex = /https?:\/\/(?:www\.|(?!www))linkedin\.com\/jobs\/view\/([^/?&]*)/
             if (url.match(mediumRegex)) {
                 /** Fetch the data from the URL */
                 const result = await axios.get(url);
@@ -460,6 +463,18 @@ const fetchArticleByLink = (event, context) => {
                 const result = await axios.get(url);
                 const h = result.data;
                 articleHtml = await parser.parseMeetupEvent(h);
+            } else if (url.match(indeedRegex)) {
+                const result = await axios.get(url, '.jobsearch-ViewJobLayout-jobDisplay');
+                const h = result.data;
+                articleHtml = await parser.parseJob(h);
+            } else if (url.match(githubJobsRegex)) {
+                const result = await axios.get(url);
+                const h = result.data;
+                articleHtml = await parser.parseJob(h, '.inner');
+            } else if (url.match(linkedInJobsRegex)) {
+                const result = await axios.get(url);
+                const h = result.data;
+                articleHtml = await parser.parseJob(h, '.description');
             }
 
             return resolve({
