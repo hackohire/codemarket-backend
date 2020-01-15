@@ -14,7 +14,7 @@ const postSchema = new Schema(
         })],
         type: {
             type: String,
-            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job'],
+            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job', 'job'],
         },
         featuredImage: String,
         createdBy: {
