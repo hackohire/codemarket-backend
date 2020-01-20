@@ -250,7 +250,7 @@ async function updateCompany(_, { company, operation }, { headers, db, decodedTo
                     if (company.cities && company.cities.length) {
                         company.cities = await helper.insertManyIntoCities(company.cities);
                     }
-                    updatedCompany = await Company.findByIdAndUpdate(company._id, company, { new: true }).populate('createdBy cities').execPopulate();
+                    updatedCompany = await Company.findByIdAndUpdate(company._id, company, { new: true }).populate('createdBy cities').exec();
                 }
             }
             await pubSub.publish('COMPANY_UPDATED', updatedCompany);

@@ -8,7 +8,7 @@ const companySchema = new Schema(
         cover: String,
         type: {
             type: String,
-            enum: ['non-profit', 'local-business', 'startup', 'smb', 'school', 'government'],
+            enum: ['non-profit', 'local-business', 'startup', 'smb', 'school', 'government', ''],
         },
         createdBy: {
             type: Schema.Types.ObjectId,
