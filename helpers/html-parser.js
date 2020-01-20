@@ -143,7 +143,7 @@ const parseJob = async (html, selector) => {
             em
         },
         exclusiveFilter: function (frame) {
-            return frame.tag == 'br'
+            // return frame.tag == 'br'
         }
     });
 }
