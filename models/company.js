@@ -9,6 +9,7 @@ const companySchema = new Schema(
         type: {
             type: String,
             enum: ['non-profit', 'local-business', 'startup', 'smb', 'school', 'government', ''],
+            default: ''
         },
         createdBy: {
             type: Schema.Types.ObjectId,

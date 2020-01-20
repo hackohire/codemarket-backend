@@ -469,7 +469,7 @@ async function getCompaniesByType(_, { companyType }, { headers, db, decodedToke
                 console.log('Using existing mongoose connection.');
             }
 
-            Company.find({ type: companyType ? companyType : { $ne: null } }).populate('createdBy').populate('cities').exec((err, res) => {
+            Company.find({ type: companyType ? companyType : { $regex: /^$|\w/ }}).populate('createdBy').populate('cities').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
