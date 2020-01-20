@@ -11,6 +11,7 @@ const Post = require('../models/post')();
 const helper = require('../helpers/helper');
 const Like = require('./../models/like')();
 const Unit = require('./../models/purchased_units')();
+var ObjectID = require('mongodb').ObjectID;
 // const User = require('./../models/user')();
 // const Tag = require('./../models/tag')();
 // const Subscription = require('../models/subscription')();
@@ -270,7 +271,7 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
     });
 }
 
-async function getAllPosts(_, { pageOptions, type }, { headers, db, decodedToken }) {
+async function getAllPosts(_, { pageOptions, type, referencePostId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -287,14 +288,18 @@ async function getAllPosts(_, { pageOptions, type }, { headers, db, decodedToken
             /** Taking Empty Posts array */
             let posts = [];
 
+            let condition = { status: 'Published', type: type ? type : { $ne: null }, referencePostId: referencePostId ? ObjectID(referencePostId) : null }
+            let total = await Post.countDocuments(condition).exec()
             posts = await Post.aggregate([
-                { $match: { status: 'Published', type: type ? type : { $ne: null } } },
+                {
+                    $match: condition
+                },
                 {
                     $lookup: {
                         from: 'comments',
                         // localField: '_id',
                         // foreignField: 'referenceId',
-                        let: { status: "$status", reference_id: "$_id"},
+                        let: { status: "$status", reference_id: "$_id" },
                         pipeline: [
                             {
                                 $match:
@@ -355,7 +360,7 @@ async function getAllPosts(_, { pageOptions, type }, { headers, db, decodedToken
             ])
                 .sort(sort)
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-                .limit(pageOptions.limit)
+                .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
                 .exec();
 
             console.log(posts);
@@ -369,10 +374,7 @@ async function getAllPosts(_, { pageOptions, type }, { headers, db, decodedToken
             //     .sort(sort)
             //     .exec();
 
-            return await resolve({ posts, total: await Post.countDocuments({ status: 'Published', type: type ? type : { $ne: null } }).exec() });
-
-
-
+            return await resolve({ posts, total});
 
         } catch (e) {
             console.log(e);

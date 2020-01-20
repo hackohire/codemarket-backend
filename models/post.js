@@ -70,10 +70,19 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "company",
         }],
+        salaryCurrency: String,
         salaryRangeFrom: Number,
         salaryRangeTo: Number,
         jobProfile: [String],
-        slug: { type: String, slug: ['name', '_id'] }
+        timeline: Number,
+
+        slug: { type: String, slug: ['name', '_id'] },
+
+
+        /** referencePostId right now using it for storing the id of a dream-job as reference in a job post
+         * Purpose is to connect jobs with dream-job
+         */
+        referencePostId: Schema.Types.ObjectId
     },
     {
         timestamps: true,
