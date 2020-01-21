@@ -449,6 +449,7 @@ const fetchArticleByLink = (event, context) => {
             const url = event.queryStringParameters.url;
 
             let articleHtml = '';
+            let title = '';
             const mediumRegex = /https?:\/\/medium\.com\/([^/?&]*)\/([^/?&]*)/
             const meetupRegex = /https?:\/\/(?:www\.|(?!www))meetup\.com\/([^/?&]*)\/events\/([^/?&]*)/
             const indeedRegex = /https?:\/\/(?:www\.|(?!www))indeed\.co\.in\/viewjob([^/?&]*)/
@@ -458,23 +459,34 @@ const fetchArticleByLink = (event, context) => {
                 /** Fetch the data from the URL */
                 const result = await axios.get(url);
                 const h = result.data;
-                articleHtml = await parser.parseMediumArticle(h);
+                const post = await parser.parseMediumArticle(h);
+                articleHtml = post.html;
+                title = post.title;
             } else if (url.match(meetupRegex)) {
                 const result = await axios.get(url);
                 const h = result.data;
-                articleHtml = await parser.parseMeetupEvent(h);
+                const post = await parser.parseMeetupEvent(h);
+                articleHtml = post.html;
+                title = post.title;
             } else if (url.match(indeedRegex)) {
                 const result = await axios.get(url);
                 const h = result.data;
-                articleHtml = await parser.parseJob(h, '.jobsearch-ViewJobLayout-jobDisplay');
+                const post = await parser.parseJob(h, '.jobsearch-ViewJobLayout-jobDisplay');
+                articleHtml = post.html;
+                title = post.title;
             } else if (url.match(githubJobsRegex)) {
                 const result = await axios.get(url);
                 const h = result.data;
-                articleHtml = await parser.parseJob(h, '.inner');
+                const post = await parser.parseJob(h, '.inner');
+                articleHtml = post.html;
+                title = post.title;
             } else if (url.match(linkedInJobsRegex)) {
                 const result = await axios.get(url);
                 const h = result.data;
-                articleHtml = await parser.parseJob(h, '.description');
+                const post = await parser.parseJob(h, '.description');
+                articleHtml = post.html;
+                title = post.title;
+
             }
 
             return resolve({
@@ -484,7 +496,7 @@ const fetchArticleByLink = (event, context) => {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Credentials': true,
                 },
-                body: JSON.stringify({ contentHtml: articleHtml })
+                body: JSON.stringify({ contentHtml: articleHtml, title})
             });
         } catch (e) {
             console.log(e);

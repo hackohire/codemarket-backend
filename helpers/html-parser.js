@@ -47,7 +47,7 @@ const parseMediumArticle = async (html) => {
         .get()
         .join('<hr/>');
 
-    return await sanitizeHtml(articleHtml, {
+    let sanitizedHtml =  await sanitizeHtml(articleHtml, {
         allowedTags,
         allowedAttributes,
         transformTags: {
@@ -67,6 +67,8 @@ const parseMediumArticle = async (html) => {
             return false;
         }
     });
+
+    return {html: sanitizedHtml, title: this.$('title').text().trim()}
 }
 
 const parseMeetupEvent = async (html) => {
@@ -79,7 +81,7 @@ const parseMeetupEvent = async (html) => {
         .get()
         .join('<hr/>');
 
-    return await sanitizeHtml(articleHtml, {
+    let sanitizedHtml =  await sanitizeHtml(articleHtml, {
         allowedTags,
         allowedAttributes,
         transformTags: {
@@ -122,6 +124,8 @@ const parseMeetupEvent = async (html) => {
             return false;
         }
     });
+
+    return {html: sanitizedHtml, title: this.$('title').text().trim()}
 }
 
 const parseJob = async (html, selector) => {
@@ -134,7 +138,7 @@ const parseJob = async (html, selector) => {
         .get()
         .join('<hr/>');
 
-    return await sanitizeHtml(articleHtml, {
+    let sanitizedHtml = await sanitizeHtml(articleHtml, {
         allowedTags,
         allowedAttributes,
         transformTags: {
@@ -146,6 +150,8 @@ const parseJob = async (html, selector) => {
             // return frame.tag == 'br'
         }
     });
+
+    return {html: sanitizedHtml, title: this.$('title').text().trim()}
 }
 
 module.exports = {
