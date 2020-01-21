@@ -287,8 +287,16 @@ async function getAllPosts(_, { pageOptions, type, referencePostId }, { headers,
 
             /** Taking Empty Posts array */
             let posts = [];
-
-            let condition = { status: 'Published', type: type ? type : { $ne: null }, referencePostId: referencePostId ? ObjectID(referencePostId) : null }
+            let condition = {
+                status: 'Published',
+                type: type ? type : { $ne: null },
+                $and: [{
+                    '$or': [
+                        {referencePostId: referencePostId ? ObjectID(referencePostId) : { $ne: null }},
+                        {referencePostId: { $eq: null }}
+                    ]
+                }]
+            }
             let total = await Post.countDocuments(condition).exec()
             posts = await Post.aggregate([
                 {
@@ -374,7 +382,7 @@ async function getAllPosts(_, { pageOptions, type, referencePostId }, { headers,
             //     .sort(sort)
             //     .exec();
 
-            return await resolve({ posts, total});
+            return await resolve({ posts, total });
 
         } catch (e) {
             console.log(e);
