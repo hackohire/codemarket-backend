@@ -66,10 +66,12 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             await pubSub.publish('COMMENT_ADDED', commentObj);
 
             /** Send Email Only if comment type is post */
-            if (commentObj.type === 'post' || commentObj.type === 'product') {
+            if (commentObj.type === 'post' || commentObj.type === 'product' || commentObj.type === 'dream-job') {
                 data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').select('createdBy id name type slug description blockId blockSpecificComment').lean().exec();
                 await pubSub.publish('LISTEN_NOTIFICATION', { comment: commentObj, usersToBeNotified, post: data })
-                postLink = process.env.FRONT_END_URL + `${commentObj.type === 'product' ? 'product' : 'post'}/${data.slug}?type=${data.type}&commentId=${commentObj._id}`;
+
+                const commentType = commentObj.type === 'product' ? 'product' : commentObj.type === 'dream-job' ? 'dream-job' : 'post';
+                postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?type=${data.type}&commentId=${commentObj._id}`;
 
                 const filePathToAuthor = basePath + 'email-template/commentCreateToAuthor';
                 const filePathToCommentor = basePath + 'email-template/commentCreateToCommentor';
