@@ -285,18 +285,21 @@ async function getAllPosts(_, { pageOptions, type, referencePostId }, { headers,
                 console.log('Using existing mongoose connection.');
             }
 
-            /** Taking Empty Posts array */
-            let posts = [];
             let condition = {
                 status: 'Published',
-                type: type ? type : { $ne: null },
-                $and: [{
+                type: type ? type : { $ne: null }
+            }
+
+            if (referencePostId) {
+                condition['$and'] = [{
                     '$or': [
-                        {referencePostId: referencePostId ? ObjectID(referencePostId) : { $ne: null }},
-                        {referencePostId: { $eq: null }}
+                        {referencePostId: ObjectID(referencePostId)},
                     ]
                 }]
             }
+
+            /** Taking Empty Posts array */
+            let posts = [];
             let total = await Post.countDocuments(condition).exec()
             posts = await Post.aggregate([
                 {
