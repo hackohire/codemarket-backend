@@ -78,6 +78,9 @@ const postSchema = new Schema(
 
         slug: { type: String, slug: ['name', '_id'] },
 
+        /** It will contain the url from where the post has been imported */
+        referencePostUrl: String,
+
 
         /** referencePostId right now using it for storing the id of a dream-job as reference in a job post
          * Purpose is to connect jobs with dream-job

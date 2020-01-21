@@ -6,6 +6,7 @@ const graphQlPostSchema = `
         name: String
         type: String
         description: [descriptionBlocks]
+        referencePostUrl: String
         featuredImage: String
         createdBy: User
         price: Int
@@ -44,6 +45,7 @@ const graphQlPostSchema = `
         name: String
         type: String
         description: [InputdescriptionBlock]
+        referencePostUrl: String
         shortDescription: String
         featuredImage: String
         createdBy: ID
