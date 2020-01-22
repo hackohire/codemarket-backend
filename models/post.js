@@ -14,7 +14,7 @@ const postSchema = new Schema(
         })],
         type: {
             type: String,
-            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job', 'job'],
+            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job', 'job', 'career-coach'],
         },
         featuredImage: String,
         createdBy: {
@@ -85,7 +85,13 @@ const postSchema = new Schema(
         /** referencePostId right now using it for storing the id of a dream-job as reference in a job post
          * Purpose is to connect jobs with dream-job
          */
-        referencePostId: Schema.Types.ObjectId
+        referencePostId: Schema.Types.ObjectId,
+
+        /** Fields only for type 'career-coach' */
+        gapAnalysis: Boolean,
+        careerCoachSessions: Boolean,
+        helpingWithMockInterviews: Boolean,
+        hiringMentoringSessions: Boolean
     },
     {
         timestamps: true,

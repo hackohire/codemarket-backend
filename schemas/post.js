@@ -37,6 +37,11 @@ const graphQlPostSchema = `
         jobProfile: [String]
         timeline: Int
 
+        gapAnalysis: Boolean
+        careerCoachSessions: Boolean
+        helpingWithMockInterviews: Boolean
+        hiringMentoringSessions: Boolean
+
         purchasedBy: [PurchasedBy]
     }
 
@@ -74,6 +79,11 @@ const graphQlPostSchema = `
         salaryRangeTo: Int
         jobProfile: [String]
         timeline: Int
+
+        gapAnalysis: Boolean
+        careerCoachSessions: Boolean
+        helpingWithMockInterviews: Boolean
+        hiringMentoringSessions: Boolean
 
         referencePostId: ID
     }
