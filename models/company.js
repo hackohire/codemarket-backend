@@ -49,6 +49,11 @@ const companySchema = new Schema(
                         type: String,
                         data: Schema.Types.Mixed,
                     })],
+                    goalType: {
+                        type: String,
+                        enum: ['sales', 'marketing', 'technical', 'business', 'team'],
+                        default: ''
+                    },
                     challengeType: {
                         type: String,
                         enum: ['sales', 'marketing', 'technical', 'business', 'team'],

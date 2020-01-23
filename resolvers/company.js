@@ -205,6 +205,7 @@ async function updateCompany(_, { company, operation }, { headers, db, decodedTo
                                 {
                                     _id: "$posts._id",
                                     challengeType: "$posts.challengeType",
+                                    goalType: "$posts.goalType",
                                     postType: "$posts.postType",
                                     description: "$posts.description",
                                     createdBy: "$postCreatedBy",
@@ -400,6 +401,7 @@ async function getCompanyById(_, { companyId }, { headers, db, decodedToken }) {
                             {
                                 _id: "$posts._id",
                                 challengeType: "$posts.challengeType",
+                                goalType: "$posts.goalType",
                                 postType: "$posts.postType",
                                 default: "$posts.default",
                                 description: "$posts.description",
