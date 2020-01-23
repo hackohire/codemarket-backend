@@ -271,7 +271,7 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
     });
 }
 
-async function getAllPosts(_, { pageOptions, type, referencePostId }, { headers, db, decodedToken }) {
+async function getAllPosts(_, { pageOptions, type, referencePostId, companyId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -293,9 +293,27 @@ async function getAllPosts(_, { pageOptions, type, referencePostId }, { headers,
             if (referencePostId) {
                 condition['$and'] = [{
                     '$or': [
-                        {referencePostId: ObjectID(referencePostId)},
+                        { referencePostId: ObjectID(referencePostId) },
                     ]
                 }]
+            }
+
+            /** In Company Details Page Fetch Jobs & DreamJob related to that company */
+            if (companyId) {
+                condition['$and'] = [
+                    {
+                        '$or': [
+                            { company: ObjectID(companyId) },
+                            { 'companies': ObjectID(companyId) }
+                        ]
+                    },
+                    {
+                        '$or': [
+                            { type: 'job'},
+                            { type: 'dream-job' }
+                        ]
+                    }
+                ]
             }
 
             /** Taking Empty Posts array */
