@@ -95,11 +95,13 @@ input CommentInput {
 
 type Tag {
   name: String
+  type: String
   _id: ID
 }
 
 input TagInput {
   name: String
+  type: String
   _id: ID
 }
 
@@ -385,12 +387,13 @@ type Query {
   getCommentsByReferenceId(referenceId: String): [Comment]
   deleteComment(commentId: String): String
 
-  findFromCollection(keyWord: String, searchCollection: String): [Tag]
+  findFromCollection(keyWord: String, searchCollection: String, type: String): [Tag]
 }
 
 type Mutation {
   addComment(comment: CommentInput): Comment
   updateComment(commentId: String, text: [InputdescriptionBlock]): Comment
+  addToCollection(keyWord: String, searchCollection: String, type: String): Tag
 }
 
 type Subscription {

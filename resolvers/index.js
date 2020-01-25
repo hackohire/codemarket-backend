@@ -2,7 +2,7 @@ const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, g
 const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment');
 const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
-const { findFromCollection } = require('./categories');
+const { findFromCollection, addToCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
@@ -52,6 +52,7 @@ module.exports = {
     updateUser,
     authorize,
 
+    addToCollection,
     // addProduct,
     // updateProduct,
     // deleteProduct,

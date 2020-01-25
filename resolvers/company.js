@@ -19,11 +19,6 @@ async function addCompany(_, { company }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            if (company.cities && company.cities.length) {
-                company.cities = await helper.insertManyIntoCities(company.cities);
-            }
-
-
             const int = await new Company(company);
 
             const checkIfExists = await Company.find({ $text: { $search: company.name } }).populate('createdBy').populate('cities').exec();
@@ -248,9 +243,6 @@ async function updateCompany(_, { company, operation }, { headers, db, decodedTo
                     console.log(checkIfExists);
                     throw new Error('AlreadyExists');
                 } else {
-                    if (company.cities && company.cities.length) {
-                        company.cities = await helper.insertManyIntoCities(company.cities);
-                    }
                     updatedCompany = await Company.findByIdAndUpdate(company._id, company, { new: true }).populate('createdBy cities').exec();
                 }
             }
