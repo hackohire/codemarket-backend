@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const support = require('./support');
 const slug = require('mongoose-slug-updater');
-mongoose.plugin(slug, {truncate: 0});
+mongoose.plugin(slug, { truncate: 0 });
 
 const { Schema } = mongoose;
 
@@ -14,7 +14,7 @@ const postSchema = new Schema(
         })],
         type: {
             type: String,
-            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job', 'job', 'career-coach'],
+            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job', 'job', 'career-coach', 'business-coach'],
         },
         featuredImage: String,
         createdBy: {
@@ -73,7 +73,10 @@ const postSchema = new Schema(
         salaryCurrency: String,
         salaryRangeFrom: Number,
         salaryRangeTo: Number,
-        jobProfile: [String],
+        jobProfile: [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+        }],
         timeline: Number,
 
         slug: { type: String, slug: ['name', '_id'] },
@@ -91,7 +94,37 @@ const postSchema = new Schema(
         gapAnalysis: Boolean,
         careerCoachSessions: Boolean,
         helpingWithMockInterviews: Boolean,
-        hiringMentoringSessions: Boolean
+        hiringMentoringSessions: Boolean,
+
+        /** Fields only for type 'business-coach' */
+        businessCoachSessions: Boolean,
+        businessAreas: [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+        }],
+        businessGoals: [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+        }],
+        businessChallenges: [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+        }],
+        sellProducts: {
+            sellProducts: Boolean,
+            products: [{
+                type: Schema.Types.ObjectId,
+                ref: "tag",
+            }],
+        },
+        sellServices: {
+            sellServices: Boolean,
+            services: [{
+                type: Schema.Types.ObjectId,
+                ref: "tag",
+            }],
+        }
+
     },
     {
         timestamps: true,

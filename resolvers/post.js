@@ -35,11 +35,6 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                 post.tags = await helper.insertManyIntoTags(post.tags);
             }
 
-            if (post.cities && post.cities.length) {
-                post.cities = await helper.insertManyIntoCities(post.cities);
-            }
-
-
             const int = await new Post(post);
             await int.save(post).then(async (p) => {
                 console.log(p)
@@ -49,6 +44,12 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('cities')
                     .populate('company')
                     .populate('companies')
+                    .populate('jobProfile')
+                    .populate('businessGoals')
+                    .populate('businessChallenges')
+                    .populate('businessAreas')
+                    .populate('sellProducts.products')
+                    .populate('sellServices.services')
                     .execPopulate().then(async populatedPost => {
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
                         resolve(populatedPost);
@@ -115,6 +116,12 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                 .populate('cities')
                 .populate('createdBy')
                 .populate('tags')
+                .populate('jobProfile')
+                .populate('businessGoals')
+                .populate('businessChallenges')
+                .populate('businessAreas')
+                .populate('sellProducts.products')
+                .populate('sellServices.services')
                 .exec(async (err, res) => {
 
                     if (err) {
@@ -179,6 +186,12 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 .populate('company')
                 .populate('companies')
                 .populate('cities')
+                .populate('jobProfile')
+                .populate('businessGoals')
+                .populate('businessChallenges')
+                .populate('businessAreas')
+                .populate('sellProducts.products')
+                .populate('sellServices.services')
                 .exec((err, res) => {
 
                     if (err) {
@@ -212,10 +225,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                 post.tags = await helper.insertManyIntoTags(post.tags);
             }
 
-            if (post.cities && post.cities.length) {
-                post.cities = await helper.insertManyIntoCities(post.cities);
-            }
-
+        
             await Post.findOneAndUpdate({ _id: post._id }, post, { new: true, useFindAndModify: false }, (err, res) => {
                 if (err) {
                     return reject(err)
@@ -226,7 +236,14 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                     .populate('company')
                     .populate('companies')
                     .populate('tags')
-                    .populate('cities').execPopulate().then((d) => {
+                    .populate('cities')
+                    .populate('jobProfile')
+                    .populate('businessGoals')
+                    .populate('businessChallenges')
+                    .populate('businessAreas')
+                    .populate('sellProducts.products')
+                    .populate('sellServices.services')
+                    .execPopulate().then((d) => {
                         return resolve(d);
                     });
             });

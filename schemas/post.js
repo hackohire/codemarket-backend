@@ -34,13 +34,20 @@ const graphQlPostSchema = `
         salaryCurrency: String
         salaryRangeFrom: Int
         salaryRangeTo: Int
-        jobProfile: [String]
+        jobProfile: [Tag]
         timeline: Int
 
         gapAnalysis: Boolean
         careerCoachSessions: Boolean
         helpingWithMockInterviews: Boolean
         hiringMentoringSessions: Boolean
+
+        businessCoachSessions: Boolean
+        businessAreas: [Tag]
+        businessGoals: [Tag]
+        businessChallenges: [Tag]
+        sellProducts: SellProducts
+        sellServices: SellServices
 
         purchasedBy: [PurchasedBy]
     }
@@ -71,19 +78,27 @@ const graphQlPostSchema = `
         eventType: String
         membershipRequired: Boolean
 
-        cities: [CityInput]
+        cities: [ID]
         company: ID
         companies: [ID]
         salaryCurrency: String
         salaryRangeFrom: Int
         salaryRangeTo: Int
-        jobProfile: [String]
+        jobProfile: [ID]
         timeline: Int
 
         gapAnalysis: Boolean
         careerCoachSessions: Boolean
         helpingWithMockInterviews: Boolean
         hiringMentoringSessions: Boolean
+
+        
+        businessCoachSessions: Boolean
+        businessAreas: [ID]
+        businessGoals: [ID]
+        businessChallenges: [ID]
+        sellProducts: SellProductsInput
+        sellServices: SellServicesInput
 
         referencePostId: ID
     }
@@ -102,10 +117,31 @@ const graphQlPostSchema = `
         additionalLocationDetails: String
     }
 
+    type SellProducts {
+        sellProducts: Boolean
+        products: [Tag]
+    }
+
+    input SellProductsInput {
+        sellProducts: Boolean
+        products: [ID]
+    }
+
+    type SellServices {
+        sellServices: Boolean
+        services: [Tag]
+    }
+
+    input SellServicesInput {
+        sellServices: Boolean
+        services: [ID]
+    }
+
     type RsvpEventResponse {
         validSubscription: Boolean
         usersAttending: [User]
     }
+    
     
     extend type Query {
         getPostsByType(postType: String): [Post]
