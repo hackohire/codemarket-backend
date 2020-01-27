@@ -65,7 +65,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
     });
 }
 
-async function getPostsByUserIdAndType(_, { userId, status, postType }, { headers, db, decodedToken }) {
+async function getPostsByUserIdAndType(_, { userId, status, postType, pageOptions }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -76,20 +76,25 @@ async function getPostsByUserIdAndType(_, { userId, status, postType }, { header
                 console.log('Using existing mongoose connection.');
             }
 
-            Post.find({ 'createdBy': userId, status: status ? status : { $ne: null }, type: postType })
+            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
+
+            let condition = { 'createdBy': userId, status: status ? status : { $ne: null }, type: postType }
+
+            let total = await Post.countDocuments(condition).exec()
+
+            const posts = await Post.find(condition)
                 .populate('createdBy')
                 .populate('tags')
                 .populate('company')
                 .populate('companies')
                 .populate('cities')
-                .exec((err, res) => {
+                .sort(sort)
+                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
+                .exec();
 
-                    if (err) {
-                        return reject(err)
-                    }
-
-                    return resolve(res);
-                });
+            return resolve({ posts, total });
 
         } catch (e) {
             console.log(e);

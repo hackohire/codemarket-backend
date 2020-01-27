@@ -141,11 +141,16 @@ const graphQlPostSchema = `
         validSubscription: Boolean
         usersAttending: [User]
     }
+
+    type GetPostsByUserIdAndTypeResponse {
+        posts: [Post]
+        total: Int
+      }
     
     
     extend type Query {
         getPostsByType(postType: String): [Post]
-        getPostsByUserIdAndType(userId: String, status: String, postType: String): [Post]
+        getPostsByUserIdAndType(userId: String, status: String, postType: String, pageOptions: PageOptionsInput): GetPostsByUserIdAndTypeResponse
         getPostById(postId: String): Post
         fullSearch(searchString: String): [Post]
 
