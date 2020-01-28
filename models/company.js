@@ -49,19 +49,9 @@ const companySchema = new Schema(
                         type: String,
                         data: Schema.Types.Mixed,
                     })],
-                    goalType: {
-                        type: String,
-                        enum: ['sales', 'marketing', 'technical', 'business', 'team'],
-                        default: ''
-                    },
-                    challengeType: {
-                        type: String,
-                        enum: ['sales', 'marketing', 'technical', 'business', 'team'],
-                        default: ''
-                    },
                     postType: {
                         type: String,
-                        enum: ['challenge', 'goal', 'mission', 'post'],
+                        enum: ['sales-challenge', 'marketing-challenge', 'technical-challenge', 'business-challenge', 'team-challenge', 'sales-goal', 'marketing-goal', 'technical-goal', 'business-goal', 'team-goal', 'mission', 'post'],
                         default: ''
                     },
                     createdBy: {

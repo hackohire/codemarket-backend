@@ -36,8 +36,6 @@ const graphQlCompanySchema = `
 
     type CompanyPost {
         description: [descriptionBlocks]
-        challengeType: String
-        goalType: String
         postType: String
         createdAt: String
         updatedAt: String
@@ -48,8 +46,6 @@ const graphQlCompanySchema = `
 
     input CompanyPostInput {
         description: [InputdescriptionBlock]
-        challengeType: String
-        goalType: String
         postType: String
         createdAt: String
         updatedAt: String
