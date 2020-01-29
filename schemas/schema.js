@@ -64,6 +64,7 @@ type Comment {
   _id: ID
   text: [descriptionBlocks]
   referenceId: ID
+  companyReferenceId: ID
   type: String
   parentId: ID
   createdBy: User
@@ -71,8 +72,6 @@ type Comment {
 
   blockSpecificComment: Boolean
   blockId: ID
-
-  postId: ID
 }
 
 input CommentInput {
@@ -81,6 +80,7 @@ input CommentInput {
   discussion_id: String
   parentId: ID
   referenceId: ID
+  companyReferenceId: ID
   type: String
   _id: ID
   text: [InputdescriptionBlock]
@@ -89,8 +89,6 @@ input CommentInput {
 
   blockSpecificComment: Boolean
   blockId: ID
-
-  postId: ID
 }
 
 type Tag {
@@ -370,7 +368,7 @@ input SortInput {
 }
 
 type getAllPostsResponse {
-  posts: [Product]
+  posts: [Post]
   total: Int
 }
 
@@ -397,9 +395,9 @@ type Mutation {
 }
 
 type Subscription {
-  onCommentAdded(postId: String): Comment
-  onCommentUpdated(postId: String): Comment
-  onCommentDeleted(postId: String): Comment
+  onCommentAdded(postId: String, companyId: String): Comment
+  onCommentUpdated(postId: String, companyId: String): Comment
+  onCommentDeleted(postId: String, companyId: String): Comment
 }
 `
 

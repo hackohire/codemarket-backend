@@ -51,7 +51,7 @@ const companySchema = new Schema(
                     })],
                     postType: {
                         type: String,
-                        enum: ['sales-challenge', 'marketing-challenge', 'technical-challenge', 'business-challenge', 'team-challenge', 'sales-goal', 'marketing-goal', 'technical-goal', 'business-goal', 'team-goal', 'mission', 'post'],
+                        enum: ['sales-challenge', 'marketing-challenge', 'technical-challenge', 'business-challenge', 'team-challenge', 'sales-goal', 'marketing-goal', 'technical-goal', 'business-goal', 'team-goal', 'mission', 'company-post'],
                         default: ''
                     },
                     createdBy: {

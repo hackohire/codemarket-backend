@@ -17,6 +17,7 @@ var ObjectID = require('mongodb').ObjectID;
 // const Subscription = require('../models/subscription')();
 // var moment = require('moment');
 // var ObjectID = require('mongodb').ObjectID;
+const { pubSub } = require('../helpers/pubsub');
 let conn;
 
 
@@ -50,7 +51,13 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('businessAreas')
                     .populate('sellProducts.products')
                     .populate('sellServices.services')
+                    .populate('fundingBy')
+                    .populate('fundingTo')
+                    .populate("fundingProcess")
                     .execPopulate().then(async populatedPost => {
+                        if(populatedPost && populatedPost.isPostUnderCompany) {
+                            await pubSub.publish('COMPANY_POST_CHANGES', {postAdded: populatedPost});
+                        }
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
                         resolve(populatedPost);
                     });
@@ -89,6 +96,9 @@ async function getPostsByUserIdAndType(_, { userId, status, postType, pageOption
                 .populate('company')
                 .populate('companies')
                 .populate('cities')
+                .populate('fundingBy')
+                .populate('fundingTo')
+                .populate("fundingProcess")
                 .sort(sort)
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
                 .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
@@ -127,6 +137,9 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                 .populate('businessAreas')
                 .populate('sellProducts.products')
                 .populate('sellServices.services')
+                .populate('fundingBy')
+                .populate('fundingTo')
+.populate("fundingProcess")
                 .exec(async (err, res) => {
 
                     if (err) {
@@ -197,6 +210,9 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 .populate('businessAreas')
                 .populate('sellProducts.products')
                 .populate('sellServices.services')
+                .populate('fundingBy')
+                .populate('fundingTo')
+                .populate("fundingProcess")
                 .exec((err, res) => {
 
                     if (err) {
@@ -248,7 +264,14 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                     .populate('businessAreas')
                     .populate('sellProducts.products')
                     .populate('sellServices.services')
-                    .execPopulate().then((d) => {
+                    .populate('fundingBy')
+                    .populate('fundingTo')
+                    .populate("fundingProcess")
+                    .execPopulate().then(async (d) => {
+
+                        if(d && d.isPostUnderCompany) {
+                            await pubSub.publish('COMPANY_POST_CHANGES', {postUpdated: d});
+                        }
                         return resolve(d);
                     });
             });
@@ -274,13 +297,15 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Post.deleteOne({ _id: postId }, ((err, res) => {
+            Post.findOneAndDelete({ _id: postId }, (async (err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
-
-                return resolve(res.deletedCount);
+                if(res && res.isPostUnderCompany) {
+                    await pubSub.publish('COMPANY_POST_CHANGES', {postDeleted: res});
+                }
+                return resolve(res ? 1 : 0);
             })
             );
 
@@ -332,7 +357,19 @@ async function getAllPosts(_, { pageOptions, type, referencePostId, companyId },
                     {
                         '$or': [
                             { type: 'job'},
-                            { type: 'dream-job' }
+                            { type: 'dream-job' },
+                            { type: 'sales-challenge' },
+                            { type: 'marketing-challenge' },
+                            { type: 'technical-challenge' },
+                            { type: 'business-challenge' },
+                            { type: 'team-challenge' },
+                            { type: 'sales-goal' },
+                            { type: 'marketing-goal' },
+                            { type: 'technical-goal' },
+                            { type: 'team-goal' },
+                            { type: 'business-goal' },
+                            { type: 'mission' },
+                            { type: 'company-post'}
                         ]
                     }
                 ]
@@ -365,7 +402,23 @@ async function getAllPosts(_, { pageOptions, type, referencePostId, companyId },
                                             ]
                                     }
                                 }
-                            }
+                            },
+                            {
+                                $lookup: {
+                                    "from": "users",
+                                    "let": { "created_by": "$createdBy" },
+                                    pipeline: [
+                                        { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
+                                    ],
+                                    as: "createdBy"
+                                }
+                            },
+                            {
+                                $unwind: {
+                                    "path": "$createdBy",
+                                    "preserveNullAndEmptyArrays": true
+                                }
+                            },
                         ],
                         as: 'comments'
                     }
@@ -404,7 +457,8 @@ async function getAllPosts(_, { pageOptions, type, referencePostId, companyId },
                         tags: 1,
                         likeCount: { $size: '$likes' },
                         comments: '$comments',
-                        createdAt: 1
+                        createdAt: 1,
+                        company: 1
                     }
                 }
 
@@ -413,8 +467,6 @@ async function getAllPosts(_, { pageOptions, type, referencePostId, companyId },
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
                 .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
                 .exec();
-
-            console.log(posts);
 
             /** Fetching all the Published Posts */
             // posts = await Post.find({ 

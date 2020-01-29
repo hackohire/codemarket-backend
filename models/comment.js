@@ -9,10 +9,11 @@ const commentSchema = new Schema(
             default: null
         },
 
-        /**  Id of a post | product | company*/
+        /**  Id of a post | product */
         referenceId: {
             type: Schema.Types.ObjectId
         },
+        companyReferenceId: Schema.Types.ObjectId,
         children: [{
             type: Schema.Types.ObjectId,
             ref: 'comment',
@@ -48,9 +49,6 @@ const commentSchema = new Schema(
             default: false
         },
         blockId: Schema.Types.ObjectId,
-
-        /** Field Related to company */
-        postId: Schema.Types.ObjectId /** Company Id */
     },
     {
         timestamps: true,

@@ -67,16 +67,18 @@ const graphQlCompanySchema = `
     }
 
     type CompanySubscriptionResponse {
-        companyUpdated: Company
+        postAdded: Post
+        postUpdated: Post
+        postDeleted: Post
     }
 
-    input operation {
-        operation: String
-        post: CompanyPostInput
+    type GetCompaniesByTypeResponse {
+        companies: [Company]
+        total: Int
     }
 
     extend type Query {
-        getCompaniesByType(companyType: String): [Company]
+        getCompaniesByType(companyType: String, pageOptions: PageOptionsInput): GetCompaniesByTypeResponse
         getCompaniesByUserIdAndType(userId: String, companyType: String): [Company]
         getCompanyById(companyId: String): Company
         getListOfUsersInACompany(companyId: String): [User]
@@ -85,12 +87,12 @@ const graphQlCompanySchema = `
 
     extend type Mutation {
         addCompany(company: CompanyInput): Company
-        updateCompany(company: CompanyInput, operation: operation): Company
+        updateCompany(company: CompanyInput): Company
         deleteCompany(companyId: String): Boolean
     }
 
     extend type Subscription {
-        onCompanyUpdate(companyId: String): CompanySubscriptionResponse
+        onCompanyPostChanges(companyId: String): CompanySubscriptionResponse
     }
 `
 

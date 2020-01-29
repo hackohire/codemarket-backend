@@ -98,7 +98,7 @@ module.exports = {
         pubSub.subscribe('COMMENT_ADDED'),
         (rootValue, args) => {
           // this can be async too :)
-          if (args.postId === rootValue.referenceId) {
+          if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId) {
             return true;
           }
 
@@ -115,7 +115,7 @@ module.exports = {
         pubSub.subscribe('COMMENT_UPDATED'),
         (rootValue, args) => {
           // this can be async too :)
-          if (args.postId === rootValue.referenceId) {
+          if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId) {
             return true;
           }
 
@@ -132,7 +132,7 @@ module.exports = {
         pubSub.subscribe('COMMENT_DELETED'),
         (rootValue, args) => {
           // this can be async too :)
-          if (args.postId == rootValue.referenceId) {
+          if (args.postId == rootValue.referenceId || args.companyId === rootValue.companyReferenceId) {
             return true;
           }
 
@@ -155,16 +155,24 @@ module.exports = {
         },
       ),
     },
-    onCompanyUpdate: {
+    onCompanyPostChanges: {
       resolve: (rootValue) => {
         // root value is the payload from sendMessage mutation
-        return {companyUpdated: rootValue};
+        return rootValue;
       },
       subscribe: withFilter(
-        pubSub.subscribe('COMPANY_UPDATED'),
+        pubSub.subscribe('COMPANY_POST_CHANGES'),
         (rootValue, args) => {
           // this can be async too :)
-          if (args.companyId == rootValue._id) {
+          if (rootValue.postUpdated && args.companyId == rootValue.postUpdated.company._id) {
+            return true;
+          }
+
+          if (rootValue.postAdded && args.companyId == rootValue.postAdded.company._id) {
+            return true;
+          }
+
+          if (rootValue.postDeleted && args.companyId == rootValue.postDeleted.company) {
             return true;
           }
 

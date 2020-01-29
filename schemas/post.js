@@ -30,6 +30,7 @@ const graphQlPostSchema = `
 
         cities: [City]
         company: Company
+        isPostUnderCompany: Boolean
         companies: [Company]
         salaryCurrency: String
         salaryRangeFrom: Int
@@ -48,6 +49,14 @@ const graphQlPostSchema = `
         businessChallenges: [Tag]
         sellProducts: SellProducts
         sellServices: SellServices
+
+        fundingCurrency: String
+        fundingAmount: Int
+        fundingBy: [Company]
+        fundingTo: [Company]
+        fundingDate: String
+        fundingProcess: [Tag]
+
 
         purchasedBy: [PurchasedBy]
     }
@@ -80,6 +89,7 @@ const graphQlPostSchema = `
 
         cities: [ID]
         company: ID
+        isPostUnderCompany: Boolean
         companies: [ID]
         salaryCurrency: String
         salaryRangeFrom: Int
@@ -99,6 +109,13 @@ const graphQlPostSchema = `
         businessChallenges: [ID]
         sellProducts: SellProductsInput
         sellServices: SellServicesInput
+
+        fundingCurrency: String
+        fundingAmount: Int
+        fundingBy: [ID]
+        fundingTo: [ID]
+        fundingDate: String
+        fundingProcess: [ID]
 
         referencePostId: ID
     }
@@ -145,7 +162,7 @@ const graphQlPostSchema = `
     type GetPostsByUserIdAndTypeResponse {
         posts: [Post]
         total: Int
-      }
+    }
     
     
     extend type Query {

@@ -17,7 +17,17 @@ async function findFromCollection(_, { keyWord, searchCollection, type }, { head
 
 
             var regex = new RegExp(keyWord, 'i');
-            const cat = await conn.collection(searchCollection).find({ name: { $regex: regex } }).toArray();
+            const condition = {
+                name: { $regex: regex }
+            }
+            if(type) {
+                condition['$and'] = [{
+                    '$or': [
+                        { type }
+                    ]
+                }]
+            }
+            const cat = await conn.collection(searchCollection).find(condition).toArray();
 
             return resolve(cat);
 

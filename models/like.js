@@ -15,7 +15,20 @@ const likeSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ['user', 'product', 'help-request', 'requirement', 'interview', 'testing', 'design', 'howtodoc', 'goal', 'event', 'team-skill', 'dream-job', 'job', 'career-coach', 'business-coach'],
+            enum: ['user', 'product', 'help-request', 'requirement', 'interview', 'testing', 'design', 'howtodoc', 'goal', 'event', 'team-skill', 'dream-job', 'job', 'career-coach', 'business-coach', 'capital-funding',
+            'sales-challenge',        /** company post type */
+            'marketing-challenge',    /** company post type */
+            'technical-challenge',    /** company post type */
+            'business-challenge',     /** company post type */
+            'team-challenge',         /** company post type */
+            'sales-goal',             /** company post type */
+            'marketing-goal',         /** company post type */
+            'technical-goal',         /** company post type */
+            'business-goal',          /** company post type */
+            'team-goal',              /** company post type */
+            'mission',                /** company post type */
+            'company-post'            /** company post type */
+            ],
         },
     },
     {
