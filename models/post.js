@@ -15,7 +15,7 @@ const postSchema = new Schema(
         type: {
             type: String,
             enum: [
-                'product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job', 'job', 'career-coach', 'business-coach', 'capital-funding',
+                'product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job', 'job', 'career-coach', 'business-coach', 'capital-funding', 'hiring-process',
                 'sales-challenge',        /** company post type */
                 'marketing-challenge',    /** company post type */
                 'technical-challenge',    /** company post type */
@@ -153,10 +153,17 @@ const postSchema = new Schema(
             ref: "company",
         }],
         fundingDate: String,
-        fundingProcess: [{
-            type: Schema.Types.ObjectId,
-            ref: "tag",
-        }],
+        fundingProcess: [[new Schema({
+            type: String,
+            data: Schema.Types.Mixed,
+        })]],
+
+
+        /** Field Related to hiring process */
+        hiringProcess: [[new Schema({
+            type: String,
+            data: Schema.Types.Mixed,
+        })]],
 
     },
     {

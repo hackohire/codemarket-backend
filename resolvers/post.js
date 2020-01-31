@@ -53,7 +53,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('sellServices.services')
                     .populate('fundingBy')
                     .populate('fundingTo')
-                    .populate("fundingProcess")
+                    
                     .execPopulate().then(async populatedPost => {
                         if(populatedPost && populatedPost.isPostUnderCompany) {
                             await pubSub.publish('COMPANY_POST_CHANGES', {postAdded: populatedPost});
@@ -98,7 +98,7 @@ async function getPostsByUserIdAndType(_, { userId, status, postType, pageOption
                 .populate('cities')
                 .populate('fundingBy')
                 .populate('fundingTo')
-                .populate("fundingProcess")
+                
                 .sort(sort)
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
                 .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
@@ -139,7 +139,7 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                 .populate('sellServices.services')
                 .populate('fundingBy')
                 .populate('fundingTo')
-.populate("fundingProcess")
+
                 .exec(async (err, res) => {
 
                     if (err) {
@@ -212,7 +212,7 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 .populate('sellServices.services')
                 .populate('fundingBy')
                 .populate('fundingTo')
-                .populate("fundingProcess")
+                
                 .exec((err, res) => {
 
                     if (err) {
@@ -266,7 +266,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                     .populate('sellServices.services')
                     .populate('fundingBy')
                     .populate('fundingTo')
-                    .populate("fundingProcess")
+                    
                     .execPopulate().then(async (d) => {
 
                         if(d && d.isPostUnderCompany) {

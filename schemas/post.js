@@ -55,7 +55,9 @@ const graphQlPostSchema = `
         fundingBy: [Company]
         fundingTo: [Company]
         fundingDate: String
-        fundingProcess: [Tag]
+        fundingProcess: [[descriptionBlocks]]
+
+        hiringProcess: [[descriptionBlocks]]
 
 
         purchasedBy: [PurchasedBy]
@@ -115,7 +117,9 @@ const graphQlPostSchema = `
         fundingBy: [ID]
         fundingTo: [ID]
         fundingDate: String
-        fundingProcess: [ID]
+        fundingProcess: [[InputdescriptionBlock]]
+
+        hiringProcess: [[InputdescriptionBlock]]
 
         referencePostId: ID
     }

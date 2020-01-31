@@ -57,7 +57,7 @@ async function addToCollection(_, { keyWord, searchCollection, type }, { headers
 
             // var regex = new RegExp('/^' + keyWord + '$/', 'i');
             const cat = await conn.collection(searchCollection).update(
-            { name: keyWord},
+            { name: keyWord, type},
             { $setOnInsert: { name: keyWord, type } },
             { upsert: true });
             
