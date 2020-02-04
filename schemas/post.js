@@ -20,6 +20,9 @@ const graphQlPostSchema = `
         likeCount: Int
         slug: String
 
+        connectedWithUser: User
+        isPostUnderUser: Boolean
+
         dateRange: [String]
         location: Location
         address: String
@@ -82,6 +85,9 @@ const graphQlPostSchema = `
         slug: String
         comments: [CommentInput]
         support: SupportInput
+
+        connectedWithUser: ID
+        isPostUnderUser: Boolean
 
         dateRange: [String]
         location: LocationInput

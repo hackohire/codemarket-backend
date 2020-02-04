@@ -53,10 +53,14 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('sellServices.services')
                     .populate('fundingBy')
                     .populate('fundingTo')
+                    .populate('connectedWithUser')
                     
                     .execPopulate().then(async populatedPost => {
                         if(populatedPost && populatedPost.isPostUnderCompany) {
                             await pubSub.publish('COMPANY_POST_CHANGES', {postAdded: populatedPost});
+                        }
+                        if(populatedPost && populatedPost.isPostUnderUser) {
+                            await pubSub.publish('USERS_POST_CHANGES', {postAdded: populatedPost});
                         }
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
                         resolve(populatedPost);
@@ -266,11 +270,15 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                     .populate('sellServices.services')
                     .populate('fundingBy')
                     .populate('fundingTo')
+                    .populate('connectedWithUser')
                     
                     .execPopulate().then(async (d) => {
 
                         if(d && d.isPostUnderCompany) {
                             await pubSub.publish('COMPANY_POST_CHANGES', {postUpdated: d});
+                        }
+                        if(d && d.isPostUnderUser) {
+                            await pubSub.publish('USERS_POST_CHANGES', {postAdded: d});
                         }
                         return resolve(d);
                     });
@@ -305,6 +313,9 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
                 if(res && res.isPostUnderCompany) {
                     await pubSub.publish('COMPANY_POST_CHANGES', {postDeleted: res});
                 }
+                if(res && res.isPostUnderUser) {
+                    await pubSub.publish('USERS_POST_CHANGES', {postAdded: res});
+                }
                 return resolve(res ? 1 : 0);
             })
             );
@@ -318,7 +329,7 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
     });
 }
 
-async function getAllPosts(_, { pageOptions, type, referencePostId, companyId }, { headers, db, decodedToken }) {
+async function getAllPosts(_, { pageOptions, type, referencePostId, companyId, connectedWithUser }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -343,6 +354,30 @@ async function getAllPosts(_, { pageOptions, type, referencePostId, companyId },
                         { referencePostId: ObjectID(referencePostId) },
                     ]
                 }]
+            }
+
+            /** Fetch posts related to the user's profile */
+            if (connectedWithUser) {
+                condition['$and'] = [
+                    {
+                        '$or': [
+                            { connectedWithUser: ObjectID(connectedWithUser) }
+                        ]
+                    },
+                    {
+                        '$or': [
+                            { type: 'leadership-challenge' },
+                            { type: 'technical-challenge' },
+                            { type: 'business-challenge' },
+                            { type: 'team-challenge' },
+                            { type: 'business-goal' },
+                            { type: 'startup-goal' },
+                            { type: 'technical-goal' },
+                            { type: 'social-impact-goal' },
+                            // { type: 'user-post'}
+                        ]
+                    }
+                ]
             }
 
             /** In Company Details Page Fetch Jobs & DreamJob related to that company */

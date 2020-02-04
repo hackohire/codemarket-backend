@@ -16,15 +16,21 @@ const postSchema = new Schema(
             type: String,
             enum: [
                 'product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job', 'job', 'career-coach', 'business-coach', 'capital-funding', 'hiring-process',
+                'leadership-goal',        /** user profile post type */
+                'startup-goal',           /** user profile post type */
+                'social-impact-goal',           /** user profile post type */
+
+                'leadership-challenge',   /** user profile post type */
+
                 'sales-challenge',        /** company post type */
                 'marketing-challenge',    /** company post type */
-                'technical-challenge',    /** company post type */
-                'business-challenge',     /** company post type */
+                'technical-challenge',    /** company post / user type */
+                'business-challenge',     /** company / user post type */
                 'team-challenge',         /** company post type */
                 'sales-goal',             /** company post type */
                 'marketing-goal',         /** company post type */
-                'technical-goal',         /** company post type */
-                'business-goal',          /** company post type */
+                'technical-goal',         /** company / user post type */
+                'business-goal',          /** company / user post type */
                 'team-goal',              /** company post type */
                 'mission',                /** company post type */
                 'company-post'            /** company post type */
@@ -47,6 +53,12 @@ const postSchema = new Schema(
             ref: "tag",
         }],
         support: support,
+        isPostUnderCompany: Boolean,
+        connectedWithUser: {
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        },
+        isPostUnderUser: Boolean,
 
         /** Event Specific Fields */
         dateRange: [String],
@@ -80,8 +92,6 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "company",
         },
-        isPostUnderCompany: Boolean,
-
         companies: [{
             type: Schema.Types.ObjectId,
             ref: "company",

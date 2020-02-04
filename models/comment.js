@@ -13,6 +13,8 @@ const commentSchema = new Schema(
         referenceId: {
             type: Schema.Types.ObjectId
         },
+        /** User reference ID for the comments added under the posts created in user's profile */
+        userReferenceId: Schema.Types.ObjectId,
         companyReferenceId: Schema.Types.ObjectId,
         children: [{
             type: Schema.Types.ObjectId,

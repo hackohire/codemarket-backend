@@ -78,6 +78,12 @@ type User {
     post: Post
   }
 
+  type UserPostSubscriptionResponse {
+    postAdded: Post
+    postUpdated: Post
+    postDeleted: Post
+}
+
   extend type Query {
     getUsers(_page: Int _limit: Int): [User!]!
     getUsersAndBugFixesCount: [UserAndBugFixCount]
@@ -93,6 +99,7 @@ type User {
 
   extend type Subscription {
     onUserOnline(user: UserInput): SubscriptionEvents
+    onUsersPostChanges(userId: String): UserPostSubscriptionResponse
   }
 `
 

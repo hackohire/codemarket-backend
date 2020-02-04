@@ -65,6 +65,7 @@ type Comment {
   text: [descriptionBlocks]
   referenceId: ID
   companyReferenceId: ID
+  userReferenceId: ID
   type: String
   parentId: ID
   createdBy: User
@@ -81,6 +82,7 @@ input CommentInput {
   parentId: ID
   referenceId: ID
   companyReferenceId: ID
+  userReferenceId: ID
   type: String
   _id: ID
   text: [InputdescriptionBlock]
@@ -376,7 +378,7 @@ type getAllPostsResponse {
 type Query {
   hello: String
 
-  getAllPosts(pageOptions: PageOptionsInput, type: String, referencePostId: String, companyId: String): getAllPostsResponse
+  getAllPosts(pageOptions: PageOptionsInput, type: String, referencePostId: String, companyId: String, connectedWithUser: String): getAllPostsResponse
 
   getAllProducts: [Product]
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]

@@ -98,7 +98,7 @@ module.exports = {
         pubSub.subscribe('COMMENT_ADDED'),
         (rootValue, args) => {
           // this can be async too :)
-          if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId) {
+          if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId || args.userId === rootValue.userReferenceId) {
             return true;
           }
 
@@ -115,7 +115,7 @@ module.exports = {
         pubSub.subscribe('COMMENT_UPDATED'),
         (rootValue, args) => {
           // this can be async too :)
-          if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId) {
+          if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId || args.userId === rootValue.userReferenceId) {
             return true;
           }
 
@@ -132,7 +132,7 @@ module.exports = {
         pubSub.subscribe('COMMENT_DELETED'),
         (rootValue, args) => {
           // this can be async too :)
-          if (args.postId == rootValue.referenceId || args.companyId === rootValue.companyReferenceId) {
+          if (args.postId == rootValue.referenceId || args.companyId === rootValue.companyReferenceId || args.userId === rootValue.userReferenceId) {
             return true;
           }
 
@@ -156,14 +156,10 @@ module.exports = {
       ),
     },
     onCompanyPostChanges: {
-      resolve: (rootValue) => {
-        // root value is the payload from sendMessage mutation
-        return rootValue;
-      },
+      resolve: (rootValue) => { return rootValue; },
       subscribe: withFilter(
         pubSub.subscribe('COMPANY_POST_CHANGES'),
         (rootValue, args) => {
-          // this can be async too :)
           if (rootValue.postUpdated && args.companyId == rootValue.postUpdated.company._id) {
             return true;
           }
@@ -173,6 +169,27 @@ module.exports = {
           }
 
           if (rootValue.postDeleted && args.companyId == rootValue.postDeleted.company) {
+            return true;
+          }
+
+          return false;
+        },
+      ),
+    },
+    onUsersPostChanges: {
+      resolve: (rootValue) => { return rootValue; },
+      subscribe: withFilter(
+        pubSub.subscribe('USERS_POST_CHANGES'),
+        (rootValue, args) => {
+          if (rootValue.postUpdated && args.userId == rootValue.postUpdated.connectedWithUser._id) {
+            return true;
+          }
+
+          if (rootValue.postAdded && args.userId == rootValue.postAdded.connectedWithUser._id) {
+            return true;
+          }
+
+          if (rootValue.postDeleted && args.userId == rootValue.connectedWithUser.company) {
             return true;
           }
 
