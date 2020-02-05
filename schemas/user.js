@@ -15,6 +15,7 @@ type User {
     portfolio_links: [String]
     location: String
     avatar: String
+    cover: String
     roles: [String]
     createdAt: String
     currentJobDetails: CurrentJobDetails
@@ -39,6 +40,7 @@ type User {
     portfolio_links: [String]
     location: String
     avatar: String
+    cover: String
     roles: [String]
     createdAt: String
     currentJobDetails: CurrentJobDetailsInput
