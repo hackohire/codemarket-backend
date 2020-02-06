@@ -3,8 +3,14 @@ const { Schema } = mongoose;
 
 const currentJobDetails = new Schema(
     {
-        jobProfile: String,
-        companyName: String,
+        jobProfile: [{
+            type: Schema.Types.ObjectId,
+            ref: "tag",
+        }],
+        company: {
+            type: Schema.Types.ObjectId,
+            ref: "company",
+        },
         companyLocation: String
     }
 );

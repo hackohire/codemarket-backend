@@ -106,6 +106,8 @@ async function updateUser(_, { user }, { headers, db }) {
             .populate('businessAreaInterests')
             .populate('leadershipAreaInterests')
             .populate('socialImpactInterests')
+            .populate('currentJobDetails.company')
+            .populate('currentJobDetails.jobProfile')
             .then(userCreated => {
                 console.log(userCreated)
                 return resolve(userCreated);
@@ -141,7 +143,10 @@ async function authorize(_, { applicationId }, { event, context, headers, db, })
 
             // let options = { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false };
 
-            let userFound = await User.findOne({email: u.email}).exec();
+            let userFound = await User.findOne({email: u.email})
+            .populate('currentJobDetails.jobProfile')
+            .populate('currentJobDetails.company')
+            .exec();
 
             if (userFound) {
                 // const userFound = await userFound.save(userFound);

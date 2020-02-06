@@ -51,14 +51,14 @@ type User {
   }
 
   input CurrentJobDetailsInput {
-    jobProfile: String
-    companyName: String
+    jobProfile: [ID]
+    company: ID
     companyLocation: String
   }
   
   type CurrentJobDetails {
-    jobProfile: String
-    companyName: String
+    jobProfile: [Tag]
+    company: Company
     companyLocation: String
   }
 
