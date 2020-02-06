@@ -27,7 +27,7 @@ const userSchema = new Schema(
         location: String,
         currentJobDetails: currentJobDetails,
         avatar: String,
-        user: String,
+        cover: String,
         roles: {
             type: [String],
             enum: ['Developer', 'Admin', 'User'],

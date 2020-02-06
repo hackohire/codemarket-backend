@@ -397,9 +397,9 @@ type Mutation {
 }
 
 type Subscription {
-  onCommentAdded(postId: String, companyId: String): Comment
-  onCommentUpdated(postId: String, companyId: String): Comment
-  onCommentDeleted(postId: String, companyId: String): Comment
+  onCommentAdded(postId: String, companyId: String, userId: String): Comment
+  onCommentUpdated(postId: String, companyId: String, userId: String): Comment
+  onCommentDeleted(postId: String, companyId: String, userId: String): Comment
 }
 `
 

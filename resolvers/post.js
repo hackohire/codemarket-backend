@@ -54,13 +54,13 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('fundingBy')
                     .populate('fundingTo')
                     .populate('connectedWithUser')
-                    
+
                     .execPopulate().then(async populatedPost => {
-                        if(populatedPost && populatedPost.isPostUnderCompany) {
-                            await pubSub.publish('COMPANY_POST_CHANGES', {postAdded: populatedPost});
+                        if (populatedPost && populatedPost.isPostUnderCompany) {
+                            await pubSub.publish('COMPANY_POST_CHANGES', { postAdded: populatedPost });
                         }
-                        if(populatedPost && populatedPost.isPostUnderUser) {
-                            await pubSub.publish('USERS_POST_CHANGES', {postAdded: populatedPost});
+                        if (populatedPost && populatedPost.isPostUnderUser) {
+                            await pubSub.publish('USERS_POST_CHANGES', { postAdded: populatedPost });
                         }
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
                         resolve(populatedPost);
@@ -102,7 +102,7 @@ async function getPostsByUserIdAndType(_, { userId, status, postType, pageOption
                 .populate('cities')
                 .populate('fundingBy')
                 .populate('fundingTo')
-                
+
                 .sort(sort)
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
                 .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
@@ -216,7 +216,7 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 .populate('sellServices.services')
                 .populate('fundingBy')
                 .populate('fundingTo')
-                
+
                 .exec((err, res) => {
 
                     if (err) {
@@ -250,7 +250,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                 post.tags = await helper.insertManyIntoTags(post.tags);
             }
 
-        
+
             await Post.findOneAndUpdate({ _id: post._id }, post, { new: true, useFindAndModify: false }, (err, res) => {
                 if (err) {
                     return reject(err)
@@ -271,14 +271,14 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                     .populate('fundingBy')
                     .populate('fundingTo')
                     .populate('connectedWithUser')
-                    
+
                     .execPopulate().then(async (d) => {
 
-                        if(d && d.isPostUnderCompany) {
-                            await pubSub.publish('COMPANY_POST_CHANGES', {postUpdated: d});
+                        if (d && d.isPostUnderCompany) {
+                            await pubSub.publish('COMPANY_POST_CHANGES', { postUpdated: d });
                         }
-                        if(d && d.isPostUnderUser) {
-                            await pubSub.publish('USERS_POST_CHANGES', {postAdded: d});
+                        if (d && d.isPostUnderUser) {
+                            await pubSub.publish('USERS_POST_CHANGES', { postUpdated: d });
                         }
                         return resolve(d);
                     });
@@ -310,11 +310,11 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
                 if (err) {
                     return reject(err)
                 }
-                if(res && res.isPostUnderCompany) {
-                    await pubSub.publish('COMPANY_POST_CHANGES', {postDeleted: res});
+                if (res && res.isPostUnderCompany) {
+                    await pubSub.publish('COMPANY_POST_CHANGES', { postDeleted: res });
                 }
-                if(res && res.isPostUnderUser) {
-                    await pubSub.publish('USERS_POST_CHANGES', {postAdded: res});
+                if (res && res.isPostUnderUser) {
+                    await pubSub.publish('USERS_POST_CHANGES', { postDeleted: res });
                 }
                 return resolve(res ? 1 : 0);
             })
@@ -391,7 +391,7 @@ async function getAllPosts(_, { pageOptions, type, referencePostId, companyId, c
                     },
                     {
                         '$or': [
-                            { type: 'job'},
+                            { type: 'job' },
                             { type: 'dream-job' },
                             { type: 'sales-challenge' },
                             { type: 'marketing-challenge' },
@@ -404,7 +404,7 @@ async function getAllPosts(_, { pageOptions, type, referencePostId, companyId, c
                             { type: 'team-goal' },
                             { type: 'business-goal' },
                             { type: 'mission' },
-                            { type: 'company-post'}
+                            { type: 'company-post' }
                         ]
                     }
                 ]
@@ -438,6 +438,63 @@ async function getAllPosts(_, { pageOptions, type, referencePostId, companyId, c
                                     }
                                 }
                             },
+                            // {
+                            //     $unwind: {
+                            //         "path": "$children",
+                            //     }
+                            // },
+                            // {
+                            //     $lookup: {
+                            //         from: 'comments',
+                            //         "let": { "childrenComments": "$children" },
+                            //         pipeline: [
+                            //             {
+                            //                 $match: {
+                            //                     $expr: {
+                            //                         $and:
+                            //                             [
+                            //                                 { $eq: ["$$childrenComments", '$_id']},
+                            //                                 { $ne: ["$status", "Deleted"] }
+                            //                         ]
+                            //                     }
+                            //                 }
+                            //             },
+                            //             {
+                            //                 $lookup: {
+                            //                     from: 'users',
+                            //                     localField: 'createdBy',
+                            //                     foreignField: '_id',
+                            //                     as: 'createdBy'
+                            //                 }
+                            //             },
+                            //             {
+                            //                 $unwind: {
+                            //                     "path": "$createdBy",
+                            //                     "preserveNullAndEmptyArrays": true
+                            //                 }
+                            //             },
+                            //         ],
+                            //         as: 'children'
+                            //     }
+                            // },
+                            // {
+                            //     $unwind: {
+                            //         "path": "$children",
+                            //         "preserveNullAndEmptyArrays": true
+                            //     }
+                            // },
+                            // {
+                            //     $group:
+                            //         {
+                            //             _id: "$_id",
+                            //             product: { $first: "$type"},
+                            //             status: { $first: "$status"},
+                            //             type: { $first: "$type"},
+                            //             createdBy: { $first: "$createdBy"},
+                            //             createdAt: { $first: "$createdAt"},
+                            //             children: { $push: "$children"}
+                            //         }
+                            // }, 
                             {
                                 $lookup: {
                                     "from": "users",

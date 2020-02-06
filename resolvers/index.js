@@ -189,7 +189,7 @@ module.exports = {
             return true;
           }
 
-          if (rootValue.postDeleted && args.userId == rootValue.connectedWithUser.company) {
+          if (rootValue.postDeleted && args.userId == rootValue.postDeleted.connectedWithUser) {
             return true;
           }
 
