@@ -89,23 +89,8 @@ async function updateUser(_, { user }, { headers, db }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            if (user.businessAreaInterests && user.businessAreaInterests.length) {
-                user.businessAreaInterests = await helper.insertManyIntoTags(user.businessAreaInterests);
-            }
-
-            if (user.leadershipAreaInterests && user.leadershipAreaInterests.length) {
-                user.leadershipAreaInterests = await helper.insertManyIntoTags(user.leadershipAreaInterests);
-            }
-
-            if (user.socialImpactInterests && user.socialImpactInterests.length) {
-                user.socialImpactInterests = await helper.insertManyIntoTags(user.socialImpactInterests);
-            }
-
             // const userToBeSaved = await new User(user);
             await User.findByIdAndUpdate(user._id, user, {new:true})
-            .populate('businessAreaInterests')
-            .populate('leadershipAreaInterests')
-            .populate('socialImpactInterests')
             .populate('currentJobDetails.company')
             .populate('currentJobDetails.jobProfile')
             .then(userCreated => {
@@ -247,39 +232,6 @@ async function getUserById(_, { userId }, { headers, db, decodedToken }) {
     });
 }
 
-async function getMyProfileInfo(_, { userId }, { headers, db, decodedToken }) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            // const decodedToken = await auth.auth(headers);
-            if (!db) {
-                console.log('Creating new mongoose connection.');
-                conn = await connectToMongoDB();
-            } else {
-                console.log('Using existing mongoose connection.');
-            }
-
-
-            const dreamJob = await Post.find({createdBy: userId, type: 'dream-job'}).populate('companies cities').exec();
-
-            const user = await User.findOne({_id: userId})
-            .populate('businessAreaInterests')
-            .populate('leadershipAreaInterests')
-            .populate('socialImpactInterests')
-            .exec();
-            
-            return await resolve({
-                dreamJob,
-                businessAreaInterests: user.businessAreaInterests,
-                leadershipAreaInterests: user.leadershipAreaInterests,
-                socialImpactInterests: user.socialImpactInterests
-            })
-        } catch (e) {
-            console.log(e);
-            return reject(e);
-        }
-    });
-}
-
 
 
 
@@ -289,6 +241,5 @@ module.exports = {
     updateUser,
     authorize,
     getUsersAndBugFixesCount,
-    getUserById,
-    getMyProfileInfo
+    getUserById
 };

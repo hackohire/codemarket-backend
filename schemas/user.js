@@ -22,9 +22,6 @@ type User {
     likeCount: Int
     stripeId: ID
     subscription: [SubscriptionSchema]
-    businessAreaInterests: [Tag]
-    leadershipAreaInterests: [Tag]
-    socialImpactInterests: [Tag]
   }
   
   input UserInput {
@@ -45,9 +42,6 @@ type User {
     createdAt: String
     currentJobDetails: CurrentJobDetailsInput
     stripeId: ID
-    businessAreaInterests: [TagInput]
-    leadershipAreaInterests: [TagInput]
-    socialImpactInterests: [TagInput]
   }
 
   input CurrentJobDetailsInput {
@@ -68,13 +62,6 @@ type User {
     productCount: Int
   }
 
-  type getMyProfileInfo {
-    dreamJob: [Post]
-    businessAreaInterests: [Tag]
-    leadershipAreaInterests: [Tag]
-    socialImpactInterests: [Tag]
-  }
-
   type SubscriptionEvents {
     onCommentAdded: Comment
     post: Post
@@ -90,7 +77,6 @@ type User {
     getUsers(_page: Int _limit: Int): [User!]!
     getUsersAndBugFixesCount: [UserAndBugFixCount]
     getUserById(userId: String): User
-    getMyProfileInfo(userId: String): getMyProfileInfo
   }
 
   extend type Mutation {
