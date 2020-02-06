@@ -329,7 +329,7 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
     });
 }
 
-async function getAllPosts(_, { pageOptions, type, referencePostId, companyId, connectedWithUser }, { headers, db, decodedToken }) {
+async function getAllPosts(_, { pageOptions, type, referencePostId, companyId, connectedWithUser, createdBy }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -346,6 +346,12 @@ async function getAllPosts(_, { pageOptions, type, referencePostId, companyId, c
             let condition = {
                 status: 'Published',
                 type: type ? type : { $ne: null }
+            }
+
+            if(createdBy) {
+                condition['createdBy'] = ObjectID(createdBy)
+                condition['isPostUnderUser'] =  { $ne: true };
+                condition['isPostUnderCompany'] = { $ne: true }
             }
 
             if (referencePostId) {
