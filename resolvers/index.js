@@ -181,15 +181,15 @@ module.exports = {
       subscribe: withFilter(
         pubSub.subscribe('USERS_POST_CHANGES'),
         (rootValue, args) => {
-          if (rootValue.postUpdated && args.userId == rootValue.postUpdated.connectedWithUser._id) {
+          if (rootValue.postUpdated && args.userId == rootValue.postUpdated.createdBy._id) {
             return true;
           }
 
-          if (rootValue.postAdded && args.userId == rootValue.postAdded.connectedWithUser._id) {
+          if (rootValue.postAdded && args.userId == rootValue.postAdded.createdBy._id) {
             return true;
           }
 
-          if (rootValue.postDeleted && args.userId == rootValue.postDeleted.connectedWithUser) {
+          if (rootValue.postDeleted && args.userId == rootValue.postDeleted.createdBy) {
             return true;
           }
 
