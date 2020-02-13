@@ -334,10 +334,12 @@ const attachCardAndCreateSubscription = async (event, context) => {
             await conn.collection('stripe_subscriptions').insertOne(sub);
 
             /** Send Email */
-            const filePath = basePath + 'email-template/successfulSubscription';
+            const filePath = basePath + 'email-template/common-template';
             const payLoad = {
-                AUTHORNAME: body.name,
-                PLAN_NAME: sub.plan.nickname
+                NAME: body.name,
+                // PLAN_NAME: sub.plan.nickname,
+                CONTENT: `You have successfully subscribed for ${sub.plan.nickname}.`,
+                SUBJECT: 'Thanks for choosing us!',
             };
             await helper.sendEmail(body.metadata.email, filePath, payLoad);
 

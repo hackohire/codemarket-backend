@@ -61,7 +61,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             });
             usersToBeNotified = uniq(usersToBeNotified);
 
-            console.log(usersToBeNotified);
+            // console.log(usersToBeNotified);
 
             await pubSub.publish('COMMENT_ADDED', commentObj);
 
@@ -70,22 +70,30 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                 data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').select('createdBy id name type slug description blockId blockSpecificComment').lean().exec();
                 await pubSub.publish('LISTEN_NOTIFICATION', { comment: commentObj, usersToBeNotified, post: data })
 
-                const commentType = commentObj.type === 'product' ? 'product' : commentObj.type === 'dream-job' ? 'dream-job' : 'post';
-                postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?type=${data.type}&commentId=${commentObj._id}`;
-
-                const filePathToAuthor = basePath + 'email-template/commentCreateToAuthor';
-                const filePathToCommentor = basePath + 'email-template/commentCreateToCommentor';
-                const payLoadToAuthor = {
-                    NAME: data.createdBy.name,
-                    LINK: postLink,
-                    COMMENTOR_NAME: commentObj.createdBy.name
-                };
-                const payLoadToCommentor = {
-                    NAME: commentObj.createdBy.name,
-                    LINK: postLink
-                };
-                await helper.sendEmail(data.createdBy.email, filePathToAuthor, payLoadToAuthor);
-                await helper.sendEmail(commentObj.createdBy.email, filePathToCommentor, payLoadToCommentor);
+                /** Don't send if the comment is added by post author */
+                if (commentObj.createdBy._id.toString() !== data.createdBy._id.toString()) {
+                    const commentType = commentObj.type === 'product' ? 'product' : commentObj.type === 'dream-job' ? 'dream-job' : 'post';
+                    postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?type=${data.type}&commentId=${commentObj._id}`;
+    
+                    const filePathToAuthor = basePath + 'email-template/common-template';
+                    const filePathToCommentor = basePath + 'email-template/common-template';
+                    const payLoadToAuthor = {
+                        NAME: data.createdBy.name,
+                        LINK: postLink,
+                        // COMMENTOR_NAME: commentObj.createdBy.name,
+                        CONTENT: commentObj.createdBy.name + ' added a comment on your post.',
+                        SUBJECT: 'New Comment!'
+                    };
+                    const payLoadToCommentor = {
+                        NAME: commentObj.createdBy.name,
+                        LINK: postLink,
+                        CONTENT: 'Thank you for commenting. This will add a value to our platform.',
+                        SUBJECT: 'Comment Added!'
+                    };
+    
+                    await helper.sendEmail(data.createdBy.email, filePathToAuthor, payLoadToAuthor);
+                    await helper.sendEmail(commentObj.createdBy.email, filePathToCommentor, payLoadToCommentor);
+                }
             }
             resolve(commentObj);
         } catch (e) {

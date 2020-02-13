@@ -52,20 +52,24 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
                     for (let i = 0; i < populatedTransaction.purchase_units.length; i++) {
                         const creatorEmail = populatedTransaction.purchase_units[i].reference_id.createdBy.email;
                         const creatorName = populatedTransaction.purchase_units[i].reference_id.createdBy.name;
-                        const sellertPath = basePath + 'email-template/bugFixPurchaseToAuthor';
-                        const buyerPath = basePath + 'email-template/bugFixPurchaseToBuyer';
+                        const sellertPath = basePath + 'email-template/common-template';
+                        const buyerPath = basePath + 'email-template/common-template';
     
                         const payLoadToBuyer = {
-                            BUYERNAME: populatedTransaction.purchasedBy.name,
-                            CREATOREMAIL: creatorEmail
+                            // NAME: populatedTransaction.purchasedBy.name,
+                            // CREATOREMAIL: creatorEmail,
+                            CONTENT: `Thank you for purchasing the bug-fix. Here is the email of the bug-fix author ${creatorEmail}. You can contact him/her for the support`,
+                            SUBJECT: 'Bug-fix Purchased!'
                         };
     
                         await helper.sendEmail(populatedTransaction.purchasedBy.email, buyerPath, payLoadToBuyer);
     
                         const payLoadToAuthor = {
-                            AUTHORNAME: creatorName,
+                            NAME: creatorName,
                             BUYERNAME: populatedTransaction.purchasedBy.name,
-                            BUYER_EMAIL: populatedTransaction.purchasedBy.email
+                            BUYER_EMAIL: populatedTransaction.purchasedBy.email,
+                            CONTENT: `Your bug-fix has been purchased by ${populatedTransaction.purchasedBy.name}. This is his/her email ${creatorEmail}.`,
+                            SUBJECT: 'Bug-fix Purchased!'
                         };
                         await helper.sendEmail(creatorEmail, sellertPath, payLoadToAuthor);
                     }

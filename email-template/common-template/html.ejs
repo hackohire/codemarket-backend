@@ -124,22 +124,49 @@
                                                             <p class="fontSize" style="margin-bottom: 15px;"> Dear <%= NAME %>, </p>
 
 
-                                                            <% if (CONTENT) { %>
+                                                            <!-- If the content is set drom the options -->
+                                                            <% if (locals.CONTENT) { %>
                                                                 <p class="fontSize"> <%= CONTENT %> </p>
                                                             <% } %>
 
-
-                                                            <% if (LINK) { %>
+                                                            <!-- If the link is set from the options-->
+                                                            <% if (locals.LINK) { %>
                                                                 <p class="fontSize" style="margin-top: 15px;"> Here is the link, By clicking it you
                                                                     will be redirected to the post. </p>
                                                                 <p class="fontSize"><a href="<%=LINK%>""> <%= LINK %></p>
                                                             <% } %>
+
+                                                            <!-- If the invitation link is set from the options -->
+                                                            <% if (locals.INVITATION_LINK) { %>
+                                                                <p class="fontSize" style="margin-top: 15px;">
+                                                                    Here is the invitation <a href="<%= INVITATION_LINK %>" target="_blank">link</a>, 
+                                                                    By clicking on it, You will be able to successfully accept the invitation
+                                                                </p>
+                                                            <% } %>
+
+                                                            <!-- This part is onl for RSVP event email -->
+                                                            <% if (locals.EVENT_INVITATION_LINK) { %>
+                                                                <p class="fontSize" style="margin-top: 15px;"> You have successfully RSVP for <%= EVENT_NAME %>. </p><br><br>
+                                                                <h3>Event Details:</h3>
+                                                                <p class="fontSize" style="margin-top: 15px;"><strong>From:</strong><%= FROM %></p>
+                                                                <p class="fontSize"><strong>To:</strong><%= TO %></p>
+                                                                <p class="fontSize"><strong>Location:</strong><%= ADDRESS %></p>
+                                                                <p class="fontSize" style="margin-top: 15px;">
+                                                                    Here is the invitation <a href="<%= EVENT_INVITATION_LINK %>" target="_blank">link</a>, 
+                                                                    By clicking on it, You will be able to successfully accept the invitation
+                                                                </p>
+                                                            <% } %>
+
+                                                            
                                                             <br><br>
 
                                                             <p class="fontSize">Thank You.</p>
+
+                                                            <!-- SIGNATURE -->
                                                             <p class="fontSize">
                                                                     - The Codemarket Team</p>
 
+                                                            <!-- -->
                                                             <hr style="border: 0; border-top: 1px solid #eee; margin: 40px 0;">
                                                             <p class="footer-text">Palo Alto, CA 94306, US</p>
                                                         </div>

@@ -61,7 +61,7 @@ async function sendEmail(toEmail, filePath, body) {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!process.env.IS_OFFLINE) {
+            if (!process.env.IS_OFFLINE || true) {
                 const transporter = await nodemailer.createTransport({
                     host: process.env.SMTP_HOST,
                     port: process.env.SMTP_PORT,
@@ -104,13 +104,15 @@ async function sendEmail(toEmail, filePath, body) {
 }
 
 async function sendPostCreationEmail(post, type = '') {
-    const filePath = basePath + 'email-template/productCreate';
+    const filePath = basePath + 'email-template/common-template';
     var productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${post.slug}?type=${post.type}`;
     const payLoad = {
-        AUTHORNAME: post.createdBy.name,
-        PRODUCTNAME: post.name,
-        PRODUCTLINK: productLink,
-        TYPE: type ? type : string.capitalize(post.type)
+        NAME: post.createdBy.name,
+        // PRODUCTNAME: post.name,
+        LINK: productLink,
+        CONTENT: `A ${type ? type : string.capitalize(post.type)} "${post.name}" has been created. Please Click here to check the details.`,
+        SUBJECT: `${type ? type : string.capitalize(post.type)} Created`
+        // TYPE: type ? type : string.capitalize(post.type)
     };
     await sendEmail(post.createdBy.email, filePath, payLoad);
 }

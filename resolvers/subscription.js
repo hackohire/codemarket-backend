@@ -96,13 +96,15 @@ async function inviteMembersToSubscription(_, { subscriptionId, users }, { heade
             if (subscription && subscription.subscriptionUsers && subscription.subscriptionUsers.length) {
                 subscription.subscriptionUsers.forEach(async (u) => {
                     /** Send Email for Invitation */
-                    const filePath = basePath + 'email-template/subscriptionInvitation';
+                    const filePath = basePath + 'email-template/common-template';
                     var invitationLink = process.env.FRONT_END_URL + `dashboard?subscriptionId=${subscriptionId}&email=${u.email}`;
                     // var attendee = subscription.subscriptionUsers.find(u => u.email === email);
                     const payLoad = {
-                        INVITEE: u.name,
+                        NAME: u.name,
                         BUYER: subscription.metadata.userId.name,
                         INVITATION_LINK: invitationLink,
+                        CONTENT: `Mr/Ms ${subscription.metadata.userId.name} has purchased a membership for you on Codemarket</a>`,
+                        SUBJECT: 'Codemarket Subscription Invitation!'
                     };
                     await helper.sendEmail(u.email, filePath, payLoad);
                 })
