@@ -75,8 +75,11 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                     const commentType = commentObj.type === 'product' ? 'product' : commentObj.type === 'dream-job' ? 'dream-job' : 'post';
                     postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?type=${data.type}&commentId=${commentObj._id}`;
     
+                    /** Reference to the common email templates foler */
                     const filePathToAuthor = basePath + 'email-template/common-template';
                     const filePathToCommentor = basePath + 'email-template/common-template';
+
+                    /** Creating dynamic varibales such as link, subject and email content */
                     const payLoadToAuthor = {
                         NAME: data.createdBy.name,
                         LINK: postLink,
@@ -90,7 +93,8 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                         CONTENT: 'Thank you for commenting. This will add a value to our platform.',
                         SUBJECT: 'Comment Added!'
                     };
-    
+
+                    /** Sending the email */
                     await helper.sendEmail(data.createdBy.email, filePathToAuthor, payLoadToAuthor);
                     await helper.sendEmail(commentObj.createdBy.email, filePathToCommentor, payLoadToCommentor);
                 }
