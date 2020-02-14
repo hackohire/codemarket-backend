@@ -15,8 +15,13 @@ const graphQlCompanySchema = `
         questions: [descriptionBlocks]
         location: Location
         cover: String
-        posts: [CompanyPost]
         comments: [Comment]
+        websiteLink: String
+        facebookLink: String
+        instagramLink: String
+        twitterLink: String
+        yelpLink: String
+        linkedinLink: String
     }
 
     input CompanyInput {
@@ -31,27 +36,12 @@ const graphQlCompanySchema = `
         cities: [CityInput]
         location: LocationInput
         cover: String
-        posts: [CompanyPostInput]
-    }
-
-    type CompanyPost {
-        description: [descriptionBlocks]
-        postType: String
-        createdAt: String
-        updatedAt: String
-        createdBy: User
-        _id: ID
-        comments: [Comment]
-    }
-
-    input CompanyPostInput {
-        description: [InputdescriptionBlock]
-        postType: String
-        createdAt: String
-        updatedAt: String
-        createdBy: ID
-        _id: ID
-        comments: [CommentInput]
+        websiteLink: String
+        facebookLink: String
+        instagramLink: String
+        twitterLink: String
+        yelpLink: String
+        linkedinLink: String
     }
 
     type City {
