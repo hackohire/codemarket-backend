@@ -57,7 +57,39 @@ async function insertManyIntoCities(cities) {
     return citiesAdded;
 }
 
-async function sendEmail(toEmail, filePath, body) {
+async function sendEmailWithStaticContent(event, context) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            /** parse body */
+            let body;
+            try {
+                body = JSON.parse(event.body);
+            } catch (e) {
+                body = {};
+            }
+
+            const emailSent = await sendEmail(body.email, basePath + 'email-template/be-fearless-summit', {}, 'sumi@lifeunfilteredwithalexa.com');
+            return resolve({
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+                body: JSON.stringify({ emailSent })
+            });
+        }
+        catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+
+    // let conn = await connectToMongoDB();
+    // conn.collection('emails').findOneAndUpdate({email: body.email}, {$set: });
+
+}
+
+async function sendEmail(toEmail, filePath, body, fromEmail = '') {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -77,7 +109,7 @@ async function sendEmail(toEmail, filePath, body) {
                     console.log('Error HTML Email Template Rendering', err)
                     const { html, subject } = result;
                     const mailOptions = {
-                        from: process.env.FROM_EMAIL,
+                        from: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         to: toEmail,
                         replyTo: process.env.FROM_EMAIL,
                         subject: subject,
@@ -166,5 +198,6 @@ module.exports = {
     sendEmail,
     insertManyIntoPurchasedUnit,
     sendPostCreationEmail,
-    sendMessageToWebsocketClient
+    sendMessageToWebsocketClient,
+    sendEmailWithStaticContent
 }

@@ -139,6 +139,14 @@ functions:
           method: POST
           cors: true
 
+  sendEmailWithStaticContent:
+    handler: helpers/helper.sendEmailWithStaticContent
+    events:
+      - http:
+          path: sendEmailWithStaticContent
+          method: POST
+          cors: true
+
   fetchLinkMeta:
     handler: handler.fetchLinkMeta
     events:
