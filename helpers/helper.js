@@ -75,7 +75,7 @@ async function sendEmailWithStaticContent(event, context) {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Credentials': true,
                 },
-                body: JSON.stringify({ emailSent })
+                body: JSON.stringify({ emailSent, email: body.email })
             });
         }
         catch (e) {
