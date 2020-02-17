@@ -328,7 +328,7 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
     });
 }
 
-async function getAllPosts(_, { pageOptions, type, referencePostId, companyId, connectedWithUser, createdBy }, { headers, db, decodedToken }) {
+async function getAllPosts(_, { pageOptions, type, reference, companyId, connectedWithUser, createdBy }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -353,10 +353,19 @@ async function getAllPosts(_, { pageOptions, type, referencePostId, companyId, c
                 // condition['isPostUnderCompany'] = { $ne: true }
             }
 
-            if (referencePostId) {
+            if (reference && reference.referencePostId) {
                 condition['$and'] = [{
                     '$or': [
-                        { referencePostId: ObjectID(referencePostId) },
+                        { referencePostId: ObjectID(reference.referencePostId) },
+                    ]
+                }]
+            }
+
+            console.log(reference)
+            if (reference && reference.connectedEvent) {
+                condition['$and'] = [{
+                    '$or': [
+                        { connectedEvent: ObjectID(reference.connectedEvent) },
                     ]
                 }]
             }
