@@ -111,6 +111,7 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                     const mailOptions = {
                         from: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         to: toEmail,
+                        cc: fromEmail,
                         replyTo: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         subject: subject,
                         html: html,
