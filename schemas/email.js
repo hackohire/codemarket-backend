@@ -22,6 +22,8 @@ const graphQlEmailSchema = `
         createdAt: String
         updatedAt: String
         comments: [Comment]
+
+        slug: String
     }
 
     input EmailInput {
@@ -44,8 +46,9 @@ const graphQlEmailSchema = `
 
         createdAt: String
         updatedAt: String
-        slug: String
         comments: [CommentInput]
+
+        slug: String
     }    
 
     extend type Mutation {

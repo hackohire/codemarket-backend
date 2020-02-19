@@ -40,18 +40,21 @@ async function sendEmail(_, { email }, { headers, db, decodedToken }) {
 
                 /** Save the email */
                 const int = await new Email(email);
+
+                /** Save the email as a post too */
+                const emailPost = { ...email };
+                emailPost['name'] = emailPost.subject;
+                emailPost['connectedEmail'] = int._id;
+                const post = await new Post(emailPost);
+                await post.save();
+
+
+                int['slug'] = post['slug'];
                 await int.save().then(async (p) => {
                     p.populate('createdBy').execPopulate().then(async populatedEmail => {
                         resolve(populatedEmail);
                     });
                 });
-
-                /** Save the email as a post too */
-                const emailPost = {...email};
-                emailPost['name'] = emailPost.subject;
-                emailPost['connectedEmail'] = int._id;
-                const post = await new Post(emailPost);
-                await post.save();
             }
         } catch (e) {
             console.log(e);
