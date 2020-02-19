@@ -35,7 +35,9 @@ const postSchema = new Schema(
                 'mission',                /** company post type */
                 'company-post',            /** company post type */
 
-                'assignment'            /** Post Type Connected with company */
+                'assignment',            /** Post Type Connected with company */
+
+                'email'                  /** Post type for Email */
             ],
         },
         featuredImage: String,
@@ -180,6 +182,9 @@ const postSchema = new Schema(
 
         /** Storing Event Id in this field to connect the events with how to docs and the assignment */
         connectedEvent: Schema.Types.ObjectId,
+
+        /** Storing Email Id in this field to connect email with the post */
+        connectedEmail: Schema.Types.ObjectId
 
     },
     {

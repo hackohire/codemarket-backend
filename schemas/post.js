@@ -132,6 +132,7 @@ const graphQlPostSchema = `
 
         connectedEvent: ID
         referencePostId: ID
+        connectedEmail: ID
     }
 
     type Location {
