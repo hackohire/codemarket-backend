@@ -49,6 +49,7 @@ async function sendEmail(_, { email }, { headers, db, decodedToken }) {
                 await post.save();
 
 
+                /** Save the post slug into email also, because it can be required to fetch the post */
                 int['slug'] = post['slug'];
                 await int.save().then(async (p) => {
                     p.populate('createdBy').execPopulate().then(async populatedEmail => {
