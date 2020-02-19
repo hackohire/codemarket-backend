@@ -341,7 +341,7 @@ const attachCardAndCreateSubscription = async (event, context) => {
                 CONTENT: `You have successfully subscribed for ${sub.plan.nickname}.`,
                 SUBJECT: 'Thanks for choosing us!',
             };
-            await helper.sendEmail(body.metadata.email, filePath, payLoad);
+            await helper.sendEmail({to: [body.metadata.email]}, filePath, payLoad);
 
             return resolve({
                 statusCode: 200,

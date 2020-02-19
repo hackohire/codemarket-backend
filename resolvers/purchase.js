@@ -62,7 +62,7 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
                             SUBJECT: 'Bug-fix Purchased!'
                         };
     
-                        await helper.sendEmail(populatedTransaction.purchasedBy.email, buyerPath, payLoadToBuyer);
+                        await helper.sendEmail({to: [populatedTransaction.purchasedBy.email]}, buyerPath, payLoadToBuyer);
     
                         const payLoadToAuthor = {
                             NAME: creatorName,
@@ -71,7 +71,7 @@ async function addTransaction(_, { transaction }, { headers, db, decodedToken })
                             CONTENT: `Your bug-fix has been purchased by ${populatedTransaction.purchasedBy.name}. This is his/her email ${creatorEmail}.`,
                             SUBJECT: 'Bug-fix Purchased!'
                         };
-                        await helper.sendEmail(creatorEmail, sellertPath, payLoadToAuthor);
+                        await helper.sendEmail({to: [creatorEmail]}, sellertPath, payLoadToAuthor);
                     }
                 
                     return resolve({ purchasedUnits: populatedTransaction.purchase_units });

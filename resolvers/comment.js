@@ -95,8 +95,8 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                     };
 
                     /** Sending the email */
-                    await helper.sendEmail(data.createdBy.email, filePathToAuthor, payLoadToAuthor);
-                    await helper.sendEmail(commentObj.createdBy.email, filePathToCommentor, payLoadToCommentor);
+                    await helper.sendEmail({to: [data.createdBy.email]}, filePathToAuthor, payLoadToAuthor);
+                    await helper.sendEmail({to: [commentObj.createdBy.email]}, filePathToCommentor, payLoadToCommentor);
                 }
             }
             resolve(commentObj);
