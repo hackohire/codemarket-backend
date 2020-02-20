@@ -33,7 +33,10 @@ const postSchema = new Schema(
                 'business-goal',          /** company / user post type */
                 'team-goal',              /** company post type */
                 'mission',                /** company post type */
-                'company-post'            /** company post type */
+                'company-post',           /** company post type */
+                'company-template',       /** company post type */
+                'company-profile',         /** company post type */
+                'competitive-advantage'   /** company post type */
             ],
         },
         featuredImage: String,
