@@ -57,7 +57,7 @@ async function insertManyIntoCities(cities) {
     return citiesAdded;
 }
 
-async function sendEmail(toEmail, filePath, body) {
+async function sendEmail(recepients, filePath, body) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -73,31 +73,32 @@ async function sendEmail(toEmail, filePath, body) {
                     secure: true
                 });
                 const template = new EmailTemplate(filePath);
-                await template.render(body, async (err, result) => {
-                    console.log('Error HTML Email Template Rendering', err)
-                    const { html, subject } = result;
-                    const mailOptions = {
-                        from: process.env.FROM_EMAIL,
-                        to: toEmail,
-                        replyTo: process.env.FROM_EMAIL,
-                        subject: subject,
-                        html: html,
-                    };
-                    await transporter.sendMail(mailOptions, (error, response) => {
-                        if (error) {
-                            console.log('Mail Sending Error', error);
-                            resolve(false);
-                        } else {
-                            console.log('Mail Sent Successfully', response);
-                            resolve(true);
-                        }
-                    });
-                });
+
+                const renderedTemplate = await template.render(body);
+
+                const mailOptions = {
+                    from: process.env.FROM_EMAIL,
+                    to: recepients.to,
+                    cc: recepients.cc,
+                    bcc: recepients.bcc,
+                    replyTo: process.env.FROM_EMAIL,
+                    subject: renderedTemplate.subject,
+                    html: renderedTemplate.html,
+                }; 
+
+                const emailSent = await transporter.sendMail(mailOptions);
+
+                if (emailSent) {
+                    return resolve(true);
+                } else {
+                    return reject(false);
+                }
             } else {
                 resolve(true);
             }
 
         } catch (err) {
+            console.log(err);
             return err;
         }
     })
@@ -114,7 +115,7 @@ async function sendPostCreationEmail(post, type = '') {
         SUBJECT: `${type ? type : string.capitalize(post.type)} Created`
         // TYPE: type ? type : string.capitalize(post.type)
     };
-    await sendEmail(post.createdBy.email, filePath, payLoad);
+    await sendEmail({to: [post.createdBy.email]}, filePath, payLoad);
 }
 
 async function insertManyIntoPurchasedUnit(units) {

@@ -46,7 +46,7 @@ type User {
 
   input CurrentJobDetailsInput {
     jobProfile: [ID]
-    company: ID
+    company: CompanyInput
     companyLocation: String
   }
   

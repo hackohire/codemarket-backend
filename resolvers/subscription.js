@@ -106,7 +106,7 @@ async function inviteMembersToSubscription(_, { subscriptionId, users }, { heade
                         CONTENT: `Mr/Ms ${subscription.metadata.userId.name} has purchased a membership for you on Codemarket</a>`,
                         SUBJECT: 'Codemarket Subscription Invitation!'
                     };
-                    await helper.sendEmail(u.email, filePath, payLoad);
+                    await helper.sendEmail({to: [u.email]}, filePath, payLoad);
                 })
             }
             return await resolve(subscription);

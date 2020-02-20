@@ -211,7 +211,7 @@ async function getUserById(_, { userId }, { headers, db, decodedToken }) {
 
 
             // Getting user Data by passing the userId
-            User.findById(userId).exec( async (err, res) => {
+            await User.findById(userId).populate('currentJobDetails.jobProfile').populate('currentJobDetails.company').exec( async (err, res) => {
 
                 // if error, reject with error
                 if (err) {

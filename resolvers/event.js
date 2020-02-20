@@ -56,7 +56,7 @@ async function rsvpEvent(_, { userId, eventId }, { event, db }) {
                     ADDRESS: updatedPostWithAttendees.address ?  updatedPostWithAttendees.address : '',
                     SUBJECT: `We welcome you to the event ${updatedPostWithAttendees.name}!`
                 };
-                await helper.sendEmail(attendee.email, filePath, payLoad);
+                await helper.sendEmail({to: [attendee.email]}, filePath, payLoad);
                 return resolve({ usersAttending: updatedPostWithAttendees.usersAttending, validSubscription });
             } else {
                 return resolve({ validSubscription })

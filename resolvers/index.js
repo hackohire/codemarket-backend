@@ -10,6 +10,7 @@ const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByTy
 const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
 const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
+const { sendEmail } = require('./email');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
@@ -87,6 +88,7 @@ module.exports = {
 
     addQuestionOrAnswer, updateQuestionOrAnswer,
 
+    sendEmail
   },
   Subscription: {
     onCommentAdded: {
