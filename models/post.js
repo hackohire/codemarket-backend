@@ -36,7 +36,9 @@ const postSchema = new Schema(
                 'company-post',           /** company post type */
                 'company-template',       /** company post type */
                 'company-profile',         /** company post type */
-                'competitive-advantage'   /** company post type */
+                'competitive-advantage',   /** company post type */
+
+                'assignment'            /** Post Type Connected with company */
             ],
         },
         featuredImage: String,
@@ -85,6 +87,7 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         }],
+        cover: String,
 
         /** Dreamjob Specific Fields */
         cities: [{
@@ -177,6 +180,9 @@ const postSchema = new Schema(
             type: String,
             data: Schema.Types.Mixed,
         })]],
+
+        /** Storing Event Id in this field to connect the events with how to docs and the assignment */
+        connectedEvent: Schema.Types.ObjectId,
 
     },
     {

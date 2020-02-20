@@ -30,6 +30,7 @@ const graphQlPostSchema = `
         membershipRequired: Boolean
         validSubscription: Boolean
         usersAttending: [User]
+        cover: String
 
         cities: [City]
         company: Company
@@ -62,6 +63,7 @@ const graphQlPostSchema = `
 
         hiringProcess: [[descriptionBlocks]]
 
+        connectedEvent: ID
 
         purchasedBy: [PurchasedBy]
     }
@@ -94,6 +96,7 @@ const graphQlPostSchema = `
         address: String
         eventType: String
         membershipRequired: Boolean
+        cover: String
 
         cities: [ID]
         company: ID
@@ -127,6 +130,7 @@ const graphQlPostSchema = `
 
         hiringProcess: [[InputdescriptionBlock]]
 
+        connectedEvent: ID
         referencePostId: ID
     }
 
