@@ -99,6 +99,7 @@ const graphQlPostSchema = `
         cover: String
 
         cities: [ID]
+        collaborators: [ID]
         company: CompanyInput
         isPostUnderCompany: Boolean
         companies: [ID]

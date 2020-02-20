@@ -144,6 +144,10 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "tag",
         }],
+        collaborators: [{
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }],
         sellProducts: {
             sellProducts: Boolean,
             products: [{
