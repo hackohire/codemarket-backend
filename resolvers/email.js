@@ -2,9 +2,10 @@ const connectToMongoDB = require('../helpers/db');
 const Email = require('../models/email')();
 const Post = require('../models/post')();
 const helper = require('../helpers/helper');
+const auth = require('../helpers/auth');
 let conn;
 
-async function sendEmail(_, { email }, { headers, db, decodedToken }) {
+async function sendEmail(_, { email }, { event, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -15,10 +16,27 @@ async function sendEmail(_, { email }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
+            const user = await auth.auth(event.headers);
+
+
             /** If company is set add the company link */
             if (email.company) {
                 let companyHTMLContent = `<div style="padding-top: 40px; text-align: left">Company: <a href="${process.env.FRONT_END_URL}company/${email.company._id}">
                 ${email.company.name}</a></div>`
+                email.description.push({
+                    type: 'paragraph',
+                    data: {
+                        text: companyHTMLContent
+                    }
+                });
+
+                email.descriptionHTML += companyHTMLContent;
+            }
+
+            /** Set Sent By */
+            if (user) {
+                let companyHTMLContent = `<div style="padding-top: 40px; text-align: left">Sent By: <a href="${process.env.FRONT_END_URL}dashboard/profile/${email.createdBy}">
+                ${user.name}</a></div>`
                 email.description.push({
                     type: 'paragraph',
                     data: {
