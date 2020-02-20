@@ -16,8 +16,8 @@ async function sendEmail(_, { email }, { event, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
+            /** Fetch User from token  */
             const user = await auth.auth(event.headers);
-
 
             /** If company is set add the company link */
             if (email.company) {
