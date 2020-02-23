@@ -68,13 +68,16 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             /** Send Email Only if comment type is post */
             if (commentObj.type === 'post' || commentObj.type === 'product' || commentObj.type === 'dream-job') {
                 data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').select('createdBy id name type slug description blockId blockSpecificComment').lean().exec();
-                await pubSub.publish('LISTEN_NOTIFICATION', { comment: commentObj, usersToBeNotified, post: data })
+                let commentNoti = commentObj.toObject();
+                commentNoti['referencePost'] = data;
+                /** Alert Message Notification */
+                await pubSub.publish('LISTEN_NOTIFICATION', { comment: commentNoti, usersToBeNotified })
 
                 /** Don't send if the comment is added by post author */
                 if (commentObj.createdBy._id.toString() !== data.createdBy._id.toString()) {
                     const commentType = commentObj.type === 'product' ? 'product' : commentObj.type === 'dream-job' ? 'dream-job' : 'post';
                     postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?type=${data.type}&commentId=${commentObj._id}`;
-    
+
                     /** Reference to the common email templates foler */
                     const filePathToAuthor = basePath + 'email-template/common-template';
                     const filePathToCommentor = basePath + 'email-template/common-template';
@@ -95,8 +98,8 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                     };
 
                     /** Sending the email */
-                    await helper.sendEmail({to: [data.createdBy.email]}, filePathToAuthor, payLoadToAuthor);
-                    await helper.sendEmail({to: [commentObj.createdBy.email]}, filePathToCommentor, payLoadToCommentor);
+                    await helper.sendEmail({ to: [data.createdBy.email] }, filePathToAuthor, payLoadToAuthor);
+                    await helper.sendEmail({ to: [commentObj.createdBy.email] }, filePathToCommentor, payLoadToCommentor);
                 }
             }
             resolve(commentObj);
@@ -210,10 +213,127 @@ async function updateComment(_, { commentId, text }, { headers, db, decodedToken
     });
 }
 
+/** Fecth all the comments added by anyone, on the posts created by loggedin user */
+async function fetchLatestCommentsForTheUserEngaged(_, { pageOptions, userId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
+
+            let c = await Comment.aggregate([
+                { $match: { status: {$ne: 'Deleted'}, createdBy: {$ne: ObjectID(userId)}}},
+                {
+                    /** Fetch the post realted to that comment created by the loggedin user */
+                    $lookup: {
+                        from: 'posts',
+                        as: 'referencePost',
+                        let: { status: "$status", reference_id: "$referenceId" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            { $ne: ["$status", "Deleted"] },
+                                            { $eq: ["$$reference_id", "$_id"] },
+                                            { $eq: [ObjectID(userId), '$createdBy'] }
+                                            // { $eq: ["$parentId", null] }
+                                        ]
+                                    }
+                                }
+                            },
+                        ]
+                    }
+                },
+                {
+                    /** Fetch the company realted to that comment created by the loggedin user */
+                    $lookup: {
+                        from: 'companies',
+                        as: 'referenceCompany',
+                        let: { status: "$status", reference_id: "$referenceId" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            { $ne: ["$status", "Deleted"] },
+                                            { $eq: ["$$reference_id", "$_id"] },
+                                            { $eq: [ObjectID(userId), '$createdBy'] }
+                                            // { $eq: ["$parentId", null] }
+                                        ]
+                                    }
+                                }
+                            },
+                        ]
+                    }
+                },
+                {
+                    $match: {
+                        $or: [
+                            {
+                                referencePost: { $size: 1 }
+                            },
+                            {
+                                referenceCompany: { $size: 1 }
+                            }
+                        ]
+                    }
+                },
+                {
+                    $unwind: {
+                        path: '$referencePost',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $unwind: {
+                        path: '$referenceCompany',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        "from": "users",
+                        "let": { "created_by": "$createdBy" },
+                        pipeline: [
+                            { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
+                        ],
+                        as: "createdBy"
+                    }
+                },
+                {
+                    $unwind: {
+                        "path": "$createdBy",
+                        "preserveNullAndEmptyArrays": true
+                    }
+                },
+
+            ])
+                .sort(sort)
+                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                .limit(pageOptions.limit)
+                .exec();
+
+            return resolve({messages: c, total: 1000});
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 module.exports = {
     addComment,
     getComments,
     getCommentsByReferenceId,
     deleteComment,
-    updateComment
+    updateComment,
+    fetchLatestCommentsForTheUserEngaged
 }
