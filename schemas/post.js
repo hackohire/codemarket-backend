@@ -22,7 +22,7 @@ const graphQlPostSchema = `
 
         connectedWithUser: User
         isPostUnderUser: Boolean
-
+        collaborators: [collaborators]
         dateRange: [String]
         location: Location
         address: String
@@ -99,7 +99,7 @@ const graphQlPostSchema = `
         cover: String
 
         cities: [ID]
-        collaborators: [ID]
+        collaborators: [collaboratorsInput]
         company: CompanyInput
         isPostUnderCompany: Boolean
         companies: [ID]
@@ -134,6 +134,16 @@ const graphQlPostSchema = `
         connectedEvent: ID
         referencePostId: ID
         connectedEmail: ID
+    }
+
+    type collaborators {
+        _id: ID
+        name: String
+    }
+
+    input collaboratorsInput {
+        _id: ID
+        name: String
     }
 
     type Location {
