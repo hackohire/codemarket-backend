@@ -53,7 +53,8 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             var postLink;
 
             let usersCommented = await Comment.find({ referenceId: comment.referenceId, status: { $ne: 'Deleted' }, createdBy: { $ne: comment.createdBy } }).select('createdBy').exec();
-            let usersLiked = await Like.find({ referenceId: comment.referenceId, userId: { $ne: comment.createdBy } }).select('userId').exec();
+            let usersLiked = [];
+            // await Like.find({ referenceId: comment.referenceId, userId: { $ne: comment.createdBy } }).select('userId').exec();
 
             let usersToBeNotified = usersCommented.concat(usersLiked);
             usersToBeNotified = forEach(usersToBeNotified, function (value, key) {
@@ -213,7 +214,10 @@ async function updateComment(_, { commentId, text }, { headers, db, decodedToken
     });
 }
 
-/** Fecth all the comments added by anyone, on the posts created by loggedin user */
+/** 
+ * 1. Fecth all the comments added by anyone, on the posts created by loggedin user 
+ * 2. Fetch all the comments that are added as relpy to the loggedin user's comments
+*/
 async function fetchLatestCommentsForTheUserEngaged(_, { pageOptions, userId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -226,10 +230,12 @@ async function fetchLatestCommentsForTheUserEngaged(_, { pageOptions, userId }, 
             }
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
-            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : -1 };
 
             let c = await Comment.aggregate([
-                { $match: { status: {$ne: 'Deleted'}, createdBy: {$ne: ObjectID(userId)}}},
+
+
+                { $match: { status: { $ne: 'Deleted' }, createdBy: { $ne: ObjectID(userId) } } },
                 {
                     /** Fetch the post realted to that comment created by the loggedin user */
                     $lookup: {
@@ -243,8 +249,6 @@ async function fetchLatestCommentsForTheUserEngaged(_, { pageOptions, userId }, 
                                         $and: [
                                             { $ne: ["$status", "Deleted"] },
                                             { $eq: ["$$reference_id", "$_id"] },
-                                            { $eq: [ObjectID(userId), '$createdBy'] }
-                                            // { $eq: ["$parentId", null] }
                                         ]
                                     }
                                 }
@@ -265,8 +269,26 @@ async function fetchLatestCommentsForTheUserEngaged(_, { pageOptions, userId }, 
                                         $and: [
                                             { $ne: ["$status", "Deleted"] },
                                             { $eq: ["$$reference_id", "$_id"] },
-                                            { $eq: [ObjectID(userId), '$createdBy'] }
-                                            // { $eq: ["$parentId", null] }
+                                        ]
+                                    }
+                                }
+                            },
+                        ]
+                    }
+                },
+                {
+                    /** Fetch the parent comment realted to that child comment, and check if parent comment is created by the loggedin user */
+                    $lookup: {
+                        from: 'comments',
+                        as: 'parentComment',
+                        let: { status: "$status", parentId: "$parentId" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            { $ne: ["$status", "Deleted"] },
+                                            { $eq: ["$$parentId", "$_id"] },
                                         ]
                                     }
                                 }
@@ -277,26 +299,17 @@ async function fetchLatestCommentsForTheUserEngaged(_, { pageOptions, userId }, 
                 {
                     $match: {
                         $or: [
-                            {
-                                referencePost: { $size: 1 }
-                            },
-                            {
-                                referenceCompany: { $size: 1 }
-                            }
+                            { 'referencePost.createdBy': ObjectID(userId) },
+                            { 'referenceCompany.createdBy': ObjectID(userId) },
+                            { 'parentComment.createdBy': ObjectID(userId) }
                         ]
                     }
                 },
                 {
-                    $unwind: {
-                        path: '$referencePost',
-                        preserveNullAndEmptyArrays: true
-                    }
+                    $unwind: { path: '$referencePost', preserveNullAndEmptyArrays: true }
                 },
                 {
-                    $unwind: {
-                        path: '$referenceCompany',
-                        preserveNullAndEmptyArrays: true
-                    }
+                    $unwind: { path: '$referenceCompany', preserveNullAndEmptyArrays: true }
                 },
                 {
                     $lookup: {
@@ -309,19 +322,16 @@ async function fetchLatestCommentsForTheUserEngaged(_, { pageOptions, userId }, 
                     }
                 },
                 {
-                    $unwind: {
-                        "path": "$createdBy",
-                        "preserveNullAndEmptyArrays": true
-                    }
+                    $unwind: { "path": "$createdBy", "preserveNullAndEmptyArrays": true }
                 },
 
             ])
                 .sort(sort)
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
                 .limit(pageOptions.limit)
-                .exec();
+                .exec()
 
-            return resolve({messages: c, total: 1000});
+            return resolve({ messages: c, total: 1000 });
         } catch (e) {
             console.log(e);
             return reject(e);
