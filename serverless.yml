@@ -1,4 +1,4 @@
-service: codemarketeugeneapi
+service: codemarketkevinapi
 
 provider:
   name: aws
