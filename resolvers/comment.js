@@ -235,7 +235,11 @@ async function fetchLatestCommentsForTheUserEngaged(_, { pageOptions, userId }, 
             let c = await Comment.aggregate([
 
 
-                { $match: { status: { $ne: 'Deleted' }, createdBy: { $ne: ObjectID(userId) } } },
+                { $match: { 
+                    status: { $ne: 'Deleted' },
+                    /** Uncomment this, when we don't want to show comments added by himself */
+                    // createdBy: { $ne: ObjectID(userId) }
+                } },
                 {
                     /** Fetch the post realted to that comment created by the loggedin user */
                     $lookup: {
