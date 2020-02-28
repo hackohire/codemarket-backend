@@ -142,6 +142,7 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                 .populate('sellServices.services')
                 .populate('fundingBy')
                 .populate('fundingTo')
+                .populate('collaborators')
 
                 .exec(async (err, res) => {
 
@@ -269,6 +270,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                     .populate('sellServices.services')
                     .populate('fundingBy')
                     .populate('fundingTo')
+                    .populate('collaborators')
                     // .populate('connectedWithUser')
 
                     .execPopulate().then(async (d) => {
