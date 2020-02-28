@@ -64,7 +64,6 @@ type User {
 
   type SubscriptionEvents {
     onCommentAdded: Comment
-    post: Post
   }
 
   type UserPostSubscriptionResponse {
