@@ -14,19 +14,15 @@
   "devDependencies": {
     "eslint": "^5.16.0",
     "serverless": "^1.53.0",
-    "serverless-domain-manager": "^3.2.6",
     "serverless-dynamodb-local": "^0.2.38",
     "serverless-offline": "^5.11.0",
-    "serverless-plugin-additional-stacks": "^1.2.0",
     "serverless-plugin-offline-dynamodb-stream": "^1.0.19"
   },
   "dependencies": {
     "amazon-cognito-identity-js": "^3.0.13",
     "apollo-server-lambda": "^2.9.15",
     "aws-lambda-graphql": "1.0.0-alpha.0",
-    "aws-sdk": "^2.493.0",
     "axios": "^0.18.1",
-    "bluebird": "^3.5.5",
     "cheerio": "^1.0.0-rc.2",
     "ejs": "^2.7.1",
     "email-templates-v2": "^2.0.3",
@@ -35,7 +31,6 @@
     "graphql-tools": "^4.0.6",
     "jsonwebtoken": "^8.5.1",
     "jwk-to-pem": "^2.0.1",
-    "jwks-rsa": "^1.5.1",
     "lodash": "^4.17.14",
     "moment": "^2.24.0",
     "mongoose": "^5.5.14",
@@ -43,7 +38,6 @@
     "nodemailer": "^6.3.0",
     "sanitize-html": "^1.20.0",
     "stripe": "^7.1.0",
-    "url-metadata": "^2.4.0",
-    "uuid-apikey": "^1.4.3"
+    "url-metadata": "^2.4.0"
   }
 }
