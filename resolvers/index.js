@@ -1,6 +1,6 @@
 const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
 const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
-const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment');
+const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
 const { findFromCollection, addToCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
@@ -26,7 +26,7 @@ module.exports = {
     // getProductsByUserId,
     // getProductById,
 
-    getComments, getCommentsByReferenceId, deleteComment,
+    getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged,
 
     getPostsByUserIdAndType, getPostById, getPostsByType,
 
@@ -145,7 +145,7 @@ module.exports = {
     onUserOnline: {
       resolve: (rootValue) => {
         // root value is the payload from sendMessage mutation
-        return { onCommentAdded: rootValue.comment, post: rootValue.post };
+        return { onCommentAdded: rootValue.comment, };
       },
       subscribe: withFilter(
         pubSub.subscribe('LISTEN_NOTIFICATION'),
@@ -200,6 +200,13 @@ module.exports = {
       ),
     }
   },
+
+  // CommentInterface: {
+  //   __resolveType(comment, context, info) {
+  //     return comment;
+  //   }
+  // },
+
   descriptionBlocks: {
     __resolveType(block, context, info) {
 

@@ -58,41 +58,6 @@ input SupportInput {
   description: [InputdescriptionBlock]
 }
 
-type Comment {
-  parents: [Comment]
-  children: [Comment]
-  _id: ID
-  text: [descriptionBlocks]
-  referenceId: ID
-  companyReferenceId: ID
-  userReferenceId: ID
-  type: String
-  parentId: ID
-  createdBy: User
-  createdAt: String
-
-  blockSpecificComment: Boolean
-  blockId: ID
-}
-
-input CommentInput {
-  parents: [ID]
-  children: [ID]
-  discussion_id: String
-  parentId: ID
-  referenceId: ID
-  companyReferenceId: ID
-  userReferenceId: ID
-  type: String
-  _id: ID
-  text: [InputdescriptionBlock]
-  createdBy: ID
-  createdAt: String
-
-  blockSpecificComment: Boolean
-  blockId: ID
-}
-
 type Tag {
   name: String
   type: String
@@ -388,23 +353,11 @@ type Query {
   getAllProducts: [Product]
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]
 
-  getComments(commentId: String): Comment
-  getCommentsByReferenceId(referenceId: String): [Comment]
-  deleteComment(commentId: String): String
-
   findFromCollection(keyWord: String, searchCollection: String, type: String): [Tag]
 }
 
 type Mutation {
-  addComment(comment: CommentInput): Comment
-  updateComment(commentId: String, text: [InputdescriptionBlock]): Comment
   addToCollection(keyWord: String, searchCollection: String, type: String): Tag
-}
-
-type Subscription {
-  onCommentAdded(postId: String, companyId: String, userId: String): Comment
-  onCommentUpdated(postId: String, companyId: String, userId: String): Comment
-  onCommentDeleted(postId: String, companyId: String, userId: String): Comment
 }
 `
 
