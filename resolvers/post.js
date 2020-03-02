@@ -18,6 +18,8 @@ var ObjectID = require('mongodb').ObjectID;
 // var moment = require('moment');
 // var ObjectID = require('mongodb').ObjectID;
 const { pubSub } = require('../helpers/pubsub');
+const differenceBy = require('lodash/array').differenceBy;
+
 let conn;
 
 
@@ -143,6 +145,7 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                 .populate('fundingBy')
                 .populate('fundingTo')
                 .populate('collaborators')
+                .populate('assignees')
 
                 .exec(async (err, res) => {
 
@@ -250,8 +253,9 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                 post.tags = await helper.insertManyIntoTags(post.tags);
             }
 
+            const postTemp = await Post.findOne({_id: post._id});
 
-            await Post.findOneAndUpdate({ _id: post._id }, post, { new: true, useFindAndModify: false }, (err, res) => {
+            await Post.findOneAndUpdate({ _id: post._id }, post, { new: true, useFindAndModify: false }, async (err, res) => {
                 if (err) {
                     return reject(err)
                 }
@@ -271,6 +275,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                     .populate('fundingBy')
                     .populate('fundingTo')
                     .populate('collaborators')
+                    .populate('assignees')
                     // .populate('connectedWithUser')
 
                     .execPopulate().then(async (d) => {
@@ -279,8 +284,49 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                             await pubSub.publish('COMPANY_POST_CHANGES', { postUpdated: d });
                         }
                         // if (d && d.isPostUnderUser) {
-                            await pubSub.publish('USERS_POST_CHANGES', { postUpdated: d });
+                        await pubSub.publish('USERS_POST_CHANGES', { postUpdated: d });
                         // }
+
+                        if(res && post.collaborators && post.collaborators.length) {
+                            const collaboratorsAfterUpdate = await res.toObject();
+                            const collaboratorsBeforeUpdate = (await postTemp.populate('collaborators').execPopulate()).toObject();
+                            const collaboratorsToSendEmail = differenceBy(collaboratorsAfterUpdate.collaborators, collaboratorsBeforeUpdate.collaborators, 'email');
+        
+                            const filePath = basePath + 'email-template/common-template';
+                            const productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${res.slug}?type=${res.type}`;
+                            collaboratorsToSendEmail.forEach(async (u) => {
+                                const payLoad = {
+                                    NAME: u.name,
+                                    LINK: productLink,
+                                    CONTENT: `You have been added as a collaborator on "${res.name}" by ${res.createdBy.name}. Please Click here to check the details.`,
+                                    SUBJECT: `Collaborator Rights Given`
+                                    // TYPE: type ? type : string.capitalize(post.type)
+                                };
+                                await helper.sendEmail({to: [u.email]}, filePath, payLoad);
+                            })
+                            console.log(collaboratorsToSendEmail);
+                        }
+
+                        if(res && post.assignees && post.assignees.length) {
+                            const assigneesAfterUpdate = await res.toObject();
+                            const assigneesBeforeUpdate = (await postTemp.populate('assignees').execPopulate()).toObject();
+                            const assiggneesToSendEmail = differenceBy(assigneesAfterUpdate.assignees, assigneesBeforeUpdate.assignees, 'email');
+        
+                            const filePath = basePath + 'email-template/common-template';
+                            const productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${res.slug}?type=${res.type}`;
+                            assiggneesToSendEmail.forEach(async (u) => {
+                                const payLoad = {
+                                    NAME: u.name,
+                                    LINK: productLink,
+                                    CONTENT: `An assignment "${res.name}" has been assigned to you by ${res.createdBy.name}. Please Click here to check the details.`,
+                                    SUBJECT: `New Assignment assigned to you`
+                                    // TYPE: type ? type : string.capitalize(post.type)
+                                };
+                                await helper.sendEmail({to: [u.email]}, filePath, payLoad);
+                            })
+                            console.log(assiggneesToSendEmail);
+                        }
+
                         return resolve(d);
                     });
             });
