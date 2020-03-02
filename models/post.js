@@ -11,6 +11,10 @@ const postSchema = new Schema(
         description: [new Schema({
             type: String,
             data: Schema.Types.Mixed,
+            status: {
+                type: String,
+                enum: ['Completed']
+            }
         })],
         type: {
             type: String,
@@ -145,6 +149,10 @@ const postSchema = new Schema(
             ref: "tag",
         }],
         collaborators: [{
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }],
+        assignees: [{
             type: Schema.Types.ObjectId,
             ref: "user",
         }],
