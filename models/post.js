@@ -38,9 +38,11 @@ const postSchema = new Schema(
                 'team-goal',              /** company post type */
                 'mission',                /** company post type */
                 'company-post',           /** company post type */
+                'customer-profile',       /** company post type */
                 'company-template',       /** company post type */
-                'company-profile',         /** company post type */
-                'competitive-advantage',   /** company post type */
+                'company-profile',        /** company post type */
+                'competitive-advantage',  /** company post type */
+                'business-services',      /** company post type */
 
                 'assignment',            /** Post Type Connected with company */
 
