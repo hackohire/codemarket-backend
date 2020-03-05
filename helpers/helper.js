@@ -68,7 +68,7 @@ async function sendEmailWithStaticContent(event, context) {
                 body = {};
             }
 
-            const emailSent = await sendEmail(body.email, basePath + 'email-template/be-fearless-summit', {}, 'sumi@lifeunfilteredwithalexa.com');
+            const emailSent = await sendEmail(body.email, basePath + 'email-template/bni-event-template', body, 'sumi@codemarket.io');
             return resolve({
                 statusCode: 200,
                 headers: {
@@ -111,7 +111,8 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                     const mailOptions = {
                         from: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         to: toEmail,
-                        cc: fromEmail,
+                        // cc: fromEmail,
+                        bcc: 'sumi@codemarket.io',
                         replyTo: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         subject: subject,
                         html: html,
