@@ -1,8 +1,4 @@
 const nodemailer = require('nodemailer');
-var auth = require('./auth');
-const Tag = require('../models/tag')();
-const City = require('../models/city')();
-const Unit = require('../models/purchased_units')();
 const { EmailTemplate } = require('email-templates-v2');
 var string = require('lodash/string');
 const AWS = require('aws-sdk');
@@ -61,41 +57,46 @@ async function sendEmail(recepients, filePath, body) {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!process.env.IS_OFFLINE || true) {
-                const transporter = await nodemailer.createTransport({
-                    host: process.env.SMTP_HOST,
-                    port: process.env.SMTP_PORT,
-                    auth: {
-                        user: process.env.SMTP_USER,
-                        pass: process.env.SMTP_PASSWORD
-                    },
-                    debug: true,
-                    secure: true
-                });
-                const template = new EmailTemplate(filePath);
+            /** Create a nodemailer trasnporte with the credentials from AWS SES */
+            const transporter = await nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: process.env.SMTP_PORT,
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASSWORD
+                },
+                debug: true,
+                secure: true
+            });
 
-                const renderedTemplate = await template.render(body);
+            /** Create a template instance by accessing the file path given by the user */
+            const template = new EmailTemplate(filePath);
 
-                const mailOptions = {
-                    from: process.env.FROM_EMAIL,
-                    to: recepients.to,
-                    cc: recepients.cc,
-                    bcc: recepients.bcc,
-                    replyTo: process.env.FROM_EMAIL,
-                    subject: renderedTemplate.subject,
-                    html: renderedTemplate.html,
-                }; 
+            /** Render the email template with the template variablse such as NAME, LINK & etc, which are defined in the template 
+             * file, html.ejs or subject.ejs
+             */
+            const renderedTemplate = await template.render(body);
 
-                const emailSent = await transporter.sendMail(mailOptions);
+            /** Preparin the mailoptions */
+            const mailOptions = {
+                from: process.env.FROM_EMAIL, /** From Email Address, it has to be verified with AWS SES */
+                to: recepients.to, /** to email address */
+                cc: recepients.cc,
+                bcc: recepients.bcc,
+                replyTo: process.env.FROM_EMAIL,
+                subject: renderedTemplate.subject,
+                html: renderedTemplate.html,
+            };
 
-                if (emailSent) {
-                    return resolve(true);
-                } else {
-                    return reject(false);
-                }
+            /** Send email using the nodemailer transporter */
+            const emailSent = await transporter.sendMail(mailOptions);
+
+            if (emailSent) {
+                return resolve(true);
             } else {
-                resolve(true);
+                return reject(false);
             }
+
 
         } catch (err) {
             console.log(err);
@@ -109,13 +110,11 @@ async function sendPostCreationEmail(post, type = '') {
     var productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${post.slug}?type=${post.type}`;
     const payLoad = {
         NAME: post.createdBy.name,
-        // PRODUCTNAME: post.name,
         LINK: productLink,
         CONTENT: `A ${type ? type : string.capitalize(post.type)} "${post.name}" has been created. Please Click here to check the details.`,
         SUBJECT: `${type ? type : string.capitalize(post.type)} Created`
-        // TYPE: type ? type : string.capitalize(post.type)
     };
-    await sendEmail({to: [post.createdBy.email]}, filePath, payLoad);
+    await sendEmail({ to: [post.createdBy.email] }, filePath, payLoad);
 }
 
 async function insertManyIntoPurchasedUnit(units) {
