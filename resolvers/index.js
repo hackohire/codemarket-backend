@@ -14,6 +14,9 @@ const { sendEmail } = require('./email');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
+
+const { tweet, fetchTweets } = require('./tweet');
+
 module.exports = {
   Query: {
     hello: () => 'Hello world!',
@@ -46,7 +49,9 @@ module.exports = {
 
     getBookingList,
 
-    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer
+    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer,
+
+    fetchTweets
   },
   Mutation: {
     createUser,
@@ -88,7 +93,9 @@ module.exports = {
 
     addQuestionOrAnswer, updateQuestionOrAnswer,
 
-    sendEmail
+    sendEmail,
+
+    tweet
   },
   Subscription: {
     onCommentAdded: {

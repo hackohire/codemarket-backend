@@ -9,6 +9,7 @@ const graphQlBookingSchema = require('./booking');
 const graphQlQuestionAndAnswerSchema = require('./q&a');
 const graphQlEmailSchema = require('./email');
 const commentSchema = require('./comment');
+const tweetSchema = require('./tweet');
 const schema = require('./schema');
 
 const schemaArray = [
@@ -23,7 +24,8 @@ const schemaArray = [
     graphQlQuestionAndAnswerSchema,
     graphQlBookingSchema,
     graphQlEmailSchema,
-    commentSchema
+    commentSchema,
+    tweetSchema
 ];
 
 module.exports = schemaArray;
