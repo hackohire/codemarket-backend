@@ -77,7 +77,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                 /** Don't send if the comment is added by post author */
                 if (commentObj.createdBy._id.toString() !== data.createdBy._id.toString()) {
                     const commentType = commentObj.type === 'product' ? 'product' : commentObj.type === 'dream-job' ? 'dream-job' : 'post';
-                    postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?type=${data.type}&commentId=${commentObj._id}`;
+                    postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?commentId=${commentObj._id}`;
 
                     /** Reference to the common email templates foler */
                     const filePathToAuthor = basePath + 'email-template/common-template';

@@ -293,7 +293,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                             const collaboratorsToSendEmail = differenceBy(collaboratorsAfterUpdate.collaborators, collaboratorsBeforeUpdate.collaborators, 'email');
         
                             const filePath = basePath + 'email-template/common-template';
-                            const productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${res.slug}?type=${res.type}`;
+                            const productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${res.slug}`;
                             collaboratorsToSendEmail.forEach(async (u) => {
                                 const payLoad = {
                                     NAME: u.name,
@@ -313,7 +313,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                             const assiggneesToSendEmail = differenceBy(assigneesAfterUpdate.assignees, assigneesBeforeUpdate.assignees, 'email');
         
                             const filePath = basePath + 'email-template/common-template';
-                            const productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${res.slug}?type=${res.type}`;
+                            const productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${res.slug}`;
                             assiggneesToSendEmail.forEach(async (u) => {
                                 const payLoad = {
                                     NAME: u.name,

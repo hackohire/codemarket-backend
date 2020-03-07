@@ -106,7 +106,7 @@ async function sendEmail(recepients, filePath, body) {
 
 async function sendPostCreationEmail(post, type = '') {
     const filePath = basePath + 'email-template/common-template';
-    var productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${post.slug}?type=${post.type}`;
+    var productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${post.slug}`;
     const payLoad = {
         NAME: post.createdBy.name,
         // PRODUCTNAME: post.name,
