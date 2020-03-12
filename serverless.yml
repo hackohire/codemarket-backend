@@ -1,4 +1,4 @@
-service: medighee
+service: jane
 
 provider:
   name: aws
