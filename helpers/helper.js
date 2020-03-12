@@ -135,12 +135,11 @@ async function sendMessageToWebsocketClient(event, connectionId, postData, conn)
 
         const domain = event.requestContext.domainName;
         const stage = event.requestContext.stage;
-        // const callbackUrlForAWS = 'https://i8zthpq9j3.execute-api.ap-south-1.amazonaws.com/prod'; 
         const callbackUrlForAWS = util.format(util.format('https://%s/%s', domain, stage));
 
         const apigwManagementApi = new AWS.ApiGatewayManagementApi({
             apiVersion: '2018-11-29',
-            region: 'ap-south-1',
+            region: 'us-east-1',
             endpoint: event.requestContext.domainName.includes('local') ? process.env.SOCKET_URL : callbackUrlForAWS
         });
 

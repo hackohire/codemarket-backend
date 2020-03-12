@@ -1,9 +1,9 @@
-service: codemarketapi
+service: jtinsurance
 
 provider:
   name: aws
   runtime: nodejs10.x
-  region: ap-south-1
+  region: us-east-1
   stage: ${opt:stage, 'dev'}
   # websocketsApiName: codemarket-videochat-socket
   # websocketsApiRouteSelectionExpression: $request.body.action
@@ -293,7 +293,7 @@ plugins:
   - serverless-dynamodb-local
   - serverless-plugin-offline-dynamodb-stream
   - serverless-offline
-  # - serverless-domain-manager
+  - serverless-domain-manager
 
 custom:
   dynamodb:
@@ -310,7 +310,7 @@ custom:
     host: localhost
     port: 8000
     # this fixes the problem with missing region
-    region: ap-south-1
+    region: us-east-1
     pollForever: true
     streams:
       - table: ${self:service}-${self:provider.stage}-Events
@@ -319,3 +319,12 @@ custom:
 
   serverless-offline:
     port: 3200
+
+  customDomain:
+    domainName: ${self:service}-api.codemarket.io
+    basePath: ''
+    certificateName: '*.codemarket.io'
+    createRoute53Record:	false
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+    stage: ${self:provider.stage}

@@ -1,4 +1,4 @@
-# codemarket
+# jtinsurance
 
 NodeJS + Serverless + MongoDB + Mongoose + GraphQL
 

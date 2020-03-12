@@ -4,7 +4,7 @@ const AWS = require('aws-sdk');
 AWS.config.update({
   secretAccessKey: process.env.AWS_SECRETKEY,
   accessKeyId: process.env.AWS_ACCESSKEY_ID,
-  region: 'ap-south-1'
+  region: 'us-east-1'
 });
 
 // serverless offline support
