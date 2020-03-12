@@ -1,4 +1,4 @@
-# amber
+# medighee
 
 NodeJS + Serverless + MongoDB + Mongoose + GraphQL
 
