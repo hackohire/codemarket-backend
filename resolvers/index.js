@@ -12,6 +12,7 @@ const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
 const { sendEmail } = require('./email');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
+const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 module.exports = {
@@ -46,7 +47,9 @@ module.exports = {
 
     getBookingList,
 
-    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer
+    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer,
+
+    fetchFields, fetchPostTypes,
   },
   Mutation: {
     createUser,
@@ -88,7 +91,9 @@ module.exports = {
 
     addQuestionOrAnswer, updateQuestionOrAnswer,
 
-    sendEmail
+    sendEmail,
+
+    addPostType, updatePostType, deletePostType
   },
   Subscription: {
     onCommentAdded: {
