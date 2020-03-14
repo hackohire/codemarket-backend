@@ -162,27 +162,6 @@ module.exports = {
         },
       ),
     },
-    onCompanyPostChanges: {
-      resolve: (rootValue) => { return rootValue; },
-      subscribe: withFilter(
-        pubSub.subscribe('COMPANY_POST_CHANGES'),
-        (rootValue, args) => {
-          if (rootValue.postUpdated && args.companyId == rootValue.postUpdated.company._id) {
-            return true;
-          }
-
-          if (rootValue.postAdded && args.companyId == rootValue.postAdded.company._id) {
-            return true;
-          }
-
-          if (rootValue.postDeleted && args.companyId == rootValue.postDeleted.company) {
-            return true;
-          }
-
-          return false;
-        },
-      ),
-    },
     onUsersPostChanges: {
       resolve: (rootValue) => { return rootValue; },
       subscribe: withFilter(

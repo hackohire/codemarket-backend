@@ -348,7 +348,7 @@ input ReferenceObject {
 type Query {
   hello: String
 
-  getAllPosts(pageOptions: PageOptionsInput, type: String, reference: ReferenceObject, companyId: String, connectedWithUser: String, createdBy: String): getAllPostsResponse
+  getAllPosts(pageOptions: PageOptionsInput, type: String, reference: ReferenceObject, companyId: String, createdBy: String): getAllPostsResponse
 
   getAllProducts: [Product]
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]

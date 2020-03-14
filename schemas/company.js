@@ -13,7 +13,6 @@ const graphQlCompanySchema = `
         cities: [City]
         ideas: [descriptionBlocks]
         questions: [descriptionBlocks]
-        location: Location
         cover: String
         comments: [Comment]
         websiteLink: String
@@ -34,7 +33,6 @@ const graphQlCompanySchema = `
         createdBy: ID
         status: Status
         cities: [CityInput]
-        location: LocationInput
         cover: String
         websiteLink: String
         facebookLink: String
@@ -79,10 +77,6 @@ const graphQlCompanySchema = `
         addCompany(company: CompanyInput): Company
         updateCompany(company: CompanyInput): Company
         deleteCompany(companyId: String): Boolean
-    }
-
-    extend type Subscription {
-        onCompanyPostChanges(companyId: String): CompanySubscriptionResponse
     }
 `
 
