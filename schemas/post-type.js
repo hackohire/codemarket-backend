@@ -44,7 +44,7 @@ const graphQlPostTypeSchema = `
         createdAt: String
     }
 
-    type FieldInput {
+    input FieldInput {
         name: String
         label: String
         type: String
@@ -59,7 +59,8 @@ const graphQlPostTypeSchema = `
 
     extend type Mutation {
         addPostType(postType: PostTypeInput): PostType
-        editPostType(postType: PostTypeInput): PostType
+        updatePostType(postType: PostTypeInput): PostType
+        deletePostType(postId: String): Boolean
     }
 `
 
