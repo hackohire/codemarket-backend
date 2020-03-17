@@ -57,42 +57,38 @@ async function sendEmail(recepients, filePath, body) {
     return new Promise(async (resolve, reject) => {
         try {
 
-            /** Create a nodemailer trasnporte with the credentials from AWS SES */
-            const transporter = await nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: process.env.SMTP_PORT,
-                auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASSWORD
-                },
-                debug: true,
-                secure: true
-            });
+            if (!process.env.IS_OFFLINE) {
+                const transporter = await nodemailer.createTransport({
+                    host: process.env.SMTP_HOST,
+                    port: process.env.SMTP_PORT,
+                    auth: {
+                        user: process.env.SMTP_USER,
+                        pass: process.env.SMTP_PASSWORD
+                    },
+                    debug: true,
+                    secure: true
+                });
+                const template = new EmailTemplate(filePath);
 
-            /** Create a template instance by accessing the file path given by the user */
-            const template = new EmailTemplate(filePath);
+                const renderedTemplate = await template.render(body);
 
-            /** Render the email template with the template variablse such as NAME, LINK & etc, which are defined in the template 
-             * file, html.ejs or subject.ejs
-             */
-            const renderedTemplate = await template.render(body);
+                const mailOptions = {
+                    from: process.env.FROM_EMAIL,
+                    to: recepients.to,
+                    cc: recepients.cc,
+                    bcc: recepients.bcc,
+                    replyTo: process.env.FROM_EMAIL,
+                    subject: renderedTemplate.subject,
+                    html: renderedTemplate.html,
+                }; 
 
-            /** Preparin the mailoptions */
-            const mailOptions = {
-                from: process.env.FROM_EMAIL, /** From Email Address, it has to be verified with AWS SES */
-                to: recepients.to, /** to email address */
-                cc: recepients.cc,
-                bcc: recepients.bcc,
-                replyTo: process.env.FROM_EMAIL,
-                subject: renderedTemplate.subject,
-                html: renderedTemplate.html,
-            };
+                const emailSent = await transporter.sendMail(mailOptions);
 
-            /** Send email using the nodemailer transporter */
-            const emailSent = await transporter.sendMail(mailOptions);
-
-            if (emailSent) {
-                return resolve(true);
+                if (emailSent) {
+                    return resolve(true);
+                } else {
+                    return reject(false);
+                }
             } else {
                 return reject(false);
             }
