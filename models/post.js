@@ -23,6 +23,10 @@ const postSchema = new Schema(
 
                 'competitive-advantage',   /** company post type */
 
+                'class',
+
+                'service',
+
                 'challenge',
 
                 'assignment',
