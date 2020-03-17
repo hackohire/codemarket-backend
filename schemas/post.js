@@ -9,6 +9,7 @@ const graphQlPostSchema = `
         referencePostUrl: String
         featuredImage: String
         createdBy: User
+        users: [User]
         price: Int
         categories: [String]
         status: Status
@@ -16,12 +17,9 @@ const graphQlPostSchema = `
         updatedAt: String
         tags: [Tag]
         comments: [Comment]
-        support: Support
         likeCount: Int
         slug: String
 
-        connectedWithUser: User
-        isPostUnderUser: Boolean
         dateRange: [String]
         location: Location
         address: String
@@ -32,37 +30,12 @@ const graphQlPostSchema = `
         cover: String
 
         cities: [City]
-        company: Company
-        isPostUnderCompany: Boolean
         companies: [Company]
         salaryCurrency: String
         salaryRangeFrom: Int
         salaryRangeTo: Int
         jobProfile: [Tag]
         timeline: Int
-
-        gapAnalysis: Boolean
-        careerCoachSessions: Boolean
-        helpingWithMockInterviews: Boolean
-        hiringMentoringSessions: Boolean
-
-        businessCoachSessions: Boolean
-        businessAreas: [Tag]
-        businessGoals: [Tag]
-        businessChallenges: [Tag]
-        sellProducts: SellProducts
-        sellServices: SellServices
-
-        fundingCurrency: String
-        fundingAmount: Int
-        fundingBy: [Company]
-        fundingTo: [Company]
-        fundingDate: String
-        fundingProcess: [[descriptionBlocks]]
-
-        hiringProcess: [[descriptionBlocks]]
-
-        connectedEvent: ID
 
         purchasedBy: [PurchasedBy]
 
@@ -79,19 +52,14 @@ const graphQlPostSchema = `
         shortDescription: String
         featuredImage: String
         createdBy: ID
+        users: [UserInput]
         price: Int
-        categories: [String]
         status: Status
-        addedToCart: Boolean
         tags: [TagInput]
         createdAt: String
         updatedAt: String
         slug: String
         comments: [CommentInput]
-        support: SupportInput
-
-        connectedWithUser: ID
-        isPostUnderUser: Boolean
 
         dateRange: [String]
         location: LocationInput
@@ -102,38 +70,13 @@ const graphQlPostSchema = `
 
         cities: [ID]
 
-        company: CompanyInput
-        isPostUnderCompany: Boolean
-        companies: [ID]
+        companies: [CompanyInput]
         salaryCurrency: String
         salaryRangeFrom: Int
         salaryRangeTo: Int
         jobProfile: [ID]
         timeline: Int
 
-        gapAnalysis: Boolean
-        careerCoachSessions: Boolean
-        helpingWithMockInterviews: Boolean
-        hiringMentoringSessions: Boolean
-
-        
-        businessCoachSessions: Boolean
-        businessAreas: [ID]
-        businessGoals: [ID]
-        businessChallenges: [ID]
-        sellProducts: SellProductsInput
-        sellServices: SellServicesInput
-
-        fundingCurrency: String
-        fundingAmount: Int
-        fundingBy: [ID]
-        fundingTo: [ID]
-        fundingDate: String
-        fundingProcess: [[InputdescriptionBlock]]
-
-        hiringProcess: [[InputdescriptionBlock]]
-
-        connectedEvent: ID
         referencePostId: ID
         connectedEmail: ID
         
