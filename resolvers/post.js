@@ -45,24 +45,10 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                 p.populate('createdBy')
                     .populate('tags')
                     .populate('cities')
-                    .populate('company')
                     .populate('companies')
                     .populate('jobProfile')
-                    .populate('businessGoals')
-                    .populate('businessChallenges')
-                    .populate('businessAreas')
-                    .populate('sellProducts.products')
-                    .populate('sellServices.services')
-                    .populate('fundingBy')
-                    .populate('fundingTo')
 
                     .execPopulate().then(async populatedPost => {
-                        if (populatedPost && populatedPost.isPostUnderCompany) {
-                            await pubSub.publish('COMPANY_POST_CHANGES', { postAdded: populatedPost });
-                        }
-                        // if (populatedPost && populatedPost.isPostUnderUser) {
-                            await pubSub.publish('USERS_POST_CHANGES', { postAdded: populatedPost });
-                        // }
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
                         resolve(populatedPost);
                     });
@@ -98,11 +84,9 @@ async function getPostsByUserIdAndType(_, { userId, status, postType, pageOption
             const posts = await Post.find(condition)
                 .populate('createdBy')
                 .populate('tags')
-                .populate('company')
                 .populate('companies')
                 .populate('cities')
-                .populate('fundingBy')
-                .populate('fundingTo')
+                .populate('users')
 
                 .sort(sort)
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
@@ -131,21 +115,14 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
 
             Post.findById(postId)
                 .populate({ path: 'usersAttending', select: 'name avatar' })
-                .populate('company')
                 .populate('companies')
                 .populate('cities')
                 .populate('createdBy')
                 .populate('tags')
                 .populate('jobProfile')
-                .populate('businessGoals')
-                .populate('businessChallenges')
-                .populate('businessAreas')
-                .populate('sellProducts.products')
-                .populate('sellServices.services')
-                .populate('fundingBy')
-                .populate('fundingTo')
                 .populate('collaborators')
                 .populate('assignees')
+                .populate('users')
 
                 .exec(async (err, res) => {
 
@@ -208,17 +185,10 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
             Post.find({ status: 'Published', type: postType })
                 .populate('createdBy')
                 .populate('tags')
-                .populate('company')
                 .populate('companies')
                 .populate('cities')
                 .populate('jobProfile')
-                .populate('businessGoals')
-                .populate('businessChallenges')
-                .populate('businessAreas')
-                .populate('sellProducts.products')
-                .populate('sellServices.services')
-                .populate('fundingBy')
-                .populate('fundingTo')
+                .populate('users')
 
                 .exec((err, res) => {
 
@@ -262,30 +232,15 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
 
                 res
                     .populate('createdBy')
-                    .populate('company')
                     .populate('companies')
                     .populate('tags')
                     .populate('cities')
                     .populate('jobProfile')
-                    .populate('businessGoals')
-                    .populate('businessChallenges')
-                    .populate('businessAreas')
-                    .populate('sellProducts.products')
-                    .populate('sellServices.services')
-                    .populate('fundingBy')
-                    .populate('fundingTo')
                     .populate('collaborators')
                     .populate('assignees')
-                    // .populate('connectedWithUser')
+                    .populate('users')
 
                     .execPopulate().then(async (d) => {
-
-                        if (d && d.isPostUnderCompany) {
-                            await pubSub.publish('COMPANY_POST_CHANGES', { postUpdated: d });
-                        }
-                        // if (d && d.isPostUnderUser) {
-                        await pubSub.publish('USERS_POST_CHANGES', { postUpdated: d });
-                        // }
 
                         if(res && post.collaborators && post.collaborators.length) {
                             const collaboratorsAfterUpdate = await res.toObject();
@@ -357,12 +312,6 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
                 if (err) {
                     return reject(err)
                 }
-                if (res && res.isPostUnderCompany) {
-                    await pubSub.publish('COMPANY_POST_CHANGES', { postDeleted: res });
-                }
-                // if (res && res.isPostUnderUser) {
-                await pubSub.publish('USERS_POST_CHANGES', { postDeleted: res });
-                // }
                 return resolve(res ? 1 : 0);
             })
             );
@@ -397,8 +346,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
 
             if(createdBy) {
                 condition['createdBy'] = ObjectID(createdBy)
-                // condition['isPostUnderUser'] =  { $ne: true };
-                // condition['isPostUnderCompany'] = { $ne: true }
             }
 
             if (reference && reference.referencePostId) {
@@ -418,30 +365,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 }]
             }
 
-            /** Fetch posts related to the user's profile */
-            // if (connectedWithUser) {
-            //     condition['$and'] = [
-            //         {
-            //             '$or': [
-            //                 { connectedWithUser: ObjectID(connectedWithUser) }
-            //             ]
-            //         },
-            //         {
-            //             '$or': [
-            //                 { type: 'leadership-challenge' },
-            //                 { type: 'technical-challenge' },
-            //                 { type: 'business-challenge' },
-            //                 { type: 'team-challenge' },
-            //                 { type: 'business-goal' },
-            //                 { type: 'startup-goal' },
-            //                 { type: 'technical-goal' },
-            //                 { type: 'social-impact-goal' },
-            //                 // { type: 'user-post'}
-            //             ]
-            //         }
-            //     ]
-            // }
-
             /** In Company Details Page Fetch Jobs & DreamJob related to that company */
             if (companyId) {
                 condition['$and'] = [
@@ -451,24 +374,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                             { 'companies': ObjectID(companyId) }
                         ]
                     },
-                    {
-                        '$or': [
-                            { type: 'job' },
-                            { type: 'dream-job' },
-                            { type: 'sales-challenge' },
-                            { type: 'marketing-challenge' },
-                            { type: 'technical-challenge' },
-                            { type: 'business-challenge' },
-                            { type: 'team-challenge' },
-                            { type: 'sales-goal' },
-                            { type: 'marketing-goal' },
-                            { type: 'technical-goal' },
-                            { type: 'team-goal' },
-                            { type: 'business-goal' },
-                            { type: 'mission' },
-                            { type: 'company-post' }
-                        ]
-                    }
                 ]
             }
 
