@@ -330,7 +330,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
         try {
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
-            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : -1 };
 
             if (!db) {
                 console.log('Creating new mongoose connection.');
@@ -379,7 +379,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
 
             /** Taking Empty Posts array */
             let posts = [];
-            let total = await Post.countDocuments(condition).exec()
+            // let total = await Post.countDocuments(condition).exec()
             posts = await Post.aggregate([
                 {
                     $match: condition
@@ -387,8 +387,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 {
                     $lookup: {
                         from: 'comments',
-                        // localField: '_id',
-                        // foreignField: 'referenceId',
                         let: { status: "$status", reference_id: "$_id" },
                         pipeline: [
                             {
@@ -405,63 +403,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                                     }
                                 }
                             },
-                            // {
-                            //     $unwind: {
-                            //         "path": "$children",
-                            //     }
-                            // },
-                            // {
-                            //     $lookup: {
-                            //         from: 'comments',
-                            //         "let": { "childrenComments": "$children" },
-                            //         pipeline: [
-                            //             {
-                            //                 $match: {
-                            //                     $expr: {
-                            //                         $and:
-                            //                             [
-                            //                                 { $eq: ["$$childrenComments", '$_id']},
-                            //                                 { $ne: ["$status", "Deleted"] }
-                            //                         ]
-                            //                     }
-                            //                 }
-                            //             },
-                            //             {
-                            //                 $lookup: {
-                            //                     from: 'users',
-                            //                     localField: 'createdBy',
-                            //                     foreignField: '_id',
-                            //                     as: 'createdBy'
-                            //                 }
-                            //             },
-                            //             {
-                            //                 $unwind: {
-                            //                     "path": "$createdBy",
-                            //                     "preserveNullAndEmptyArrays": true
-                            //                 }
-                            //             },
-                            //         ],
-                            //         as: 'children'
-                            //     }
-                            // },
-                            // {
-                            //     $unwind: {
-                            //         "path": "$children",
-                            //         "preserveNullAndEmptyArrays": true
-                            //     }
-                            // },
-                            // {
-                            //     $group:
-                            //         {
-                            //             _id: "$_id",
-                            //             product: { $first: "$type"},
-                            //             status: { $first: "$status"},
-                            //             type: { $first: "$type"},
-                            //             createdBy: { $first: "$createdBy"},
-                            //             createdAt: { $first: "$createdAt"},
-                            //             children: { $push: "$children"}
-                            //         }
-                            // }, 
                             {
                                 $lookup: {
                                     "from": "users",
@@ -519,12 +460,24 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         createdAt: 1,
                         company: 1
                     }
-                }
+                },
+                {
+                    $facet: {
+                      posts: [
+                        { $sort: sort },
+                        { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                        { $limit: pageOptions.limit },
+                      ],
+                      pageInfo: [
+                        { $group: { _id: null, count: { $sum: 1 } } },
+                      ],
+                    },
+                  },
 
             ])
-                .sort(sort)
-                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-                .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
+                // .sort(sort)
+                // .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                // .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
                 .exec();
 
             /** Fetching all the Published Posts */
@@ -536,7 +489,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             //     .sort(sort)
             //     .exec();
 
-            return await resolve({ posts, total });
+            return await resolve({ posts: posts && posts.length ? posts[0].posts : [], total: posts[0].pageInfo[0].count});
 
         } catch (e) {
             console.log(e);
