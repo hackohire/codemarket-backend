@@ -384,45 +384,46 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 {
                     $match: condition
                 },
-                {
-                    $lookup: {
-                        from: 'comments',
-                        let: { status: "$status", reference_id: "$_id" },
-                        pipeline: [
-                            {
-                                $match:
-                                {
-                                    $expr:
-                                    {
-                                        $and:
-                                            [
-                                                { $ne: ["$status", "Deleted"] },
-                                                { $eq: ["$$reference_id", "$referenceId"] },
-                                                { $eq: ["$parentId", null] }
-                                            ]
-                                    }
-                                }
-                            },
-                            {
-                                $lookup: {
-                                    "from": "users",
-                                    "let": { "created_by": "$createdBy" },
-                                    pipeline: [
-                                        { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
-                                    ],
-                                    as: "createdBy"
-                                }
-                            },
-                            {
-                                $unwind: {
-                                    "path": "$createdBy",
-                                    "preserveNullAndEmptyArrays": true
-                                }
-                            },
-                        ],
-                        as: 'comments'
-                    }
-                },
+                /** The below commented code is to fetch the comments related to the posts */
+                // {
+                //     $lookup: {
+                //         from: 'comments',
+                //         let: { status: "$status", reference_id: "$_id" },
+                //         pipeline: [
+                //             {
+                //                 $match:
+                //                 {
+                //                     $expr:
+                //                     {
+                //                         $and:
+                //                             [
+                //                                 { $ne: ["$status", "Deleted"] },
+                //                                 { $eq: ["$$reference_id", "$referenceId"] },
+                //                                 { $eq: ["$parentId", null] }
+                //                             ]
+                //                     }
+                //                 }
+                //             },
+                //             {
+                //                 $lookup: {
+                //                     "from": "users",
+                //                     "let": { "created_by": "$createdBy" },
+                //                     pipeline: [
+                //                         { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
+                //                     ],
+                //                     as: "createdBy"
+                //                 }
+                //             },
+                //             {
+                //                 $unwind: {
+                //                     "path": "$createdBy",
+                //                     "preserveNullAndEmptyArrays": true
+                //                 }
+                //             },
+                //         ],
+                //         as: 'comments'
+                //     }
+                // },
                 {
                     $lookup: {
                         from: 'likes',
@@ -489,7 +490,11 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             //     .sort(sort)
             //     .exec();
 
-            return await resolve({ posts: posts && posts.length ? posts[0].posts : [], total: posts[0].pageInfo[0].count});
+            return await resolve(
+                { 
+                    posts: posts && posts.length ? posts[0].posts : [],
+                    total: posts && posts.length ? posts[0].pageInfo[0].count : 0
+                });
 
         } catch (e) {
             console.log(e);
