@@ -3,7 +3,7 @@ service: codemarketapi
 provider:
   name: aws
   runtime: nodejs10.x
-  region: ap-south-1
+  region: us-east-1
   stage: ${opt:stage, 'dev'}
   # websocketsApiName: codemarket-videochat-socket
   # websocketsApiRouteSelectionExpression: $request.body.action
@@ -174,35 +174,7 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
               - x-requested-with
-            allowCredentials: false  
-
-  # socketConnectionHandler:
-  #   handler: websocket.socketConnectionHandler
-  #   events:
-  #     - websocket:
-  #         route: $connect
-  #     - websocket:
-  #         route: $disconnect
-  #     - websocket:
-  #         route: $default
-  
-  # onOffer:
-  #   handler: websocket.onOffer
-  #   events:
-  #     - websocket:
-  #         route: onOffer
-
-  # setUserOnline:
-  #   handler: websocket.setUserOnline
-  #   events:
-  #     - websocket:
-  #         route: setUserOnline
-
-  # calling:
-  #   handler: websocket.calling
-  #   events:
-  #     - websocket:
-  #         route: calling
+            allowCredentials: false
 
 
 resources:
@@ -293,7 +265,7 @@ plugins:
   - serverless-dynamodb-local
   - serverless-plugin-offline-dynamodb-stream
   - serverless-offline
-  # - serverless-domain-manager
+  - serverless-domain-manager
 
 custom:
   dynamodb:
@@ -319,3 +291,12 @@ custom:
 
   serverless-offline:
     port: 3200
+
+  customDomain:
+    domainName: ${self:service}-${self:provider.stage}.codemarket.io
+    basePath: ''
+    certificateName: '*.codemarket.io'
+    createRoute53Record:	false
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+    stage: ${self:provider.stage}
