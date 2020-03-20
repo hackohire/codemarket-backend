@@ -57,7 +57,7 @@ const postSchema = new Schema(
 
         /** Event Specific Fields */
         dateRange: [String],
-        address: String,
+
         location: new Schema({
             latitude: Number,
             longitude: Number,
@@ -118,7 +118,15 @@ const postSchema = new Schema(
         }],
 
         /** Storing Email Id in this field to connect email with the post */
-        connectedEmail: Schema.Types.ObjectId
+        connectedEmail: Schema.Types.ObjectId,
+
+        /** Fields related to Contact */
+        phone: [String],
+        email: [String],
+        birthDate: String,
+        address: String,
+        website: String
+
 
     },
     {

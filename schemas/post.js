@@ -22,7 +22,6 @@ const graphQlPostSchema = `
 
         dateRange: [String]
         location: Location
-        address: String
         eventType: String
         membershipRequired: Boolean
         validSubscription: Boolean
@@ -41,6 +40,12 @@ const graphQlPostSchema = `
 
         collaborators: [User]
         assignees: [User]
+
+        phone: [String]
+        email: [String]
+        birthDate: String
+        address: String
+        website: String
     }
 
     input PostInput {
@@ -63,7 +68,6 @@ const graphQlPostSchema = `
 
         dateRange: [String]
         location: LocationInput
-        address: String
         eventType: String
         membershipRequired: Boolean
         cover: String
@@ -82,6 +86,12 @@ const graphQlPostSchema = `
         
         collaborators: [UserInput]
         assignees: [UserInput]
+
+        phone: [String]
+        email: [String]
+        birthDate: String
+        address: String
+        website: String
     }
 
     type Location {
