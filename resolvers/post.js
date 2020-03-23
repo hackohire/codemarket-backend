@@ -493,7 +493,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             return await resolve(
                 { 
                     posts: posts && posts.length ? posts[0].posts : [],
-                    total: posts && posts.length ? posts[0].pageInfo[0].count : 0
+                    total: posts && posts.length && posts.length.pageInfo ? posts[0].pageInfo[0].count : 0
                 });
 
         } catch (e) {
