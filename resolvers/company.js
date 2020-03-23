@@ -5,10 +5,11 @@ const helper = require('../helpers/helper');
 const Like = require('./../models/like')();
 var array = require('lodash/array');
 const { pubSub } = require('../helpers/pubsub');
+const auth = require('../helpers/auth');
 var ObjectID = require('mongodb').ObjectID;
 let conn;
 
-async function addCompany(_, { company }, { headers, db, decodedToken }) {
+async function addCompany(_, { company }, { headers, db, event }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -28,7 +29,22 @@ async function addCompany(_, { company }, { headers, db, decodedToken }) {
                 throw new Error('AlreadyExists');
             } else {
                 await int.save(company).then(async (p) => {
-                    console.log(p)
+                    console.log(p);
+
+                    const filePath = basePath + 'email-template/common-template';
+
+                    let authUser = await auth.auth(event.headers);
+
+                    /** Creating dynamic varibales such as link, subject and email content */
+                    const payLoad = {
+                        NAME: authUser.name,
+                        CONTENT: ` You have successful create your business page "${company.name}". And we look forward to help you expand & grow your business.`,
+                        LINK: `${process.env.FRONT_END_URL}company/${p._id}?view="home"`,
+                        SUBJECT: 'Business Page Created!'
+                    };
+
+                    /** Sending the email */
+                    await helper.sendEmail({ to: [authUser.email] }, filePath, payLoad);
 
                     p.populate('createdBy').populate('cities').execPopulate().then(async populatedCompany => {
                         // await helper.sendCompanyCreationEmail(populatedCompany, populatedCompany.type === 'product' ? 'Bugfix' : '');
@@ -235,14 +251,14 @@ async function updateCompany(_, { company }, { headers, db, decodedToken }) {
             //     ]);
             //     updatedCompany = updatedCompany[0];
             // } else {
-                const checkIfExists = await Company.find({ $text: { $search: company.name } }).populate('createdBy').populate('cities').exec();
+            const checkIfExists = await Company.find({ $text: { $search: company.name } }).populate('createdBy').populate('cities').exec();
 
-                if (checkIfExists.length && checkIfExists[0].id !== company._id) {
-                    console.log(checkIfExists);
-                    throw new Error('AlreadyExists');
-                } else {
-                    updatedCompany = await Company.findByIdAndUpdate(company._id, company, { new: true }).populate('createdBy cities').exec();
-                }
+            if (checkIfExists.length && checkIfExists[0].id !== company._id) {
+                console.log(checkIfExists);
+                throw new Error('AlreadyExists');
+            } else {
+                updatedCompany = await Company.findByIdAndUpdate(company._id, company, { new: true }).populate('createdBy cities').exec();
+            }
             // }
             // await pubSub.publish('COMPANY_UPDATED', updatedCompany);
             return resolve(updatedCompany);
@@ -462,14 +478,14 @@ async function getCompaniesByType(_, { companyType, pageOptions }, { headers, db
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
             let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
 
-            let condition = { type: companyType ? companyType : { $regex: /^$|\w/ }};
+            let condition = { type: companyType ? companyType : { $regex: /^$|\w/ } };
 
             let total = await Company.countDocuments(condition).exec()
 
             const companies = await Company.find(condition).populate('createdBy').populate('cities')
-            .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-            .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
-            .exec();
+                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
+                .exec();
 
             return resolve({ companies, total });
 
@@ -495,22 +511,24 @@ async function getCompaniesPostsByPostType(_, { postType, pageOptions }, { heade
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
             let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
 
-            let condition = { 'posts.postType': {$regex: postType}};
+            let condition = { 'posts.postType': { $regex: postType } };
 
             const companiesPosts = await Company.aggregate([
-                {$unwind: "$posts"},
-                {$match: condition},
-                {$group: {
-                    _id: '$posts._id',
-                    posts: {$first: '$posts' }
-                }}
+                { $unwind: "$posts" },
+                { $match: condition },
+                {
+                    $group: {
+                        _id: '$posts._id',
+                        posts: { $first: '$posts' }
+                    }
+                }
             ])
-            .sort(sort)
-            .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-            .limit(pageOptions.limit)
-            .exec();
+                .sort(sort)
+                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                .limit(pageOptions.limit)
+                .exec();
 
-            return resolve({companiesPosts: companiesPosts, total: companiesPosts.length });
+            return resolve({ companiesPosts: companiesPosts, total: companiesPosts.length });
 
 
         } catch (e) {
