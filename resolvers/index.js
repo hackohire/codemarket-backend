@@ -205,6 +205,9 @@ module.exports = {
         case 'linkTool':
           return 'LinkToolBlock'
 
+        case 'delimiter':
+          return 'DelimiterBlock'
+
         default:
           console.log('default case')
           return null;
