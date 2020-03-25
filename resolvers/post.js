@@ -39,6 +39,8 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
             }
 
             const int = await new Post(post);
+
+            /** Save the post in the database & send the email notifications */
             await int.save(post).then(async (p) => {
                 console.log(p)
 
@@ -47,9 +49,48 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('cities')
                     .populate('companies')
                     .populate('jobProfile')
+                    .populate('collaborators')
+                    .populate('assignees')
 
                     .execPopulate().then(async populatedPost => {
+
+                        /** Send email notification to the post creator */
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
+
+                        /** Send email notification to the collaborators */
+                        if(post.status === 'Published' && populatedPost && populatedPost.collaborators && populatedPost.collaborators.length) {      
+                            const filePath = basePath + 'email-template/common-template';
+                            const productLink = `${process.env.FRONT_END_URL}post/${populatedPost.slug}`;
+                            populatedPost.collaborators.forEach(async (u) => {
+                                const payLoad = {
+                                    NAME: u.name,
+                                    LINK: productLink,
+                                    CONTENT: `You have been added as a collaborator on "${post.name}" by ${post.createdBy.name}. Please Click here to check the details.`,
+                                    SUBJECT: `Collaborator Rights Given`
+                                    // TYPE: type ? type : string.capitalize(post.type)
+                                };
+                                await helper.sendEmail({to: [u.email]}, filePath, payLoad);
+                            })
+                            console.log( populatedPost.collaborators);
+                        }
+
+                        /** Send email notification to the assignee */
+                        if(post.status === 'Published' && populatedPost && populatedPost.assignees && populatedPost.assignees.length) {       
+                            const filePath = basePath + 'email-template/common-template';
+                            const productLink = `${process.env.FRONT_END_URL}post/${populatedPost.slug}`;
+                            populatedPost.assignees.forEach(async (u) => {
+                                const payLoad = {
+                                    NAME: u.name,
+                                    LINK: productLink,
+                                    CONTENT: `An assignment "${post.name}" has been assigned to you by ${post.createdBy.name}. Please Click here to check the details.`,
+                                    SUBJECT: `New Assignment assigned to you`
+                                    // TYPE: type ? type : string.capitalize(post.type)
+                                };
+                                await helper.sendEmail({to: [u.email]}, filePath, payLoad);
+                            })
+                        }
+
+
                         resolve(populatedPost);
                     });
 
@@ -87,6 +128,8 @@ async function getPostsByUserIdAndType(_, { userId, status, postType, pageOption
                 .populate('companies')
                 .populate('cities')
                 .populate('users')
+                .populate('collaborators')
+                .populate('assignees')
 
                 .sort(sort)
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
@@ -188,7 +231,9 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 .populate('companies')
                 .populate('cities')
                 .populate('jobProfile')
-                .populate('users')
+                .populate('collaborators')
+                .populate('assignees')
+                // .populate('users')
 
                 .exec((err, res) => {
 
@@ -248,7 +293,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                             const collaboratorsToSendEmail = differenceBy(collaboratorsAfterUpdate.collaborators, collaboratorsBeforeUpdate.collaborators, 'email');
         
                             const filePath = basePath + 'email-template/common-template';
-                            const productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${res.slug}`;
+                            const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
                             collaboratorsToSendEmail.forEach(async (u) => {
                                 const payLoad = {
                                     NAME: u.name,
@@ -268,12 +313,12 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                             const assiggneesToSendEmail = differenceBy(assigneesAfterUpdate.assignees, assigneesBeforeUpdate.assignees, 'email');
         
                             const filePath = basePath + 'email-template/common-template';
-                            const productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${res.slug}`;
+                            const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
                             assiggneesToSendEmail.forEach(async (u) => {
                                 const payLoad = {
                                     NAME: u.name,
                                     LINK: productLink,
-                                    CONTENT: `An assignment "${res.name}" has been assigned to you by ${res.createdBy.name}. Please Click here to check the details.`,
+                                    CONTENT: `A "${res.type} ${res.name}" has been assigned to you by ${res.createdBy.name}. Please Click here to check the details.`,
                                     SUBJECT: `New Assignment assigned to you`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
@@ -345,7 +390,11 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             }
 
             if(createdBy) {
-                condition['createdBy'] = ObjectID(createdBy)
+                condition['$and'] = [{
+                    '$or': [
+                        { createdBy: ObjectID(createdBy) }
+                    ]
+                }]
             }
 
             if (reference && reference.referencePostId) {
@@ -356,11 +405,19 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 }]
             }
 
-            console.log(reference)
             if (reference && reference.connectedEvent) {
                 condition['$and'] = [{
                     '$or': [
                         { connectedEvent: ObjectID(reference.connectedEvent) },
+                    ]
+                }]
+            }
+
+            if (connectedWithUser) {
+                condition['$and'] = [{
+                    '$or': [
+                        { collaborators: ObjectID(connectedWithUser) },
+                        { assignees: ObjectID(connectedWithUser) },
                     ]
                 }]
             }
@@ -442,6 +499,30 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 },
                 {
                     $lookup: {
+                        from: 'companies',
+                        localField: 'companies',
+                        foreignField: '_id',
+                        as: 'companies'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'collaborators',
+                        foreignField: '_id',
+                        as: 'collaborators'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'assignees',
+                        foreignField: '_id',
+                        as: 'assignees'
+                    }
+                },
+                {
+                    $lookup: {
                         from: 'tags',
                         localField: 'tags',
                         foreignField: '_id',
@@ -459,7 +540,9 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         likeCount: { $size: '$likes' },
                         comments: '$comments',
                         createdAt: 1,
-                        company: 1
+                        companies: 1,
+                        collaborators: 1,
+                        assignees: 1
                     }
                 },
                 {
