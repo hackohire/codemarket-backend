@@ -233,8 +233,6 @@ async function fetchLatestCommentsForTheUserEngaged(_, { pageOptions, userId }, 
             let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : -1 };
 
             let c = await Comment.aggregate([
-
-
                 { $match: { 
                     status: { $ne: 'Deleted' },
                     /** Uncomment this, when we don't want to show comments added by himself */
@@ -329,13 +327,26 @@ async function fetchLatestCommentsForTheUserEngaged(_, { pageOptions, userId }, 
                     $unwind: { "path": "$createdBy", "preserveNullAndEmptyArrays": true }
                 },
 
+                {
+                    $facet: {
+                      comments: [
+                        { $sort: sort },
+                        { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                        { $limit: pageOptions.limit },
+                      ],
+                      pageInfo: [
+                        { $group: { _id: null, count: { $sum: 1 } } },
+                      ],
+                    },
+                  },
+
             ])
-                .sort(sort)
-                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-                .limit(pageOptions.limit)
+                // .sort(sort)
+                // .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                // .limit(pageOptions.limit)
                 .exec()
 
-            return resolve({ messages: c, total: 1000 });
+            return resolve({ messages: c && c.length ? c[0].comments : [], total: c[0].pageInfo[0].count });
         } catch (e) {
             console.log(e);
             return reject(e);
