@@ -1,8 +1,4 @@
 const nodemailer = require('nodemailer');
-var auth = require('./auth');
-const Tag = require('../models/tag')();
-const City = require('../models/city')();
-const Unit = require('../models/purchased_units')();
 const { EmailTemplate } = require('email-templates-v2');
 var string = require('lodash/string');
 const AWS = require('aws-sdk');
@@ -94,8 +90,9 @@ async function sendEmail(recepients, filePath, body) {
                     return reject(false);
                 }
             } else {
-                resolve(true);
+                return reject(false);
             }
+
 
         } catch (err) {
             console.log(err);
@@ -109,13 +106,11 @@ async function sendPostCreationEmail(post, type = '') {
     var productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${post.slug}`;
     const payLoad = {
         NAME: post.createdBy.name,
-        // PRODUCTNAME: post.name,
         LINK: productLink,
         CONTENT: `A ${type ? type : string.capitalize(post.type)} "${post.name}" has been created. Please Click here to check the details.`,
         SUBJECT: `${type ? type : string.capitalize(post.type)} Created`
-        // TYPE: type ? type : string.capitalize(post.type)
     };
-    await sendEmail({to: [post.createdBy.email]}, filePath, payLoad);
+    await sendEmail({ to: [post.createdBy.email] }, filePath, payLoad);
 }
 
 async function insertManyIntoPurchasedUnit(units) {
