@@ -150,7 +150,7 @@ input InputdescriptionBlocks {
   meta: MetaInput
 }
 
-union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock | DelimiterBlock
+union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock
 
 type CodeBlock {
   type: String
@@ -161,16 +161,6 @@ type CodeBlock {
 type Code {
   code: String
   language: String
-}
-
-type DelimiterBlock {
-  type: String
-  data: Delimiter
-  _id: ID
-}
-
-type Delimiter {
-  text: String
 }
 
 type ImageBlock {

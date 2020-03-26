@@ -173,7 +173,7 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                         return reject(err)
                     }
 
-                    if (res.type === 'product') {
+                    if (res && res.type === 'product') {
                         /** List of users who purchased the bugfix */
                         let usersWhoPurchased = [];
 
