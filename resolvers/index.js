@@ -14,6 +14,9 @@ const { sendEmail } = require('./email');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
+// Jane add
+const { getQuote } = require('./quote');
+// Jane add end
 module.exports = {
   Query: {
     hello: () => 'Hello world!',
@@ -88,7 +91,9 @@ module.exports = {
 
     addQuestionOrAnswer, updateQuestionOrAnswer,
 
-    sendEmail
+    sendEmail,
+
+    getQuote
   },
   Subscription: {
     onCommentAdded: {
