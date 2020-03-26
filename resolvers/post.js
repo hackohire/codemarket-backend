@@ -39,31 +39,58 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
             }
 
             const int = await new Post(post);
+
+            /** Save the post in the database & send the email notifications */
             await int.save(post).then(async (p) => {
                 console.log(p)
 
                 p.populate('createdBy')
                     .populate('tags')
                     .populate('cities')
-                    .populate('company')
                     .populate('companies')
                     .populate('jobProfile')
-                    .populate('businessGoals')
-                    .populate('businessChallenges')
-                    .populate('businessAreas')
-                    .populate('sellProducts.products')
-                    .populate('sellServices.services')
-                    .populate('fundingBy')
-                    .populate('fundingTo')
+                    .populate('collaborators')
+                    .populate('assignees')
 
                     .execPopulate().then(async populatedPost => {
-                        if (populatedPost && populatedPost.isPostUnderCompany) {
-                            await pubSub.publish('COMPANY_POST_CHANGES', { postAdded: populatedPost });
-                        }
-                        // if (populatedPost && populatedPost.isPostUnderUser) {
-                            await pubSub.publish('USERS_POST_CHANGES', { postAdded: populatedPost });
-                        // }
+
+                        /** Send email notification to the post creator */
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
+
+                        /** Send email notification to the collaborators */
+                        if(post.status === 'Published' && populatedPost && populatedPost.collaborators && populatedPost.collaborators.length) {      
+                            const filePath = basePath + 'email-template/common-template';
+                            const productLink = `${process.env.FRONT_END_URL}post/${populatedPost.slug}`;
+                            populatedPost.collaborators.forEach(async (u) => {
+                                const payLoad = {
+                                    NAME: u.name,
+                                    LINK: productLink,
+                                    CONTENT: `You have been added as a collaborator on "${post.name}" by ${post.createdBy.name}. Please Click here to check the details.`,
+                                    SUBJECT: `Collaborator Rights Given`
+                                    // TYPE: type ? type : string.capitalize(post.type)
+                                };
+                                await helper.sendEmail({to: [u.email]}, filePath, payLoad);
+                            })
+                            console.log( populatedPost.collaborators);
+                        }
+
+                        /** Send email notification to the assignee */
+                        if(post.status === 'Published' && populatedPost && populatedPost.assignees && populatedPost.assignees.length) {       
+                            const filePath = basePath + 'email-template/common-template';
+                            const productLink = `${process.env.FRONT_END_URL}post/${populatedPost.slug}`;
+                            populatedPost.assignees.forEach(async (u) => {
+                                const payLoad = {
+                                    NAME: u.name,
+                                    LINK: productLink,
+                                    CONTENT: `An assignment "${post.name}" has been assigned to you by ${post.createdBy.name}. Please Click here to check the details.`,
+                                    SUBJECT: `New Assignment assigned to you`
+                                    // TYPE: type ? type : string.capitalize(post.type)
+                                };
+                                await helper.sendEmail({to: [u.email]}, filePath, payLoad);
+                            })
+                        }
+
+
                         resolve(populatedPost);
                     });
 
@@ -98,11 +125,11 @@ async function getPostsByUserIdAndType(_, { userId, status, postType, pageOption
             const posts = await Post.find(condition)
                 .populate('createdBy')
                 .populate('tags')
-                .populate('company')
                 .populate('companies')
                 .populate('cities')
-                .populate('fundingBy')
-                .populate('fundingTo')
+                .populate('users')
+                .populate('collaborators')
+                .populate('assignees')
 
                 .sort(sort)
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
@@ -131,21 +158,14 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
 
             Post.findById(postId)
                 .populate({ path: 'usersAttending', select: 'name avatar' })
-                .populate('company')
                 .populate('companies')
                 .populate('cities')
                 .populate('createdBy')
                 .populate('tags')
                 .populate('jobProfile')
-                .populate('businessGoals')
-                .populate('businessChallenges')
-                .populate('businessAreas')
-                .populate('sellProducts.products')
-                .populate('sellServices.services')
-                .populate('fundingBy')
-                .populate('fundingTo')
                 .populate('collaborators')
                 .populate('assignees')
+                .populate('users')
 
                 .exec(async (err, res) => {
 
@@ -153,7 +173,7 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                         return reject(err)
                     }
 
-                    if (res.type === 'product') {
+                    if (res && res.type === 'product') {
                         /** List of users who purchased the bugfix */
                         let usersWhoPurchased = [];
 
@@ -208,17 +228,12 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
             Post.find({ status: 'Published', type: postType })
                 .populate('createdBy')
                 .populate('tags')
-                .populate('company')
                 .populate('companies')
                 .populate('cities')
                 .populate('jobProfile')
-                .populate('businessGoals')
-                .populate('businessChallenges')
-                .populate('businessAreas')
-                .populate('sellProducts.products')
-                .populate('sellServices.services')
-                .populate('fundingBy')
-                .populate('fundingTo')
+                .populate('collaborators')
+                .populate('assignees')
+                // .populate('users')
 
                 .exec((err, res) => {
 
@@ -262,30 +277,15 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
 
                 res
                     .populate('createdBy')
-                    .populate('company')
                     .populate('companies')
                     .populate('tags')
                     .populate('cities')
                     .populate('jobProfile')
-                    .populate('businessGoals')
-                    .populate('businessChallenges')
-                    .populate('businessAreas')
-                    .populate('sellProducts.products')
-                    .populate('sellServices.services')
-                    .populate('fundingBy')
-                    .populate('fundingTo')
                     .populate('collaborators')
                     .populate('assignees')
-                    // .populate('connectedWithUser')
+                    .populate('users')
 
                     .execPopulate().then(async (d) => {
-
-                        if (d && d.isPostUnderCompany) {
-                            await pubSub.publish('COMPANY_POST_CHANGES', { postUpdated: d });
-                        }
-                        // if (d && d.isPostUnderUser) {
-                        await pubSub.publish('USERS_POST_CHANGES', { postUpdated: d });
-                        // }
 
                         if(res && post.collaborators && post.collaborators.length) {
                             const collaboratorsAfterUpdate = await res.toObject();
@@ -293,7 +293,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                             const collaboratorsToSendEmail = differenceBy(collaboratorsAfterUpdate.collaborators, collaboratorsBeforeUpdate.collaborators, 'email');
         
                             const filePath = basePath + 'email-template/common-template';
-                            const productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${res.slug}`;
+                            const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
                             collaboratorsToSendEmail.forEach(async (u) => {
                                 const payLoad = {
                                     NAME: u.name,
@@ -313,12 +313,12 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                             const assiggneesToSendEmail = differenceBy(assigneesAfterUpdate.assignees, assigneesBeforeUpdate.assignees, 'email');
         
                             const filePath = basePath + 'email-template/common-template';
-                            const productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${res.slug}`;
+                            const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
                             assiggneesToSendEmail.forEach(async (u) => {
                                 const payLoad = {
                                     NAME: u.name,
                                     LINK: productLink,
-                                    CONTENT: `An assignment "${res.name}" has been assigned to you by ${res.createdBy.name}. Please Click here to check the details.`,
+                                    CONTENT: `A "${res.type} ${res.name}" has been assigned to you by ${res.createdBy.name}. Please Click here to check the details.`,
                                     SUBJECT: `New Assignment assigned to you`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
@@ -357,12 +357,6 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
                 if (err) {
                     return reject(err)
                 }
-                if (res && res.isPostUnderCompany) {
-                    await pubSub.publish('COMPANY_POST_CHANGES', { postDeleted: res });
-                }
-                // if (res && res.isPostUnderUser) {
-                await pubSub.publish('USERS_POST_CHANGES', { postDeleted: res });
-                // }
                 return resolve(res ? 1 : 0);
             })
             );
@@ -381,7 +375,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
         try {
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
-            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : -1 };
 
             if (!db) {
                 console.log('Creating new mongoose connection.');
@@ -396,9 +390,21 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             }
 
             if(createdBy) {
-                condition['createdBy'] = ObjectID(createdBy)
-                // condition['isPostUnderUser'] =  { $ne: true };
-                // condition['isPostUnderCompany'] = { $ne: true }
+                condition['$and'] = [{
+                    '$or': [
+                        { createdBy: ObjectID(createdBy) }
+                    ]
+                }]
+            }
+
+            if (connectedWithUser) {
+                condition['$and'] = [{
+                    '$or': [
+                        { collaborators: ObjectID(connectedWithUser) },
+                        { assignees: ObjectID(connectedWithUser) },
+                        { createdBy: ObjectID(connectedWithUser) }
+                    ]
+                }]
             }
 
             if (reference && reference.referencePostId) {
@@ -409,7 +415,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 }]
             }
 
-            console.log(reference)
             if (reference && reference.connectedEvent) {
                 condition['$and'] = [{
                     '$or': [
@@ -417,30 +422,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                     ]
                 }]
             }
-
-            /** Fetch posts related to the user's profile */
-            // if (connectedWithUser) {
-            //     condition['$and'] = [
-            //         {
-            //             '$or': [
-            //                 { connectedWithUser: ObjectID(connectedWithUser) }
-            //             ]
-            //         },
-            //         {
-            //             '$or': [
-            //                 { type: 'leadership-challenge' },
-            //                 { type: 'technical-challenge' },
-            //                 { type: 'business-challenge' },
-            //                 { type: 'team-challenge' },
-            //                 { type: 'business-goal' },
-            //                 { type: 'startup-goal' },
-            //                 { type: 'technical-goal' },
-            //                 { type: 'social-impact-goal' },
-            //                 // { type: 'user-post'}
-            //             ]
-            //         }
-            //     ]
-            // }
 
             /** In Company Details Page Fetch Jobs & DreamJob related to that company */
             if (companyId) {
@@ -451,132 +432,56 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                             { 'companies': ObjectID(companyId) }
                         ]
                     },
-                    {
-                        '$or': [
-                            { type: 'job' },
-                            { type: 'dream-job' },
-                            { type: 'sales-challenge' },
-                            { type: 'marketing-challenge' },
-                            { type: 'technical-challenge' },
-                            { type: 'business-challenge' },
-                            { type: 'team-challenge' },
-                            { type: 'sales-goal' },
-                            { type: 'marketing-goal' },
-                            { type: 'technical-goal' },
-                            { type: 'team-goal' },
-                            { type: 'business-goal' },
-                            { type: 'mission' },
-                            { type: 'company-post' }
-                        ]
-                    }
                 ]
             }
 
             /** Taking Empty Posts array */
             let posts = [];
-            let total = await Post.countDocuments(condition).exec()
+            // let total = await Post.countDocuments(condition).exec()
             posts = await Post.aggregate([
                 {
                     $match: condition
                 },
-                {
-                    $lookup: {
-                        from: 'comments',
-                        // localField: '_id',
-                        // foreignField: 'referenceId',
-                        let: { status: "$status", reference_id: "$_id" },
-                        pipeline: [
-                            {
-                                $match:
-                                {
-                                    $expr:
-                                    {
-                                        $and:
-                                            [
-                                                { $ne: ["$status", "Deleted"] },
-                                                { $eq: ["$$reference_id", "$referenceId"] },
-                                                { $eq: ["$parentId", null] }
-                                            ]
-                                    }
-                                }
-                            },
-                            // {
-                            //     $unwind: {
-                            //         "path": "$children",
-                            //     }
-                            // },
-                            // {
-                            //     $lookup: {
-                            //         from: 'comments',
-                            //         "let": { "childrenComments": "$children" },
-                            //         pipeline: [
-                            //             {
-                            //                 $match: {
-                            //                     $expr: {
-                            //                         $and:
-                            //                             [
-                            //                                 { $eq: ["$$childrenComments", '$_id']},
-                            //                                 { $ne: ["$status", "Deleted"] }
-                            //                         ]
-                            //                     }
-                            //                 }
-                            //             },
-                            //             {
-                            //                 $lookup: {
-                            //                     from: 'users',
-                            //                     localField: 'createdBy',
-                            //                     foreignField: '_id',
-                            //                     as: 'createdBy'
-                            //                 }
-                            //             },
-                            //             {
-                            //                 $unwind: {
-                            //                     "path": "$createdBy",
-                            //                     "preserveNullAndEmptyArrays": true
-                            //                 }
-                            //             },
-                            //         ],
-                            //         as: 'children'
-                            //     }
-                            // },
-                            // {
-                            //     $unwind: {
-                            //         "path": "$children",
-                            //         "preserveNullAndEmptyArrays": true
-                            //     }
-                            // },
-                            // {
-                            //     $group:
-                            //         {
-                            //             _id: "$_id",
-                            //             product: { $first: "$type"},
-                            //             status: { $first: "$status"},
-                            //             type: { $first: "$type"},
-                            //             createdBy: { $first: "$createdBy"},
-                            //             createdAt: { $first: "$createdAt"},
-                            //             children: { $push: "$children"}
-                            //         }
-                            // }, 
-                            {
-                                $lookup: {
-                                    "from": "users",
-                                    "let": { "created_by": "$createdBy" },
-                                    pipeline: [
-                                        { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
-                                    ],
-                                    as: "createdBy"
-                                }
-                            },
-                            {
-                                $unwind: {
-                                    "path": "$createdBy",
-                                    "preserveNullAndEmptyArrays": true
-                                }
-                            },
-                        ],
-                        as: 'comments'
-                    }
-                },
+                /** The below commented code is to fetch the comments related to the posts */
+                // {
+                //     $lookup: {
+                //         from: 'comments',
+                //         let: { status: "$status", reference_id: "$_id" },
+                //         pipeline: [
+                //             {
+                //                 $match:
+                //                 {
+                //                     $expr:
+                //                     {
+                //                         $and:
+                //                             [
+                //                                 { $ne: ["$status", "Deleted"] },
+                //                                 { $eq: ["$$reference_id", "$referenceId"] },
+                //                                 { $eq: ["$parentId", null] }
+                //                             ]
+                //                     }
+                //                 }
+                //             },
+                //             {
+                //                 $lookup: {
+                //                     "from": "users",
+                //                     "let": { "created_by": "$createdBy" },
+                //                     pipeline: [
+                //                         { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
+                //                     ],
+                //                     as: "createdBy"
+                //                 }
+                //             },
+                //             {
+                //                 $unwind: {
+                //                     "path": "$createdBy",
+                //                     "preserveNullAndEmptyArrays": true
+                //                 }
+                //             },
+                //         ],
+                //         as: 'comments'
+                //     }
+                // },
                 {
                     $lookup: {
                         from: 'likes',
@@ -591,6 +496,30 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         localField: 'createdBy',
                         foreignField: '_id',
                         as: 'createdBy'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'companies',
+                        localField: 'companies',
+                        foreignField: '_id',
+                        as: 'companies'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'collaborators',
+                        foreignField: '_id',
+                        as: 'collaborators'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'assignees',
+                        foreignField: '_id',
+                        as: 'assignees'
                     }
                 },
                 {
@@ -612,14 +541,28 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         likeCount: { $size: '$likes' },
                         comments: '$comments',
                         createdAt: 1,
-                        company: 1
+                        companies: 1,
+                        collaborators: 1,
+                        assignees: 1
                     }
-                }
+                },
+                {
+                    $facet: {
+                      posts: [
+                        { $sort: sort },
+                        { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                        { $limit: pageOptions.limit },
+                      ],
+                      pageInfo: [
+                        { $group: { _id: null, count: { $sum: 1 } } },
+                      ],
+                    },
+                  },
 
             ])
-                .sort(sort)
-                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-                .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
+                // .sort(sort)
+                // .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                // .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
                 .exec();
 
             /** Fetching all the Published Posts */
@@ -631,7 +574,11 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             //     .sort(sort)
             //     .exec();
 
-            return await resolve({ posts, total });
+            return await resolve(
+                { 
+                    posts: posts && posts.length ? posts[0].posts : [],
+                    total: posts && posts.length && posts.length.pageInfo ? posts[0].pageInfo[0].count : 0
+                });
 
         } catch (e) {
             console.log(e);
