@@ -1,7 +1,7 @@
 const { gql } = require('apollo-server-lambda');
 
 const quoteSchema = `
- type QuoteFields = {
+ type QuoteFields {
      _id: ID
      createdAt: String
      updatedAt: String
@@ -16,7 +16,7 @@ const quoteSchema = `
      healthLevel: String
  }
 
- input InputQuoteFields = {
+ input QuoteFieldsInput {
     _id: ID
     createdAt: String
     updatedAt: String
@@ -32,7 +32,7 @@ const quoteSchema = `
  }
 
  extend type Mutation {
-     getQuote(quote:QuoteFieldInput) : QuoteFields
+     getQuote(quote:QuoteFieldsInput) : QuoteFields
  }
 `
 module.exports = gql(quoteSchema);
