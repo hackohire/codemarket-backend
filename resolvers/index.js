@@ -12,6 +12,7 @@ const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
 const { sendEmail } = require('./email');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
+const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 module.exports = {
@@ -46,7 +47,9 @@ module.exports = {
 
     getBookingList,
 
-    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer
+    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer,
+
+    fetchFields, fetchPostTypes,
   },
   Mutation: {
     createUser,
@@ -88,7 +91,9 @@ module.exports = {
 
     addQuestionOrAnswer, updateQuestionOrAnswer,
 
-    sendEmail
+    sendEmail,
+
+    addPostType, updatePostType, deletePostType
   },
   Subscription: {
     onCommentAdded: {
@@ -157,48 +162,6 @@ module.exports = {
         },
       ),
     },
-    onCompanyPostChanges: {
-      resolve: (rootValue) => { return rootValue; },
-      subscribe: withFilter(
-        pubSub.subscribe('COMPANY_POST_CHANGES'),
-        (rootValue, args) => {
-          if (rootValue.postUpdated && args.companyId == rootValue.postUpdated.company._id) {
-            return true;
-          }
-
-          if (rootValue.postAdded && args.companyId == rootValue.postAdded.company._id) {
-            return true;
-          }
-
-          if (rootValue.postDeleted && args.companyId == rootValue.postDeleted.company) {
-            return true;
-          }
-
-          return false;
-        },
-      ),
-    },
-    onUsersPostChanges: {
-      resolve: (rootValue) => { return rootValue; },
-      subscribe: withFilter(
-        pubSub.subscribe('USERS_POST_CHANGES'),
-        (rootValue, args) => {
-          if (rootValue.postUpdated && args.userId == rootValue.postUpdated.createdBy._id) {
-            return true;
-          }
-
-          if (rootValue.postAdded && args.userId == rootValue.postAdded.createdBy._id) {
-            return true;
-          }
-
-          if (rootValue.postDeleted && args.userId == rootValue.postDeleted.createdBy) {
-            return true;
-          }
-
-          return false;
-        },
-      ),
-    }
   },
 
   // CommentInterface: {
@@ -241,6 +204,9 @@ module.exports = {
 
         case 'linkTool':
           return 'LinkToolBlock'
+
+        case 'delimiter':
+          return 'DelimiterBlock'
 
         default:
           console.log('default case')
