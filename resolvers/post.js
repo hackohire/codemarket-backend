@@ -397,6 +397,16 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 }]
             }
 
+            if (connectedWithUser) {
+                condition['$and'] = [{
+                    '$or': [
+                        { collaborators: ObjectID(connectedWithUser) },
+                        { assignees: ObjectID(connectedWithUser) },
+                        { createdBy: ObjectID(connectedWithUser) }
+                    ]
+                }]
+            }
+
             if (reference && reference.referencePostId) {
                 condition['$and'] = [{
                     '$or': [
@@ -409,15 +419,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 condition['$and'] = [{
                     '$or': [
                         { connectedEvent: ObjectID(reference.connectedEvent) },
-                    ]
-                }]
-            }
-
-            if (connectedWithUser) {
-                condition['$and'] = [{
-                    '$or': [
-                        { collaborators: ObjectID(connectedWithUser) },
-                        { assignees: ObjectID(connectedWithUser) },
                     ]
                 }]
             }
