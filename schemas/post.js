@@ -38,6 +38,7 @@ const graphQlPostSchema = `
 
         purchasedBy: [PurchasedBy]
 
+        connectedPosts: [Post]
         collaborators: [User]
         assignees: [User]
 
@@ -81,7 +82,7 @@ const graphQlPostSchema = `
         jobProfile: [ID]
         timeline: Int
 
-        referencePostId: ID
+        connectedPosts: [ID]
         connectedEmail: ID
         
         collaborators: [UserInput]

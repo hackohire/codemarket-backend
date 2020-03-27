@@ -166,6 +166,7 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                 .populate('collaborators')
                 .populate('assignees')
                 .populate('users')
+                .populate('connectedPosts')
 
                 .exec(async (err, res) => {
 
@@ -407,14 +408,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 }]
             }
 
-            if (reference && reference.referencePostId) {
-                condition['$and'] = [{
-                    '$or': [
-                        { referencePostId: ObjectID(reference.referencePostId) },
-                    ]
-                }]
-            }
-
             if (reference && reference.connectedEvent) {
                 condition['$and'] = [{
                     '$or': [
@@ -524,6 +517,14 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 },
                 {
                     $lookup: {
+                        from: 'posts',
+                        localField: 'connectedPosts',
+                        foreignField: '_id',
+                        as: 'connectedPosts'
+                    }
+                },
+                {
+                    $lookup: {
                         from: 'tags',
                         localField: 'tags',
                         foreignField: '_id',
@@ -542,6 +543,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         comments: '$comments',
                         createdAt: 1,
                         companies: 1,
+                        connectedPosts: 1,
                         collaborators: 1,
                         assignees: 1
                     }
