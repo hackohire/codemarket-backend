@@ -408,12 +408,21 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 }]
             }
 
-            if (reference && reference.connectedEvent) {
-                condition['$and'] = [{
-                    '$or': [
-                        { connectedEvent: ObjectID(reference.connectedEvent) },
-                    ]
-                }]
+            if (reference) {
+                if (reference.referencePostId && reference.referencePostId.length) {
+                    condition['$and'] = [{
+                        '$or': [
+                            { connectedPosts: reference.referencePostId.map(i => ObjectID(i)), type: reference.postType },
+                        ]
+                    }]
+                }
+                if (reference.connectedPosts && reference.connectedPosts.length) {
+                    condition['$and'] = [{
+                        '$or': [
+                            { _id: {$in : reference.connectedPosts.map(i => ObjectID(i))}, type: reference.postType },
+                        ]
+                    }]
+                }
             }
 
             /** In Company Details Page Fetch Jobs & DreamJob related to that company */
