@@ -340,8 +340,9 @@ type getAllPostsResponse {
 }
 
 input ReferenceObject {
-  referencePostId: String
-  connectedEvent: String
+  referencePostId: [ID]
+  connectedPosts: [ID]
+  postType: String
 }
 
 
@@ -350,7 +351,6 @@ type Query {
 
   getAllPosts(pageOptions: PageOptionsInput, type: String, reference: ReferenceObject, companyId: String, connectedWithUser: String, createdBy: String): getAllPostsResponse
 
-  getAllProducts: [Product]
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]
 
   findFromCollection(keyWord: String, searchCollection: String, type: String): [Tag]

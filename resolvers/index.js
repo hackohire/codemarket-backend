@@ -1,5 +1,5 @@
 const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
-const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
+const { getListOfUsersWhoPurchased } = require('./product');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
 const { findFromCollection, addToCollection } = require('./categories');
@@ -23,7 +23,7 @@ module.exports = {
     getAllPosts,
     fullSearch,
 
-    getAllProducts, getListOfUsersWhoPurchased,
+    getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
 
