@@ -150,7 +150,7 @@ input InputdescriptionBlocks {
   meta: MetaInput
 }
 
-union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock | DelimiterBlock
+union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock
 
 type CodeBlock {
   type: String
@@ -161,16 +161,6 @@ type CodeBlock {
 type Code {
   code: String
   language: String
-}
-
-type DelimiterBlock {
-  type: String
-  data: Delimiter
-  _id: ID
-}
-
-type Delimiter {
-  text: String
 }
 
 type ImageBlock {
@@ -350,8 +340,9 @@ type getAllPostsResponse {
 }
 
 input ReferenceObject {
-  referencePostId: String
-  connectedEvent: String
+  referencePostId: [ID]
+  connectedPosts: [ID]
+  postType: String
 }
 
 
@@ -360,7 +351,6 @@ type Query {
 
   getAllPosts(pageOptions: PageOptionsInput, type: String, reference: ReferenceObject, companyId: String, connectedWithUser: String, createdBy: String): getAllPostsResponse
 
-  getAllProducts: [Product]
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]
 
   findFromCollection(keyWord: String, searchCollection: String, type: String): [Tag]
