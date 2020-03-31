@@ -1,4 +1,4 @@
-service: classes
+service: grants
 
 provider:
   name: aws
