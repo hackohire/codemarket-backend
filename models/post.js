@@ -31,6 +31,8 @@ const postSchema = new Schema(
 
                 'assignment',
 
+                'note',
+
                 'email'                  /** Post type for Email */
             ],
         },
@@ -102,11 +104,11 @@ const postSchema = new Schema(
         /** It will contain the url from where the post has been imported */
         referencePostUrl: String,
 
-
-        /** referencePostId right now using it for storing the id of a dream-job as reference in a job post
-         * Purpose is to connect jobs with dream-job
-         */
-        referencePostId: Schema.Types.ObjectId,
+        /** Array of ID of posts, a post is tied to */
+        connectedPosts: [{
+            type: Schema.Types.ObjectId,
+            ref: "post",
+        }],
 
         collaborators: [{
             type: Schema.Types.ObjectId,

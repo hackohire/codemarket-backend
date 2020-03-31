@@ -67,7 +67,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             await pubSub.publish('COMMENT_ADDED', commentObj);
 
             /** Send Email Only if comment type is post */
-            if (commentObj.type === 'post' || commentObj.type === 'product' || commentObj.type === 'dream-job') {
+            if (commentObj.type === 'post') {
                 data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').select('createdBy id name type slug description blockId blockSpecificComment').lean().exec();
                 let commentNoti = commentObj.toObject();
                 commentNoti['referencePost'] = data;
@@ -76,8 +76,12 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
 
                 /** Don't send if the comment is added by post author */
                 if (commentObj.createdBy._id.toString() !== data.createdBy._id.toString()) {
-                    const commentType = commentObj.type === 'product' ? 'product' : commentObj.type === 'dream-job' ? 'dream-job' : 'post';
+                    const commentType = 'post';
                     postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?commentId=${commentObj._id}`;
+
+                    if(commentObj.blockId) {
+                        postLink = postLink.concat(`&blockId=${commentObj.blockId}`)
+                    }
 
                     /** Reference to the common email templates foler */
                     const filePathToAuthor = basePath + 'email-template/common-template';
