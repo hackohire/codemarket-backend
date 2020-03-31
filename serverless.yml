@@ -1,4 +1,4 @@
-service: codemarketapi
+service: classes
 
 provider:
   name: aws
@@ -292,7 +292,7 @@ custom:
     port: 3200
 
   customDomain:
-    domainName: ${self:service}-${self:provider.stage}.codemarket.io
+    domainName: ${self:service}-api.codemarket.io
     basePath: ''
     certificateName: '*.codemarket.io'
     createRoute53Record:	false
