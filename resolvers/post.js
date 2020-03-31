@@ -166,6 +166,7 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                 .populate('collaborators')
                 .populate('assignees')
                 .populate('users')
+                .populate('connectedPosts')
 
                 .exec(async (err, res) => {
 
@@ -173,7 +174,7 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                         return reject(err)
                     }
 
-                    if (res.type === 'product') {
+                    if (res && res.type === 'product') {
                         /** List of users who purchased the bugfix */
                         let usersWhoPurchased = [];
 
@@ -397,29 +398,31 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 }]
             }
 
-            if (reference && reference.referencePostId) {
-                condition['$and'] = [{
-                    '$or': [
-                        { referencePostId: ObjectID(reference.referencePostId) },
-                    ]
-                }]
-            }
-
-            if (reference && reference.connectedEvent) {
-                condition['$and'] = [{
-                    '$or': [
-                        { connectedEvent: ObjectID(reference.connectedEvent) },
-                    ]
-                }]
-            }
-
             if (connectedWithUser) {
                 condition['$and'] = [{
                     '$or': [
                         { collaborators: ObjectID(connectedWithUser) },
                         { assignees: ObjectID(connectedWithUser) },
+                        { createdBy: ObjectID(connectedWithUser) }
                     ]
                 }]
+            }
+
+            if (reference) {
+                if (reference.referencePostId && reference.referencePostId.length) {
+                    condition['$and'] = [{
+                        '$or': [
+                            { connectedPosts: reference.referencePostId.map(i => ObjectID(i)), type: reference.postType },
+                        ]
+                    }]
+                }
+                if (reference.connectedPosts && reference.connectedPosts.length) {
+                    condition['$and'] = [{
+                        '$or': [
+                            { _id: {$in : reference.connectedPosts.map(i => ObjectID(i))}, type: reference.postType },
+                        ]
+                    }]
+                }
             }
 
             /** In Company Details Page Fetch Jobs & DreamJob related to that company */
@@ -523,6 +526,14 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 },
                 {
                     $lookup: {
+                        from: 'posts',
+                        localField: 'connectedPosts',
+                        foreignField: '_id',
+                        as: 'connectedPosts'
+                    }
+                },
+                {
+                    $lookup: {
                         from: 'tags',
                         localField: 'tags',
                         foreignField: '_id',
@@ -541,6 +552,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         comments: '$comments',
                         createdAt: 1,
                         companies: 1,
+                        connectedPosts: 1,
                         collaborators: 1,
                         assignees: 1
                     }
@@ -576,7 +588,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             return await resolve(
                 { 
                     posts: posts && posts.length ? posts[0].posts : [],
-                    total: posts && posts.length && posts.length.pageInfo ? posts[0].pageInfo[0].count : 0
+                    total: posts && posts.length && posts[0].pageInfo ? posts[0].pageInfo[0].count : 0
                 });
 
         } catch (e) {
