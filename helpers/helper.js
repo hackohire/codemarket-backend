@@ -129,36 +129,7 @@ async function insertManyIntoPurchasedUnit(units) {
     return unitsAdded;
 }
 
-async function sendMessageToWebsocketClient(event, connectionId, postData, conn) {
 
-    return new Promise(async (resolve, reject) => {
-
-        const domain = event.requestContext.domainName;
-        const stage = event.requestContext.stage;
-        // const callbackUrlForAWS = 'https://i8zthpq9j3.execute-api.ap-south-1.amazonaws.com/prod'; 
-        const callbackUrlForAWS = util.format(util.format('https://%s/%s', domain, stage));
-
-        const apigwManagementApi = new AWS.ApiGatewayManagementApi({
-            apiVersion: '2018-11-29',
-            region: 'ap-south-1',
-            endpoint: event.requestContext.domainName.includes('local') ? process.env.SOCKET_URL : callbackUrlForAWS
-        });
-
-        try {
-            await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: JSON.stringify(postData) }).promise();
-            return resolve('Sent');
-        } catch (e) {
-            if (e.statusCode === 410) {
-                console.log(`Found stale connection, deleting ${connectionId}`);
-                await conn.collection('connections').findOneAndDelete({ connectionId: connectionId });
-                return resolve('Deleted');
-            } else {
-                return reject(e);
-            }
-        }
-    });
-
-}
 
 module.exports = {
     checkIfUserIsAdmin,
@@ -166,6 +137,5 @@ module.exports = {
     insertManyIntoCities,
     sendEmail,
     insertManyIntoPurchasedUnit,
-    sendPostCreationEmail,
-    sendMessageToWebsocketClient
+    sendPostCreationEmail
 }
