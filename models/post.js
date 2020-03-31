@@ -33,6 +33,8 @@ const postSchema = new Schema(
 
                 'note',
 
+                'question',
+
                 'email'                  /** Post type for Email */
             ],
         },
