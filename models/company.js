@@ -15,6 +15,10 @@ const companySchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         },
+        owners: [{
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }],
         status: {
             type: String,
             enum: ['Created', 'Drafted', 'Published', 'Unpublished', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
