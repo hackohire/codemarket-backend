@@ -122,40 +122,45 @@
                                                                          color: black;
                                                                          padding: 2%;
                                                                          margin: 0px;
-                                                                         /* background-color: #f2e8df; */
-                                                                         /* border: 1px solid; */
+                                                                         background-color: #fafafa;
+                                                                         border: 1px solid; 
                                                                          ">
                                                                             <div>
                                                                                <% if (locals.NAME) { %>
                                                                                   Dear <%= NAME %> ,
                                                                               <% } %>
                                                                             </div>
-                                                                            <br>
                                                                             <% if (locals.HTML_CONTENT) { %>
+                                                                              <br>
+
                                                                                <div> <%- HTML_CONTENT %> </div>
                                                                             <% } %>
- 
                                                                             <!-- If the content is set from the options -->
                                                                             <% if (locals.CONTENT) { %>
+                                                                              <br>
+
                                                                                <div> <%= CONTENT %> </div>
                                                                             <% } %>
- 
                                                                             <!-- If the link is set from the options-->
                                                                             <% if (locals.LINK) { %>
+                                                                              <br>
+
                                                                                <div> Here is the link, By clicking it you will be redirected to the post. </div>
                                                                                <div><a href="<%=LINK%>""> <%= LINK %></div>
                                                                             <% } %>
- 
                                                                             <!-- If the invitation link is set from the options -->
                                                                             <% if (locals.INVITATION_LINK) { %>
+                                                                              <br>
+
                                                                                <div>
                                                                                   Here is the invitation <a href="<%= INVITATION_LINK %>" target="_blank">link</a>,
                                                                                   By clicking on it, You will be able to successfully accept the invitation
                                                                                </div>
                                                                             <% } %>
- 
                                                                             <!-- This part is onl for RSVP event email -->
                                                                             <% if (locals.EVENT_INVITATION_LINK) { %>
+                                                                              <br> 
+
                                                                                <div> You have
                                                                                   successfully RSVP for <%= EVENT_NAME %>. </div><br><br>
                                                                                <h3>Event Details:</h3>
@@ -172,7 +177,6 @@
                                                                                   accept the invitation
                                                                                </div>
                                                                             <% } %>
- 
                                                                             <% if (!locals.HTML_CONTENT) { %>
                                                                                <br>
                
@@ -185,13 +189,13 @@
                                                                            <hr style="border: 0; border-top: 1px solid #eee;">
                                                                            <div style="text-align: center;">
 
-                                                                              <a style="display: inline-block;" href="https://www.facebook.com/joincodemarket/" title="Facebook" target="_blank"><img alt="Facebook" width="24" style="display:block;width:100%;max-width:24px;border:0" src="https://image.flaticon.com/icons/svg/1384/1384053.svg" class="CToWUd"></a>
+                                                                              <a style="display: inline-block;" href="https://www.facebook.com/joincodemarket/" title="Facebook" target="_blank"><img alt="Facebook" width="24" style="display:block;width:100%;max-width:24px;border:0" src="https://codemarket-files.s3.amazonaws.com/public/facebook.png" class="CToWUd"></a>
                                                                               &nbsp;
 
-                                                                              <a style="display: inline-block;" href="https://twitter.com/joincodemarket" title="Twitter" target="_blank" ><img alt="Twitter" width="24" style="display:block;width:100%;max-width:24px;border:0" src="https://image.flaticon.com/icons/svg/733/733579.svg" class="CToWUd"></a>
+                                                                              <a style="display: inline-block;" href="https://twitter.com/joincodemarket" title="Twitter" target="_blank" ><img alt="Twitter" width="24" style="display:block;width:100%;max-width:24px;border:0" src="https://codemarket-files.s3.amazonaws.com/public/twitter.png" class="CToWUd"></a>
                                                                               &nbsp;
 
-                                                                              <a style="display: inline-block;" href="https://www.linkedin.com/company/joincodemarket/" title="Twitter" target="_blank"><img alt="Twitter" width="24" style="display:block;width:100%;max-width:24px;border:0" src="https://image.flaticon.com/icons/svg/174/174857.svg" class="CToWUd"></a>
+                                                                              <a style="display: inline-block;" href="https://www.linkedin.com/company/joincodemarket/" title="Twitter" target="_blank"><img alt="Twitter" width="24" style="display:block;width:100%;max-width:24px;border:0" src="https://codemarket-files.s3.amazonaws.com/public/linkedin.png" class="CToWUd"></a>
 
                                                                            </div>
                                                                             <div style="text-align: center;">Palo Alto, CA 94306, US</div>
