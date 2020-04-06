@@ -145,6 +145,7 @@ const graphQlPostSchema = `
         getPostsByUserIdAndType(userId: String, status: String, postType: String, pageOptions: PageOptionsInput): GetPostsByUserIdAndTypeResponse
         getPostById(postId: String): Post
         fullSearch(searchString: String): [Post]
+        fetchFiles(blockType: String, userId: String): [AttachesBlock]
 
         myRSVP(userId: String): [Post]
     }

@@ -148,6 +148,8 @@ input InputdescriptionBlocks {
 
   link: String
   meta: MetaInput
+
+  createdBy: ID
 }
 
 union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock | AttachesBlock
@@ -172,6 +174,7 @@ type AttachesBlock {
 type Attaches {
   file: AttachFile
   title: String
+  createdBy: User
 }
 
 type AttachFile {
