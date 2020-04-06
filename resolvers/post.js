@@ -62,7 +62,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
 
                         /** Send email notification to the collaborators */
-                        if(post.status === 'Published' && populatedPost && populatedPost.collaborators && populatedPost.collaborators.length) {      
+                        if (post.status === 'Published' && populatedPost && populatedPost.collaborators && populatedPost.collaborators.length) {
                             const filePath = basePath + 'email-template/common-template';
                             const productLink = `${process.env.FRONT_END_URL}post/${populatedPost.slug}`;
                             populatedPost.collaborators.forEach(async (u) => {
@@ -73,13 +73,13 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                                     SUBJECT: `Collaborator Rights Given`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
-                                await helper.sendEmail({to: [u.email]}, filePath, payLoad);
+                                await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
                             })
-                            console.log( populatedPost.collaborators);
+                            console.log(populatedPost.collaborators);
                         }
 
                         /** Send email notification to the assignee */
-                        if(post.status === 'Published' && populatedPost && populatedPost.assignees && populatedPost.assignees.length) {       
+                        if (post.status === 'Published' && populatedPost && populatedPost.assignees && populatedPost.assignees.length) {
                             const filePath = basePath + 'email-template/common-template';
                             const productLink = `${process.env.FRONT_END_URL}post/${populatedPost.slug}`;
                             populatedPost.assignees.forEach(async (u) => {
@@ -90,7 +90,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                                     SUBJECT: `New Assignment assigned to you`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
-                                await helper.sendEmail({to: [u.email]}, filePath, payLoad);
+                                await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
                             })
                         }
 
@@ -273,7 +273,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                 post.tags = await helper.insertManyIntoTags(post.tags);
             }
 
-            const postTemp = await Post.findOne({_id: post._id});
+            const postTemp = await Post.findOne({ _id: post._id });
 
             await Post.findOneAndUpdate({ _id: post._id }, post, { new: true, useFindAndModify: false }, async (err, res) => {
                 if (err) {
@@ -318,7 +318,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                             const collaboratorsAfterUpdate = await res.toObject();
                             const collaboratorsBeforeUpdate = (await postTemp.populate('collaborators').execPopulate()).toObject();
                             const collaboratorsToSendEmail = differenceBy(collaboratorsAfterUpdate.collaborators, collaboratorsBeforeUpdate.collaborators, 'email');
-        
+
                             const filePath = basePath + 'email-template/common-template';
                             const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
                             collaboratorsToSendEmail.forEach(async (u) => {
@@ -329,16 +329,16 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                                     SUBJECT: `Collaborator Rights Given`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
-                                await helper.sendEmail({to: [u.email]}, filePath, payLoad);
+                                await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
                             })
                             console.log(collaboratorsToSendEmail);
                         }
 
-                        if(res && post.assignees && post.assignees.length) {
+                        if (res && post.assignees && post.assignees.length) {
                             const assigneesAfterUpdate = await res.toObject();
                             const assigneesBeforeUpdate = (await postTemp.populate('assignees').execPopulate()).toObject();
                             const assiggneesToSendEmail = differenceBy(assigneesAfterUpdate.assignees, assigneesBeforeUpdate.assignees, 'email');
-        
+
                             const filePath = basePath + 'email-template/common-template';
                             const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
                             assiggneesToSendEmail.forEach(async (u) => {
@@ -349,7 +349,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                                     SUBJECT: `New Assignment assigned to you`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
-                                await helper.sendEmail({to: [u.email]}, filePath, payLoad);
+                                await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
                             })
                             console.log(assiggneesToSendEmail);
                         }
@@ -419,6 +419,59 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
     });
 }
 
+async function fetchFiles(_, { blockType, userId }, { headers }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            conn = await connectToMongoDB();
+
+            let files = await Post.aggregate([
+                {
+                    $match:
+                    {
+                        "description.data.createdBy": ObjectID(userId),
+                        "description.type": blockType
+                    }
+                },
+                {
+                    $project:
+                    {
+                        blocks:
+                        {
+                            $filter:
+                            {
+                                input: "$description",
+                                as: "block",
+                                cond: { $and: [{ $eq: ["$$block.type", blockType] }, { $eq: ["$$block.data.createdBy", ObjectID(userId)] }] }
+                            }
+                        }
+                    }
+                },
+                {
+                    $unwind: 
+                        {
+                            path: "$blocks",
+                            preserveNullAndEmptyArrays: true
+                        }
+                },
+                {
+                    $group:
+                    {
+                        _id: "$blocks.data.createdBy",
+                        blocks: { $push: "$blocks"}
+                    }
+                },
+            ])
+
+            resolve(files && files.length ? files[0].blocks : []);
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 async function getAllPosts(_, { pageOptions, type, reference, companyId, connectedWithUser, createdBy }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -438,7 +491,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 type: type ? type : { $ne: null }
             }
 
-            if(createdBy) {
+            if (createdBy) {
                 condition['$and'] = [{
                     '$or': [
                         { createdBy: ObjectID(createdBy) }
@@ -467,7 +520,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 if (reference.connectedPosts && reference.connectedPosts.length) {
                     condition['$and'] = [{
                         '$or': [
-                            { _id: {$in : reference.connectedPosts.map(i => ObjectID(i))}, type: reference.postType },
+                            { _id: { $in: reference.connectedPosts.map(i => ObjectID(i)) }, type: reference.postType },
                         ]
                     }]
                 }
@@ -607,16 +660,16 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 },
                 {
                     $facet: {
-                      posts: [
-                        { $sort: sort },
-                        { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
-                        { $limit: pageOptions.limit },
-                      ],
-                      pageInfo: [
-                        { $group: { _id: null, count: { $sum: 1 } } },
-                      ],
+                        posts: [
+                            { $sort: sort },
+                            { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                            { $limit: pageOptions.limit },
+                        ],
+                        pageInfo: [
+                            { $group: { _id: null, count: { $sum: 1 } } },
+                        ],
                     },
-                  },
+                },
 
             ])
                 // .sort(sort)
@@ -634,7 +687,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             //     .exec();
 
             return await resolve(
-                { 
+                {
                     posts: posts && posts.length ? posts[0].posts : [],
                     total: posts && posts.length && posts[0].pageInfo ? posts[0].pageInfo[0].count : 0
                 });
@@ -711,14 +764,9 @@ async function fullSearch(_, { searchString }, { headers, db, decodedToken }) {
     });
 }
 
-
-
-
-
-
-
 module.exports = {
     getAllPosts,
+    fetchFiles,
     fullSearch,
 
     addPost,

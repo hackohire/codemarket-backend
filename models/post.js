@@ -10,7 +10,54 @@ const postSchema = new Schema(
         name: String,
         description: [new Schema({
             type: String,
-            data: Schema.Types.Mixed,
+            data: {
+                text: String,
+                level: Number,
+                code: String,
+                language: String,
+
+                caption: String,
+                stretched: Boolean,
+                withBackground: Boolean,
+                withBorder: Boolean,
+
+                style: String,
+                items: [String],
+
+                alignment: String,
+
+                content: [[String]],
+
+                title: String,
+                message: String,
+
+                service: String,
+                source: String,
+                embed: String,
+                width: Number,
+                height: Number,
+
+                link: String,
+                meta: {
+                    title: String,
+                    description: String,
+                    domain: String,
+                    url: String,
+                    image: {
+                        url: String
+                    }
+                },
+                file: {
+                    url: String,
+                    name: String,
+                    size: Number,
+                    extension: String
+                },
+                createdBy: {
+                    type: Schema.Types.ObjectId,
+                    ref: "user", 
+                }
+            },
             status: {
                 type: String,
                 enum: ['Completed']

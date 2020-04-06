@@ -8,6 +8,7 @@ provider:
   # websocketsApiName: codemarket-videochat-socket
   # websocketsApiRouteSelectionExpression: $request.body.action
   environment:
+
     MONGODB_URL: ${file(env.yml):${self:provider.stage}.MONGODB_URL}
     MONGODB_DBNAME: ${file(env.yml):${self:provider.stage}.MONGODB_DBNAME}
     AWS_ACCESSKEY_ID: ${file(env.yml):${self:provider.stage}.AWS_ACCESSKEY_ID}
@@ -28,6 +29,7 @@ provider:
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
     EVENTS: ${self:service}-${self:provider.stage}-Events
     SUBSCRIPTION_OPERATIONS: ${self:service}-${self:provider.stage}-SubscriptionOperations
+
 
 functions:
   
@@ -64,6 +66,7 @@ functions:
               - x-requested-with
             allowCredentials: false 
 
+            
   webSocketHandler:
     handler: handler.handleWebSocket
     events:
@@ -273,7 +276,7 @@ custom:
     host: localhost
     port: 8000
     # this fixes the problem with missing region
-    region: ap-south-1
+    region: us-east-1
     pollForever: true
     streams:
       - table: ${self:service}-${self:provider.stage}-Events
