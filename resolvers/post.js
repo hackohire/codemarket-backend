@@ -19,6 +19,10 @@ var ObjectID = require('mongodb').ObjectID;
 // var ObjectID = require('mongodb').ObjectID;
 const { pubSub } = require('../helpers/pubsub');
 const differenceBy = require('lodash/array').differenceBy;
+const unionBy = require('lodash/array').unionBy;
+const map = require('lodash/collection').map;
+const partialRight = require('lodash/function').partialRight;
+const pick = require('lodash/object').pick;
 
 let conn;
 
@@ -288,6 +292,28 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
 
                     .execPopulate().then(async (d) => {
 
+                        const allUserAfterPostSave = await helper.getUserAssociatedWithPost(post._id);
+
+                        /**Send email to author, company owners and  commentators only. Beacuse are sending email to collaborator differently.*/
+                        const mergedObjects = unionBy(allUserAfterPostSave[0].author, allUserAfterPostSave[0].commentators, allUserAfterPostSave[0].companyOwners, 'email');
+                        
+                        const totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
+
+                        if (totalEmails && totalEmails.length) {
+                            const filePath = basePath + 'email-template/common-template';
+                            const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
+                            totalEmails.forEach(async (u) => {
+                                const payLoad = {
+                                    NAME: u.name,
+                                    LINK: productLink,
+                                    CONTENT: `The Post "${res.name}" is updated. Please check it for latest update`,
+                                    SUBJECT: `Post Upated!`
+                                };
+
+                                await helper.sendEmail({to: [u.email]}, filePath, payLoad)
+                            });
+                        }
+
                         if(res && post.collaborators && post.collaborators.length) {
                             const collaboratorsAfterUpdate = await res.toObject();
                             const collaboratorsBeforeUpdate = (await postTemp.populate('collaborators').execPopulate()).toObject();
@@ -352,6 +378,28 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
             } else {
                 console.log('Using existing mongoose connection.');
             }
+
+            const postData = await Post.findOne({ _id: postId }).exec();
+            const allUserAfterPostSave = await helper.getUserAssociatedWithPost(postId);
+             /**Send email to author, company owners and commentators and collaborators.*/
+             const mergedObjects = unionBy(allUserAfterPostSave[0].author, allUserAfterPostSave[0].commentators, allUserAfterPostSave[0].collaborators, allUserAfterPostSave[0].companyOwners, 'email');
+                        
+             const totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
+
+             if (totalEmails && totalEmails.length) {
+                 const filePath = basePath + 'email-template/common-template';
+
+                 totalEmails.forEach(async (u) => {
+                     const payLoad = {
+                         NAME: u.name,
+                        //  LINK: productLink,
+                         CONTENT: `The Post "${postData.name}" is deleted. Please check it for latest update`,
+                         SUBJECT: `Post Deleted!`
+                     };
+
+                     await helper.sendEmail({to: [u.email]}, filePath, payLoad)
+                 });
+             }
 
             Post.findOneAndDelete({ _id: postId }, (async (err, res) => {
 
