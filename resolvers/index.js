@@ -208,6 +208,9 @@ module.exports = {
         case 'delimiter':
           return 'ParagraphBlock'
 
+        case 'attaches':
+          return 'AttachesBlock'
+
         default:
           console.log('default case')
           return null;
