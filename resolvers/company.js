@@ -46,7 +46,7 @@ async function addCompany(_, { company }, { headers, db, event }) {
                     /** Sending the email */
                     await helper.sendEmail({ to: [authUser.email] }, filePath, payLoad);
 
-                    p.populate('createdBy').populate('cities').execPopulate().then(async populatedCompany => {
+                    p.populate('createdBy owners').populate('cities').execPopulate().then(async populatedCompany => {
                         // await helper.sendCompanyCreationEmail(populatedCompany, populatedCompany.type === 'product' ? 'Bugfix' : '');
                         resolve(populatedCompany);
                     });
@@ -73,13 +73,13 @@ async function updateCompany(_, { company }, { headers, db, decodedToken }) {
 
             let updatedCompany;
 
-            const checkIfExists = await Company.find({ $text: { $search: company.name } }).populate('createdBy').populate('cities').exec();
+            const checkIfExists = await Company.find({ $text: { $search: company.name } }).populate('createdBy owners').populate('cities').exec();
 
             if (checkIfExists.length && checkIfExists[0].id !== company._id) {
                 console.log(checkIfExists);
                 throw new Error('AlreadyExists');
             } else {
-                updatedCompany = await Company.findByIdAndUpdate(company._id, company, { new: true }).populate('createdBy cities').exec();
+                updatedCompany = await Company.findByIdAndUpdate(company._id, company, { new: true }).populate('createdBy owners cities').exec();
             }
 
             return resolve(updatedCompany);
@@ -102,7 +102,7 @@ async function getCompaniesByUserIdAndType(_, { userId, companyType }, { headers
                 console.log('Using existing mongoose connection.');
             }
 
-            Company.find({ 'createdBy': userId, type: companyType ? companyType : { $ne: null } }).populate('createdBy').populate('cities').exec((err, res) => {
+            Company.find({ 'createdBy': userId, type: companyType ? companyType : { $ne: null } }).populate('createdBy owners').populate('cities').exec((err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -129,7 +129,7 @@ async function getCompanyById(_, { companyId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Company.findById(companyId).populate('createdBy').populate('cities').exec(async (err, res) => {
+            Company.findById(companyId).populate('createdBy owners').populate('cities').exec(async (err, res) => {
 
                 if (err) {
                     return reject(err)
@@ -168,7 +168,7 @@ async function getCompaniesByType(_, { companyType, pageOptions }, { headers, db
 
             let total = await Company.countDocuments(condition).exec()
 
-            const companies = await Company.find(condition).populate('createdBy').populate('cities')
+            const companies = await Company.find(condition).populate('createdBy owners').populate('cities')
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
                 .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
                 .exec();
@@ -181,49 +181,6 @@ async function getCompaniesByType(_, { companyType, pageOptions }, { headers, db
         }
     });
 }
-
-/** This Lambda Function, takes the postType as argument, and returns all the posts of that type from all the companies */
-async function getCompaniesPostsByPostType(_, { postType, pageOptions }, { headers, db, decodedToken }) {
-    return new Promise(async (resolve, reject) => {
-        try {
-
-            if (!db) {
-                console.log('Creating new mongoose connection.');
-                conn = await connectToMongoDB();
-            } else {
-                console.log('Using existing mongoose connection.');
-            }
-
-            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
-            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
-
-            let condition = { 'posts.postType': { $regex: postType } };
-
-            const companiesPosts = await Company.aggregate([
-                { $unwind: "$posts" },
-                { $match: condition },
-                {
-                    $group: {
-                        _id: '$posts._id',
-                        posts: { $first: '$posts' }
-                    }
-                }
-            ])
-                .sort(sort)
-                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-                .limit(pageOptions.limit)
-                .exec();
-
-            return resolve({ companiesPosts: companiesPosts, total: companiesPosts.length });
-
-
-        } catch (e) {
-            console.log(e);
-            return reject(e);
-        }
-    });
-}
-
 
 
 async function deleteCompany(_, { companyId }, { headers, db, decodedToken }) {
@@ -324,6 +281,5 @@ module.exports = {
     getCompaniesByType,
     deleteCompany,
     getListOfUsersInACompany,
-    getEventsByCompanyId,
-    getCompaniesPostsByPostType
+    getEventsByCompanyId
 }

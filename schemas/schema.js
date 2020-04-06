@@ -150,7 +150,7 @@ input InputdescriptionBlocks {
   meta: MetaInput
 }
 
-union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock
+union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock | AttachesBlock
 
 type CodeBlock {
   type: String
@@ -161,6 +161,24 @@ type CodeBlock {
 type Code {
   code: String
   language: String
+}
+
+type AttachesBlock {
+  type: String
+  data: Attaches
+  _id: ID
+}
+
+type Attaches {
+  file: AttachFile
+  title: String
+}
+
+type AttachFile {
+  name: String
+  url: String
+  size: Int
+  extension: String
 }
 
 type ImageBlock {
@@ -291,6 +309,9 @@ type URL {
 
 input URLInput {
   url: String
+  name: String
+  size: Int
+  extension: String
 }
 
 type Address {
