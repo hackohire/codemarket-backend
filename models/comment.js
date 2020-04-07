@@ -9,9 +9,10 @@ const commentSchema = new Schema(
             default: null
         },
 
-        /**  Id of a post | product */
+        /** reference Id */
         referenceId: {
-            type: Schema.Types.ObjectId
+            type: Schema.Types.ObjectId,
+            // ref: 'post'
         },
         /** User reference ID for the comments added under the posts created in user's profile */
         userReferenceId: Schema.Types.ObjectId,

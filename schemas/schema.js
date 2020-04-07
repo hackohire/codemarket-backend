@@ -58,41 +58,6 @@ input SupportInput {
   description: [InputdescriptionBlock]
 }
 
-type Comment {
-  parents: [Comment]
-  children: [Comment]
-  _id: ID
-  text: [descriptionBlocks]
-  referenceId: ID
-  companyReferenceId: ID
-  userReferenceId: ID
-  type: String
-  parentId: ID
-  createdBy: User
-  createdAt: String
-
-  blockSpecificComment: Boolean
-  blockId: ID
-}
-
-input CommentInput {
-  parents: [ID]
-  children: [ID]
-  discussion_id: String
-  parentId: ID
-  referenceId: ID
-  companyReferenceId: ID
-  userReferenceId: ID
-  type: String
-  _id: ID
-  text: [InputdescriptionBlock]
-  createdBy: ID
-  createdAt: String
-
-  blockSpecificComment: Boolean
-  blockId: ID
-}
-
 type Tag {
   name: String
   type: String
@@ -183,9 +148,11 @@ input InputdescriptionBlocks {
 
   link: String
   meta: MetaInput
+
+  createdBy: ID
 }
 
-union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock
+union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock | AttachesBlock
 
 type CodeBlock {
   type: String
@@ -196,6 +163,25 @@ type CodeBlock {
 type Code {
   code: String
   language: String
+}
+
+type AttachesBlock {
+  type: String
+  data: Attaches
+  _id: ID
+}
+
+type Attaches {
+  file: AttachFile
+  title: String
+  createdBy: User
+}
+
+type AttachFile {
+  name: String
+  url: String
+  size: Int
+  extension: String
 }
 
 type ImageBlock {
@@ -326,6 +312,9 @@ type URL {
 
 input URLInput {
   url: String
+  name: String
+  size: Int
+  extension: String
 }
 
 type Address {
@@ -374,32 +363,25 @@ type getAllPostsResponse {
   total: Int
 }
 
+input ReferenceObject {
+  referencePostId: [ID]
+  connectedPosts: [ID]
+  postType: String
+}
+
 
 type Query {
   hello: String
 
-  getAllPosts(pageOptions: PageOptionsInput, type: String, referencePostId: String, companyId: String, connectedWithUser: String, createdBy: String): getAllPostsResponse
+  getAllPosts(pageOptions: PageOptionsInput, type: String, reference: ReferenceObject, companyId: String, connectedWithUser: String, createdBy: String): getAllPostsResponse
 
-  getAllProducts: [Product]
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]
-
-  getComments(commentId: String): Comment
-  getCommentsByReferenceId(referenceId: String): [Comment]
-  deleteComment(commentId: String): String
 
   findFromCollection(keyWord: String, searchCollection: String, type: String): [Tag]
 }
 
 type Mutation {
-  addComment(comment: CommentInput): Comment
-  updateComment(commentId: String, text: [InputdescriptionBlock]): Comment
   addToCollection(keyWord: String, searchCollection: String, type: String): Tag
-}
-
-type Subscription {
-  onCommentAdded(postId: String, companyId: String, userId: String): Comment
-  onCommentUpdated(postId: String, companyId: String, userId: String): Comment
-  onCommentDeleted(postId: String, companyId: String, userId: String): Comment
 }
 `
 

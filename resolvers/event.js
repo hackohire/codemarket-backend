@@ -45,7 +45,7 @@ async function rsvpEvent(_, { userId, eventId }, { event, db }) {
             if (updatedPostWithAttendees) {
                 /** Send Email on Successful RSVP */
                 const filePath = basePath + 'email-template/common-template';
-                var eventLink = process.env.FRONT_END_URL + `${updatedPostWithAttendees.type === 'product' ? 'product' : 'post'}/${updatedPostWithAttendees.slug}?type=${updatedPostWithAttendees.type}`;
+                var eventLink = process.env.FRONT_END_URL + `${updatedPostWithAttendees.type === 'product' ? 'product' : 'post'}/${updatedPostWithAttendees.slug}`;
                 var attendee = updatedPostWithAttendees.usersAttending.find(u => u.id === userId);
                 const payLoad = {
                     ATTENDEE: attendee.name,
@@ -56,7 +56,7 @@ async function rsvpEvent(_, { userId, eventId }, { event, db }) {
                     ADDRESS: updatedPostWithAttendees.address ?  updatedPostWithAttendees.address : '',
                     SUBJECT: `We welcome you to the event ${updatedPostWithAttendees.name}!`
                 };
-                await helper.sendEmail(attendee.email, filePath, payLoad);
+                await helper.sendEmail({to: [attendee.email]}, filePath, payLoad);
                 return resolve({ usersAttending: updatedPostWithAttendees.usersAttending, validSubscription });
             } else {
                 return resolve({ validSubscription })

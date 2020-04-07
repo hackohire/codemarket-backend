@@ -3,11 +3,12 @@ service: codemarketapi
 provider:
   name: aws
   runtime: nodejs10.x
-  region: ap-south-1
+  region: us-east-1
   stage: ${opt:stage, 'dev'}
   # websocketsApiName: codemarket-videochat-socket
   # websocketsApiRouteSelectionExpression: $request.body.action
   environment:
+
     MONGODB_URL: ${file(env.yml):${self:provider.stage}.MONGODB_URL}
     MONGODB_DBNAME: ${file(env.yml):${self:provider.stage}.MONGODB_DBNAME}
     AWS_ACCESSKEY_ID: ${file(env.yml):${self:provider.stage}.AWS_ACCESSKEY_ID}
@@ -22,13 +23,13 @@ provider:
     SMTP_USER: ${file(env.yml):${self:provider.stage}.SMTP_USER}
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
-    SOCKET_URL: ${file(env.yml):${self:provider.stage}.SOCKET_URL}
     STRIPE_SECRET_KEY: ${file(env.yml):${self:provider.stage}.STRIPE_SECRET_KEY}
 
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
     EVENTS: ${self:service}-${self:provider.stage}-Events
     SUBSCRIPTION_OPERATIONS: ${self:service}-${self:provider.stage}-SubscriptionOperations
+
 
 functions:
   
@@ -65,6 +66,7 @@ functions:
               - x-requested-with
             allowCredentials: false 
 
+            
   webSocketHandler:
     handler: handler.handleWebSocket
     events:
@@ -82,14 +84,6 @@ functions:
           type: dynamodb
           arn:
             Fn::GetAtt: [EventsDynamoDBTable, StreamArn]
-
-  hello:
-    handler: handler1.hello
-    events:
-      - http:
-          path: hello
-          method: GET
-          cors: true
 
   checkoutSessionCompleted:
     handler: handler.checkoutSessionCompleted
@@ -182,35 +176,7 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
               - x-requested-with
-            allowCredentials: false  
-
-  # socketConnectionHandler:
-  #   handler: websocket.socketConnectionHandler
-  #   events:
-  #     - websocket:
-  #         route: $connect
-  #     - websocket:
-  #         route: $disconnect
-  #     - websocket:
-  #         route: $default
-  
-  # onOffer:
-  #   handler: websocket.onOffer
-  #   events:
-  #     - websocket:
-  #         route: onOffer
-
-  # setUserOnline:
-  #   handler: websocket.setUserOnline
-  #   events:
-  #     - websocket:
-  #         route: setUserOnline
-
-  # calling:
-  #   handler: websocket.calling
-  #   events:
-  #     - websocket:
-  #         route: calling
+            allowCredentials: false
 
 
 resources:
@@ -301,7 +267,7 @@ plugins:
   - serverless-dynamodb-local
   - serverless-plugin-offline-dynamodb-stream
   - serverless-offline
-  # - serverless-domain-manager
+  - serverless-domain-manager
 
 custom:
   dynamodb:
@@ -318,7 +284,7 @@ custom:
     host: localhost
     port: 8000
     # this fixes the problem with missing region
-    region: ap-south-1
+    region: us-east-1
     pollForever: true
     streams:
       - table: ${self:service}-${self:provider.stage}-Events
@@ -327,3 +293,12 @@ custom:
 
   serverless-offline:
     port: 3200
+
+  customDomain:
+    domainName: ${self:service}-${self:provider.stage}.codemarket.io
+    basePath: ''
+    certificateName: '*.codemarket.io'
+    createRoute53Record:	false
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+    stage: ${self:provider.stage}

@@ -10,30 +10,83 @@ const postSchema = new Schema(
         name: String,
         description: [new Schema({
             type: String,
-            data: Schema.Types.Mixed,
+            data: {
+                text: String,
+                level: Number,
+                code: String,
+                language: String,
+
+                caption: String,
+                stretched: Boolean,
+                withBackground: Boolean,
+                withBorder: Boolean,
+
+                style: String,
+                items: [String],
+
+                alignment: String,
+
+                content: [[String]],
+
+                title: String,
+                message: String,
+
+                service: String,
+                source: String,
+                embed: String,
+                width: Number,
+                height: Number,
+
+                link: String,
+                meta: {
+                    title: String,
+                    description: String,
+                    domain: String,
+                    url: String,
+                    image: {
+                        url: String
+                    }
+                },
+                file: {
+                    url: String,
+                    name: String,
+                    size: Number,
+                    extension: String
+                },
+                createdBy: {
+                    type: Schema.Types.ObjectId,
+                    ref: "user", 
+                }
+            },
+            status: {
+                type: String,
+                enum: ['Completed']
+            }
         })],
         type: {
             type: String,
             enum: [
-                'product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design', 'goal', 'event', 'team-skill', 'dream-job', 'job', 'career-coach', 'business-coach', 'capital-funding', 'hiring-process',
-                'leadership-goal',        /** user profile post type */
-                'startup-goal',           /** user profile post type */
-                'social-impact-goal',           /** user profile post type */
+                'product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'goal', 'event', 'dream-job', 'job', 'bug',
 
-                'leadership-challenge',   /** user profile post type */
+                'competitive-advantage',   /** company post type */
 
-                'sales-challenge',        /** company post type */
-                'marketing-challenge',    /** company post type */
-                'technical-challenge',    /** company post / user type */
-                'business-challenge',     /** company / user post type */
-                'team-challenge',         /** company post type */
-                'sales-goal',             /** company post type */
-                'marketing-goal',         /** company post type */
-                'technical-goal',         /** company / user post type */
-                'business-goal',          /** company / user post type */
-                'team-goal',              /** company post type */
-                'mission',                /** company post type */
-                'company-post'            /** company post type */
+                'business',
+
+                'class',
+
+                'service',
+
+                'challenge',
+
+                'assignment',
+
+                'contact',
+
+                'note',
+
+                'question',
+
+                'email'                  /** Post type for Email */
             ],
         },
         featuredImage: String,
@@ -41,6 +94,10 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         },
+        users: [{
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }],
         price: Number,
         categories: [],
         status: {
@@ -52,17 +109,10 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "tag",
         }],
-        support: support,
-        isPostUnderCompany: Boolean,
-        connectedWithUser: {
-            type: Schema.Types.ObjectId,
-            ref: "user",
-        },
-        isPostUnderUser: Boolean,
 
         /** Event Specific Fields */
         dateRange: [String],
-        address: String,
+
         location: new Schema({
             latitude: Number,
             longitude: Number,
@@ -82,16 +132,13 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         }],
+        cover: String,
 
         /** Dreamjob Specific Fields */
         cities: [{
             type: Schema.Types.ObjectId,
             ref: "city",
         }],
-        company: {
-            type: Schema.Types.ObjectId,
-            ref: "company",
-        },
         companies: [{
             type: Schema.Types.ObjectId,
             ref: "company",
@@ -110,70 +157,31 @@ const postSchema = new Schema(
         /** It will contain the url from where the post has been imported */
         referencePostUrl: String,
 
-
-        /** referencePostId right now using it for storing the id of a dream-job as reference in a job post
-         * Purpose is to connect jobs with dream-job
-         */
-        referencePostId: Schema.Types.ObjectId,
-
-        /** Fields only for type 'career-coach' */
-        gapAnalysis: Boolean,
-        careerCoachSessions: Boolean,
-        helpingWithMockInterviews: Boolean,
-        hiringMentoringSessions: Boolean,
-
-        /** Fields only for type 'business-coach' */
-        businessCoachSessions: Boolean,
-        businessAreas: [{
+        /** Array of ID of posts, a post is tied to */
+        connectedPosts: [{
             type: Schema.Types.ObjectId,
-            ref: "tag",
+            ref: "post",
         }],
-        businessGoals: [{
-            type: Schema.Types.ObjectId,
-            ref: "tag",
-        }],
-        businessChallenges: [{
-            type: Schema.Types.ObjectId,
-            ref: "tag",
-        }],
-        sellProducts: {
-            sellProducts: Boolean,
-            products: [{
-                type: Schema.Types.ObjectId,
-                ref: "tag",
-            }],
-        },
-        sellServices: {
-            sellServices: Boolean,
-            services: [{
-                type: Schema.Types.ObjectId,
-                ref: "tag",
-            }],
-        },
 
-        /** Fields related to post type 'capital-funding' */
-        fundingCurrency: String,
-        fundingAmount: Number,
-        fundingBy: [{
+        collaborators: [{
             type: Schema.Types.ObjectId,
-            ref: "company",
+            ref: "user",
         }],
-        fundingTo: [{
+        assignees: [{
             type: Schema.Types.ObjectId,
-            ref: "company",
+            ref: "user",
         }],
-        fundingDate: String,
-        fundingProcess: [[new Schema({
-            type: String,
-            data: Schema.Types.Mixed,
-        })]],
 
+        /** Storing Email Id in this field to connect email with the post */
+        connectedEmail: Schema.Types.ObjectId,
 
-        /** Field Related to hiring process */
-        hiringProcess: [[new Schema({
-            type: String,
-            data: Schema.Types.Mixed,
-        })]],
+        /** Fields related to Contact */
+        phone: [String],
+        email: [String],
+        birthDate: String,
+        address: String,
+        website: String
+
 
     },
     {

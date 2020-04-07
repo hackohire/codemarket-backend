@@ -22,7 +22,11 @@ const userSchema = new Schema(
         lastName: String,
         name: String,
         sub: String,
-        email: String,
+        email: {
+            type: String,
+            unique: true,
+            required: true
+        },
         email_verified: Boolean,
         phone: String,
         programming_languages: { type: Array, default: [] },

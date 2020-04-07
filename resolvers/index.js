@@ -1,16 +1,18 @@
 const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
-const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
-const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment');
+const { getListOfUsersWhoPurchased } = require('./product');
+const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
 const { findFromCollection, addToCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch } = require('./post');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch, fetchFiles } = require('./post');
 const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
 const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
+const { sendEmail } = require('./email');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
+const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 module.exports = {
@@ -21,13 +23,13 @@ module.exports = {
     getAllPosts,
     fullSearch,
 
-    getAllProducts, getListOfUsersWhoPurchased,
+    getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
 
-    getComments, getCommentsByReferenceId, deleteComment,
+    getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged,
 
-    getPostsByUserIdAndType, getPostById, getPostsByType,
+    getPostsByUserIdAndType, getPostById, getPostsByType, fetchFiles,
 
     findFromCollection,
 
@@ -45,7 +47,9 @@ module.exports = {
 
     getBookingList,
 
-    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer
+    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer,
+
+    fetchFields, fetchPostTypes,
   },
   Mutation: {
     createUser,
@@ -87,6 +91,9 @@ module.exports = {
 
     addQuestionOrAnswer, updateQuestionOrAnswer,
 
+    sendEmail,
+
+    addPostType, updatePostType, deletePostType
   },
   Subscription: {
     onCommentAdded: {
@@ -143,7 +150,7 @@ module.exports = {
     onUserOnline: {
       resolve: (rootValue) => {
         // root value is the payload from sendMessage mutation
-        return { onCommentAdded: rootValue.comment, post: rootValue.post };
+        return { onCommentAdded: rootValue.comment, };
       },
       subscribe: withFilter(
         pubSub.subscribe('LISTEN_NOTIFICATION'),
@@ -155,49 +162,14 @@ module.exports = {
         },
       ),
     },
-    onCompanyPostChanges: {
-      resolve: (rootValue) => { return rootValue; },
-      subscribe: withFilter(
-        pubSub.subscribe('COMPANY_POST_CHANGES'),
-        (rootValue, args) => {
-          if (rootValue.postUpdated && args.companyId == rootValue.postUpdated.company._id) {
-            return true;
-          }
-
-          if (rootValue.postAdded && args.companyId == rootValue.postAdded.company._id) {
-            return true;
-          }
-
-          if (rootValue.postDeleted && args.companyId == rootValue.postDeleted.company) {
-            return true;
-          }
-
-          return false;
-        },
-      ),
-    },
-    onUsersPostChanges: {
-      resolve: (rootValue) => { return rootValue; },
-      subscribe: withFilter(
-        pubSub.subscribe('USERS_POST_CHANGES'),
-        (rootValue, args) => {
-          if (rootValue.postUpdated && args.userId == rootValue.postUpdated.createdBy._id) {
-            return true;
-          }
-
-          if (rootValue.postAdded && args.userId == rootValue.postAdded.createdBy._id) {
-            return true;
-          }
-
-          if (rootValue.postDeleted && args.userId == rootValue.postDeleted.createdBy) {
-            return true;
-          }
-
-          return false;
-        },
-      ),
-    }
   },
+
+  // CommentInterface: {
+  //   __resolveType(comment, context, info) {
+  //     return comment;
+  //   }
+  // },
+
   descriptionBlocks: {
     __resolveType(block, context, info) {
 
@@ -232,6 +204,12 @@ module.exports = {
 
         case 'linkTool':
           return 'LinkToolBlock'
+
+        case 'delimiter':
+          return 'ParagraphBlock'
+
+        case 'attaches':
+          return 'AttachesBlock'
 
         default:
           console.log('default case')

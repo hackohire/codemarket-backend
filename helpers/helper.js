@@ -2,6 +2,8 @@ const nodemailer = require('nodemailer');
 var auth = require('./auth');
 const Tag = require('../models/tag')();
 const City = require('../models/city')();
+const Post = require('../models/post')();
+var ObjectId = require('mongodb').ObjectID;
 const Unit = require('../models/purchased_units')();
 const { EmailTemplate } = require('email-templates-v2');
 var string = require('lodash/string');
@@ -93,7 +95,7 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!process.env.IS_OFFLINE || true) {
+            if (!process.env.IS_OFFLINE) {
                 const transporter = await nodemailer.createTransport({
                     host: process.env.SMTP_HOST,
                     port: process.env.SMTP_PORT,
@@ -132,6 +134,7 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
             }
 
         } catch (err) {
+            console.log(err);
             return err;
         }
     })
@@ -139,7 +142,7 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
 
 async function sendPostCreationEmail(post, type = '') {
     const filePath = basePath + 'email-template/common-template';
-    var productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${post.slug}?type=${post.type}`;
+    var productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${post.slug}`;
     const payLoad = {
         NAME: post.createdBy.name,
         // PRODUCTNAME: post.name,
@@ -148,7 +151,7 @@ async function sendPostCreationEmail(post, type = '') {
         SUBJECT: `${type ? type : string.capitalize(post.type)} Created`
         // TYPE: type ? type : string.capitalize(post.type)
     };
-    await sendEmail(post.createdBy.email, filePath, payLoad);
+    await sendEmail({to: [post.createdBy.email]}, filePath, payLoad);
 }
 
 async function insertManyIntoPurchasedUnit(units) {
@@ -162,35 +165,91 @@ async function insertManyIntoPurchasedUnit(units) {
     return unitsAdded;
 }
 
-async function sendMessageToWebsocketClient(event, connectionId, postData, conn) {
-
-    return new Promise(async (resolve, reject) => {
-
-        const domain = event.requestContext.domainName;
-        const stage = event.requestContext.stage;
-        // const callbackUrlForAWS = 'https://i8zthpq9j3.execute-api.ap-south-1.amazonaws.com/prod'; 
-        const callbackUrlForAWS = util.format(util.format('https://%s/%s', domain, stage));
-
-        const apigwManagementApi = new AWS.ApiGatewayManagementApi({
-            apiVersion: '2018-11-29',
-            region: 'ap-south-1',
-            endpoint: event.requestContext.domainName.includes('local') ? process.env.SOCKET_URL : callbackUrlForAWS
-        });
-
-        try {
-            await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: JSON.stringify(postData) }).promise();
-            return resolve('Sent');
-        } catch (e) {
-            if (e.statusCode === 410) {
-                console.log(`Found stale connection, deleting ${connectionId}`);
-                await conn.collection('connections').findOneAndDelete({ connectionId: connectionId });
-                return resolve('Deleted');
-            } else {
-                return reject(e);
-            }
+async function getUserAssociatedWithPost(postId) {
+    const result = await Post.aggregate([
+        {
+            $match: { _id: ObjectId(postId)}
+        },
+        {
+           $lookup:
+                {
+                    from: 'comments',
+                    localField: "_id",
+                    foreignField: "referenceId",
+                    as: "commentData"
+                }
+        },
+        {
+           $lookup:
+                {
+                    from: 'companies',
+                    localField: "companies",
+                    foreignField: "_id",
+                    as: "companyData"
+                }
+        },
+        {
+            $lookup:
+                 {
+                     from: 'users',
+                     localField: "createdBy",
+                     foreignField: "_id",
+                     as: "author"
+                 }
+        },
+        {
+            $group:
+                {
+                    _id: "$_id",
+                    name: { $first: "$name"},
+                    type: { $first: "$type"},
+                    author: { $first: "$author"},
+                    collaborators: { $first: "$collaborators"},
+                    commentators: { $push: { ids: "$commentData.createdBy"}},
+                    comapnyCreators: { $push: { ids: "$companyData.createdBy"}}
+                }
+        },
+        {
+            $lookup:
+                {
+                    from: "users",
+                    localField: "collaborators",
+                    foreignField: "_id",
+                    as: "collaborators"
+                }
+        },
+        {
+            $lookup:
+                {
+                    from: "users",
+                    localField: "commentators.ids",
+                    foreignField: "_id",
+                    as: "commentators"
+                }
+        },
+        {
+            $lookup:
+                {
+                    from: "users",
+                    localField: "comapnyCreators.ids",
+                    foreignField: "_id",
+                    as: "companyOwners"
+                }
+        },
+        {
+            $project:
+                {
+                    name: 1,
+                    type: 1,
+                    author: 1,
+                    collaborators: 1,
+                    commentators: 1,
+                    companyOwners: 1
+                }
         }
-    });
+    ]).exec();
 
+    return result;
 }
 
 module.exports = {
@@ -200,6 +259,5 @@ module.exports = {
     sendEmail,
     insertManyIntoPurchasedUnit,
     sendPostCreationEmail,
-    sendMessageToWebsocketClient,
     sendEmailWithStaticContent
 }

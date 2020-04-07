@@ -15,6 +15,10 @@ const companySchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         },
+        owners: [{
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }],
         status: {
             type: String,
             enum: ['Created', 'Drafted', 'Published', 'Unpublished', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
@@ -42,30 +46,12 @@ const companySchema = new Schema(
             address: String,
             additionalLocationDetails: String
         }),
-        posts: [
-            new Schema(
-                {
-                    description: [new Schema({
-                        type: String,
-                        data: Schema.Types.Mixed,
-                    })],
-                    postType: {
-                        type: String,
-                        enum: ['sales-challenge', 'marketing-challenge', 'technical-challenge', 'business-challenge', 'team-challenge', 'sales-goal', 'marketing-goal', 'technical-goal', 'business-goal', 'team-goal', 'mission', 'company-post'],
-                        default: ''
-                    },
-                    createdBy: {
-                        type: Schema.Types.ObjectId,
-                        ref: "user",
-                    },
-                    default: [],
-                },
-                {
-                    timestamps: true,
-                    id: true,
-                }
-            )
-        ]
+        websiteLink: String,
+        facebookLink: String,
+        instagramLink: String,
+        twitterLink: String,
+        yelpLink: String,
+        linkedinLink: String,
     },
     {
         timestamps: true,
