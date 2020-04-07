@@ -15,6 +15,7 @@ const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMem
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
+const { getContact, addContact, fetchContacts } = require('./contact');
 module.exports = {
   Query: {
     hello: () => 'Hello world!',
@@ -22,7 +23,7 @@ module.exports = {
 
     getAllPosts,
     fullSearch,
-
+    
     getAllProducts, getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
@@ -55,7 +56,7 @@ module.exports = {
     createUser,
     updateUser,
     authorize,
-
+    getContact,addContact, fetchContacts,
     addToCollection,
     // addProduct,
     // updateProduct,
