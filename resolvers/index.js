@@ -11,6 +11,7 @@ const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, 
 const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
 const { sendEmail } = require('./email');
+const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
 const { withFilter } = require('aws-lambda-graphql');
@@ -55,7 +56,7 @@ module.exports = {
     createUser,
     updateUser,
     authorize,
-
+    addMakeMoney,
     addToCollection,
     // addProduct,
     // updateProduct,
