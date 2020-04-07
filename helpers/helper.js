@@ -95,7 +95,7 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!process.env.IS_OFFLINE) {
+            if (!process.env.IS_OFFLINE || true) {
                 const transporter = await nodemailer.createTransport({
                     host: process.env.SMTP_HOST,
                     port: process.env.SMTP_PORT,
@@ -114,7 +114,7 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                         from: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         to: toEmail,
                         // cc: fromEmail,
-                        bcc: 'sumi@codemarket.io',
+                        // bcc: 'sumi@codemarket.io',
                         replyTo: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         subject: subject,
                         html: html,

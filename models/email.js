@@ -21,10 +21,10 @@ const emailSchema = new Schema(
             default: ''
         },
         dateRange: [String],
-        company: {
+        companies: [{
             type: Schema.Types.ObjectId,
             ref: "company",
-        },
+        }],
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: "user",

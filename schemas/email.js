@@ -14,7 +14,7 @@ const graphQlEmailSchema = `
 
         createdBy: User
 
-        company: Company
+        companies: [Company]
 
         dateRange: [String]
 
@@ -38,7 +38,7 @@ const graphQlEmailSchema = `
 
         createdBy: ID
 
-        company: CompanyInput
+        companies: [CompanyInput]
 
         dateRange: [String]
 

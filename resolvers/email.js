@@ -20,39 +20,39 @@ async function sendEmail(_, { email }, { event, db, decodedToken }) {
             const user = await auth.auth(event.headers);
 
             /** If company is set add the company link */
-            if (email.company) {
-                let companyHTMLContent = `<div style="padding-top: 40px; text-align: left">Company: <a href="${process.env.FRONT_END_URL}company/${email.company._id}">
-                ${email.company.name}</a></div>`
-                email.description.push({
-                    type: 'paragraph',
-                    data: {
-                        text: companyHTMLContent
-                    }
-                });
+            // if (email.company) {
+            //     let companyHTMLContent = `<div style="padding-top: 40px; text-align: left">Company: <a href="${process.env.FRONT_END_URL}company/${email.company._id}">
+            //     ${email.company.name}</a></div>`
+            //     email.description.push({
+            //         type: 'paragraph',
+            //         data: {
+            //             text: companyHTMLContent
+            //         }
+            //     });
 
-                email.descriptionHTML += companyHTMLContent;
-            }
+            //     email.descriptionHTML += companyHTMLContent;
+            // }
 
             /** Set Sent By */
-            if (user) {
-                let companyHTMLContent = `<div style="padding-top: 40px; text-align: left">Sent By: <a href="${process.env.FRONT_END_URL}dashboard/profile/${email.createdBy}">
-                ${user.name}</a></div>`
-                email.description.push({
-                    type: 'paragraph',
-                    data: {
-                        text: companyHTMLContent
-                    }
-                });
+            // if (user) {
+            //     let companyHTMLContent = `<div style="padding-top: 40px; text-align: left">Sent By: <a href="${process.env.FRONT_END_URL}dashboard/profile/${email.createdBy}">
+            //     ${user.name}</a></div>`
+            //     email.description.push({
+            //         type: 'paragraph',
+            //         data: {
+            //             text: companyHTMLContent
+            //         }
+            //     });
 
-                email.descriptionHTML += companyHTMLContent;
-            }
+            //     email.descriptionHTML += companyHTMLContent;
+            // }
 
-            const templateFilepath = basePath + 'email-template/common-template';
+            const templateFilepath = basePath + 'email-template/empty';
             const payload = {
                 HTML_CONTENT: email.descriptionHTML,
                 SUBJECT: email.subject
             };
-            const emailSent = await helper.sendEmail(email, templateFilepath, payload);
+            const emailSent = await helper.sendEmail([email.to], templateFilepath, payload);
 
             if (emailSent) {
 
