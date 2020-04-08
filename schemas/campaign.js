@@ -9,7 +9,7 @@ const graphQlCampaignSchema = `
         companies: [Company]
     }
 
-    type CampaignInput {
+    input CampaignInput {
         _id: String
         name: String
         companies: [CompanyInput]
