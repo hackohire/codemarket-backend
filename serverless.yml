@@ -101,6 +101,17 @@ functions:
           method: POST
           cors: true
 
+  emailCampaignEvent:
+    handler: handler.emailCampaignEvent
+    events:
+      - http:
+          path: emailCampaignEvent
+          method: POST
+          cors: true
+
+      - sns:
+        arn: 'campaign'
+
   getCheckoutSession:
     handler: handler.getCheckoutSession
     events:
@@ -173,6 +184,12 @@ functions:
 
 resources:
   Resources:
+
+    # MyTopic:
+    #   Type: AWS::SNS::Topic
+    #   Properties:
+    #     TopicName: campaign
+
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
       Type: "AWS::ApiGateway::GatewayResponse"

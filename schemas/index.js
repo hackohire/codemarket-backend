@@ -10,6 +10,8 @@ const graphQlQuestionAndAnswerSchema = require('./q&a');
 const graphQlEmailSchema = require('./email');
 const commentSchema = require('./comment');
 const graphQlPostTypeSchema = require('./post-type');
+const makemoneySchema = require('./MakeMoney');
+const graphQlCampaignSchema = require('./campaign');
 const schema = require('./schema');
 
 const schemaArray = [
@@ -25,6 +27,9 @@ const schemaArray = [
     graphQlBookingSchema,
     graphQlEmailSchema,
     graphQlPostTypeSchema,
+    commentSchema,
+    makemoneySchema,
+    graphQlCampaignSchema,
     commentSchema
 ];
 
