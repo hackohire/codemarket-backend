@@ -35,7 +35,13 @@ const makemoneySchema = `
 
     extend type Mutation {
         addMakeMoney(makeMoney: MakeMoneyInput): MakeMoney
+        
     }
+
+    extend type Query {
+        fetchMakeMoney(makeMoney: MakeMoneyInput): [MakeMoney]
+    }
+
 `
 
 module.exports = gql(makemoneySchema);

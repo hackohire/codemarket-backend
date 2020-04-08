@@ -23,6 +23,25 @@ async function addMakeMoney(_, { makeMoney }, { headers }) {
     });
 }
 
+async function fetchMakeMoney(_,) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            /** Connect Database with the mongo db */
+            conn = await connectToMongoDB();
+
+            /** Find the tweets created by the user */
+            const makeMoneyList = await MakeMoney.find({}).exec();
+            console.log(makeMoneyList)
+            return resolve(makeMoneyList);
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
+
 module.exports = {
-    addMakeMoney
+    addMakeMoney,
+    fetchMakeMoney
 }
