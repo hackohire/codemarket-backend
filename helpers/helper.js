@@ -7,8 +7,6 @@ var ObjectId = require('mongodb').ObjectID;
 const Unit = require('../models/purchased_units')();
 const { EmailTemplate } = require('email-templates-v2');
 var string = require('lodash/string');
-const AWS = require('aws-sdk');
-const util = require('util');
 
 
 async function checkIfUserIsAdmin(decodedToken) {
