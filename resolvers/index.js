@@ -13,6 +13,7 @@ const { scheduleCall, getBookingList } = require('./booking');
 const { sendEmail } = require('./email');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
+const { getCampaignsWithTracking } = require('./campaign');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 module.exports = {
@@ -50,6 +51,8 @@ module.exports = {
     getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer,
 
     fetchFields, fetchPostTypes,
+
+    getCampaignsWithTracking
   },
   Mutation: {
     createUser,
