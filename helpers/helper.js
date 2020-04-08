@@ -77,10 +77,10 @@ async function sendEmail(recepients, filePath, body) {
                 const renderedTemplate = await template.render(body);
 
                 const mailOptions = {
-                    headers: {
-                        'X-SES-CONFIGURATION-SET': 'campaign',
-                        'X-SES-MESSAGE-TAGS': 'campaignId=5e8db413194f75696c162682'
-                    },
+                    // headers: {
+                    //     'X-SES-CONFIGURATION-SET': 'campaign',
+                    //     'X-SES-MESSAGE-TAGS': 'campaignId=5e8db413194f75696c162682'
+                    // },
                     from: process.env.FROM_EMAIL,
                     to: recepients.to,
                     cc: recepients.cc,
