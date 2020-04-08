@@ -17,6 +17,7 @@ const graphQlPostSchema = `
         updatedAt: String
         tags: [Tag]
         comments: [Comment]
+        commentCount: Int
         likeCount: Int
         slug: String
 
@@ -139,14 +140,18 @@ const graphQlPostSchema = `
         total: Int
     }
     
-    
+    type getCountAllPost {
+        _id: String,
+        count: Int
+    }
+
     extend type Query {
         getPostsByType(postType: String): [Post]
         getPostsByUserIdAndType(userId: String, status: String, postType: String, pageOptions: PageOptionsInput): GetPostsByUserIdAndTypeResponse
         getPostById(postId: String): Post
         fullSearch(searchString: String): [Post]
         fetchFiles(blockType: String, userId: String): [AttachesBlock]
-
+        getCountOfAllPost(userId: String, companyId: String, reference: ReferenceObject): [getCountAllPost]
         myRSVP(userId: String): [Post]
     }
     extend type Mutation {
