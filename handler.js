@@ -444,9 +444,18 @@ const fetchLinkMeta = async (event, context) => {
 }
 
 const emailCampaignEvent = async (event, context) => {
+    let conn = await connectToMongoDB();
+
     console.log('Received event:', JSON.stringify(event, null, 2));
+
     const message = event.Records[0].Sns.Message;
+
     console.log('From SNS:', message);
+
+    const savedEvent = await conn.collection('email-tracking').insertOne(message);
+
+    console.log('Saved Email Tracking Event', savedEvent)
+
     return message;
 };
 

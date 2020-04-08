@@ -185,10 +185,10 @@ functions:
 resources:
   Resources:
 
-    MyTopic:
-      Type: AWS::SNS::Topic
-      Properties:
-      TopicName: campaign
+    # MyTopic:
+    #   Type: AWS::SNS::Topic
+    #   Properties:
+    #     TopicName: campaign
 
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
