@@ -109,6 +109,10 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                     console.log('Error HTML Email Template Rendering', err)
                     const { html, subject } = result;
                     const mailOptions = {
+                        headers: {
+                            'X-SES-CONFIGURATION-SET': 'campaign',
+                            'X-SES-MESSAGE-TAGS': 'campaignId=5e8db413194f75696c162682'
+                        },
                         from: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         to: toEmail,
                         // cc: fromEmail,

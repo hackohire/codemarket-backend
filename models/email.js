@@ -20,6 +20,7 @@ const emailSchema = new Schema(
             enum: ['email'],
             default: ''
         },
+        campaignId: Schema.Types.ObjectId,
         dateRange: [String],
         companies: [{
             type: Schema.Types.ObjectId,

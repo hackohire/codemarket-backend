@@ -19,6 +19,9 @@ const graphQlEmailSchema = `
         dateRange: [String]
 
         status: Status
+
+        campaignId: ID
+
         createdAt: String
         updatedAt: String
         comments: [Comment]
@@ -43,6 +46,8 @@ const graphQlEmailSchema = `
         dateRange: [String]
 
         status: Status
+
+        campaignId: ID
 
         createdAt: String
         updatedAt: String
