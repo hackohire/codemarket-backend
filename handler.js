@@ -443,6 +443,27 @@ const fetchLinkMeta = async (event, context) => {
     })
 }
 
+const emailCampaignEvent = async (event, context) => {
+    let conn = await connectToMongoDB();
+
+    console.log('Received event:', JSON.stringify(event, null, 2));
+
+    const message = event.Records[0].Sns.Message;
+
+    console.log('From SNS:', message);
+
+    const parsedMessage = JSON.parse(message);
+
+    console.log('parsedMessage', parsedMessage)
+
+    const savedEvent = await conn.collection('email-tracking').insertOne(parsedMessage);
+
+    console.log('Saved Email Tracking Event', savedEvent)
+
+    return message;
+};
+
+
 /** Function to fetch the HTML Content of the webpage based on the given link */
 const fetchArticleByLink = (event, context) => {
     return new Promise(async (resolve, reject) => {
@@ -526,5 +547,6 @@ module.exports = {
     attachCardAndCreateSubscription,
     getCouponByName,
     fetchLinkMeta,
-    fetchArticleByLink
+    fetchArticleByLink,
+    emailCampaignEvent
 };
