@@ -452,7 +452,11 @@ const emailCampaignEvent = async (event, context) => {
 
     console.log('From SNS:', message);
 
-    const savedEvent = await conn.collection('email-tracking').insertOne(JSON.parse(message));
+    const parsedMessage = JSON.parse(message);
+
+    console.log('parsedMessage', parsedMessage)
+
+    const savedEvent = await conn.collection('email-tracking').insertOne(parsedMessage);
 
     console.log('Saved Email Tracking Event', savedEvent)
 
