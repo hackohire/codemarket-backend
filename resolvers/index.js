@@ -16,6 +16,7 @@ const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 // Jane add
 const { getQuote } = require('./quote');
+const { addHomework } = require('./homework');
 // Jane add end
 module.exports = {
   Query: {
@@ -93,7 +94,10 @@ module.exports = {
 
     sendEmail,
 
-    getQuote
+    getQuote,
+
+    addHomework
+    
   },
   Subscription: {
     onCommentAdded: {

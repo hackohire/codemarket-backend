@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const homeworkSchema = new Schema (
+const homeworkSchema = new Schema(
     {
         assignmentNo: Number,
         title: String,
-        assignmentPost: String,
+        detailDescription: String,
         demoUrl: String
     },
     {
