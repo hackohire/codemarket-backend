@@ -476,7 +476,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
     return new Promise(async (resolve, reject) => {
         try {
 
-            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
+            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'updatedAt';
             let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : -1 };
 
             if (!db) {
@@ -524,6 +524,16 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         ]
                     }]
                 }
+
+                if (reference.referencePostId && reference.referencePostId.length && reference.connectedPosts && reference.connectedPosts.length) {
+                    condition['$and'] = [{
+                        '$or': [
+                            { connectedPosts: reference.referencePostId.map(i => ObjectID(i)) },
+                            { _id: { $in: reference.connectedPosts.map(i => ObjectID(i)) }}
+                        ]
+                     }
+                    ];
+                }
             }
 
             /** In Company Details Page Fetch Jobs & DreamJob related to that company */
@@ -565,22 +575,22 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 //                     }
                 //                 }
                 //             },
-                //             {
-                //                 $lookup: {
-                //                     "from": "users",
-                //                     "let": { "created_by": "$createdBy" },
-                //                     pipeline: [
-                //                         { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
-                //                     ],
-                //                     as: "createdBy"
-                //                 }
-                //             },
-                //             {
-                //                 $unwind: {
-                //                     "path": "$createdBy",
-                //                     "preserveNullAndEmptyArrays": true
-                //                 }
-                //             },
+                //             // {
+                //             //     $lookup: {
+                //             //         "from": "users",
+                //             //         "let": { "created_by": "$createdBy" },
+                //             //         pipeline: [
+                //             //             { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
+                //             //         ],
+                //             //         as: "createdBy"
+                //             //     }
+                //             // },
+                //             // {
+                //             //     $unwind: {
+                //             //         "path": "$createdBy",
+                //             //         "preserveNullAndEmptyArrays": true
+                //             //     }
+                //             // },
                 //         ],
                 //         as: 'comments'
                 //     }
@@ -650,8 +660,10 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         createdBy: { $arrayElemAt: ['$createdBy', 0] },
                         tags: 1,
                         likeCount: { $size: '$likes' },
-                        comments: '$comments',
+                        // comments: '$comments',
+                        // commentCount: { $size: '$comments'},
                         createdAt: 1,
+                        updatedAt: 1,
                         companies: 1,
                         connectedPosts: 1,
                         collaborators: 1,
@@ -764,6 +776,122 @@ async function fullSearch(_, { searchString }, { headers, db, decodedToken }) {
     });
 }
 
+async function getCountOfAllPost(_, { userId, companyId, reference }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            let condition = {
+                status: "Published"
+            };
+    
+            if (userId) {
+                condition['$or'] = [
+                    { collaborators: ObjectID(userId) },
+                    { assignees: ObjectID(userId) },
+                    { createdBy: ObjectID(userId) }
+                ]
+            };
+    
+            if (companyId) {
+                condition['$or'] = [
+                    { companies: ObjectID(companyId) }
+                ]
+            };
+
+            if (reference) {
+                if (reference.referencePostId && reference.referencePostId.length) {
+                    condition['$and'] = [{
+                        '$or': [
+                            { connectedPosts: reference.referencePostId.map(i => ObjectID(i)) },
+                        ]
+                    }]
+                }
+                if (reference.connectedPosts && reference.connectedPosts.length) {
+                    condition['$and'] = [{
+                        '$or': [
+                            { _id: { $in: reference.connectedPosts.map(i => ObjectID(i)) } },
+                        ]
+                    }]
+                }
+                if (reference.referencePostId && reference.referencePostId.length && reference.connectedPosts && reference.connectedPosts.length) {
+                    condition['$and'] = [{
+                        '$or': [
+                            { connectedPosts: reference.referencePostId.map(i => ObjectID(i)) },
+                            { _id: { $in: reference.connectedPosts.map(i => ObjectID(i)) }}
+                        ]
+                     }
+                    ];
+                }
+            }
+
+            const result = await Post.aggregate([
+                {
+                    $match: condition
+                },
+                {
+                    $group:
+                        {
+                            _id: "$type",
+                            count: { $sum : 1}
+                        }
+                }
+            ]).exec();
+
+            const fileCout = await Post.aggregate([
+                {
+                    $match:
+                    {
+                        "description.data.createdBy": ObjectID(userId),
+                        "description.type": "attaches"
+                    }
+                },
+                {
+                    $project:
+                    {
+                        blocks:
+                        {
+                            $filter:
+                            {
+                                input: "$description",
+                                as: "block",
+                                cond: { $and: [{ $eq: ["$$block.type", "attaches"] }, { $eq: ["$$block.data.createdBy", ObjectID(userId)] }] }
+                            }
+                        }
+                    }
+                },
+                {
+                    $unwind: 
+                        {
+                            path: "$blocks",
+                            preserveNullAndEmptyArrays: true
+                        }
+                },
+                {
+                    $group:
+                    {
+                        _id: "$blocks.data.createdBy",
+                        count: { $sum : 1}
+                    }
+                },
+            ]);
+
+            result.push({_id: 'files', count: fileCout.length ? fileCout[0].count : 0});
+            return await resolve(result);
+
+        } catch (err) {
+            console.log(err);
+            return reject(err);
+        }
+    });
+};
+
 module.exports = {
     getAllPosts,
     fetchFiles,
@@ -775,4 +903,5 @@ module.exports = {
     getPostsByType,
     updatePost,
     deletePost,
+    getCountOfAllPost
 }
