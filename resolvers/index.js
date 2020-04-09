@@ -53,7 +53,7 @@ module.exports = {
 
     fetchFields, fetchPostTypes,
 
-    // getCampaignsWithTracking
+    getCampaignsWithTracking,
     getCountOfAllPost,
   },
   Mutation: {

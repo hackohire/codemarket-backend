@@ -8,21 +8,25 @@ async function getCampaignsWithTracking(_, { companyId, campaignId }, { headers,
 
             conn = await connectToMongoDB();
 
-            await conn.collection('stripe_subscriptions').aggregate(db.getCollection('campaign').aggregate([
+            const campaigns = await conn.collection('campaigns').aggregate([
                 {
                     $match: { companies: ObjectID(companyId) }
                 },
                 {
-                    from: 'emails',
-                    localField: '_id',
-                    foreignField: 'campaignId',
-                    as: 'emailData'
+                    $lookup: {
+                        from: 'emails',
+                        localField: '_id',
+                        foreignField: 'campaignId',
+                        as: 'emailData'
+                    }
                 },
                 {
                     $project: {
                         _id: { $toString: "$_id" },
                         name: 1,
                         label: 1,
+                        descriptionHTML: 1,
+                        subject: 1,
                         emailData: 1
                     }
                 },
@@ -34,7 +38,9 @@ async function getCampaignsWithTracking(_, { companyId, campaignId }, { headers,
                         as: 'traking-data'
                     }
                 }
-            ]));
+            ]).toArray();
+
+            return resolve(campaigns);
 
         } catch (e) {
             console.log(e);
