@@ -14,6 +14,7 @@ const pick = require('lodash/object').pick;
 const forEach = require('lodash/collection').forEach;
 const Like = require('./../models/like')();
 var ObjectID = require('mongodb').ObjectID;
+var moment = require('moment');
 let conn;
 
 async function addComment(_, { comment }, { headers, db, decodedToken, context }) {
@@ -142,13 +143,9 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                 }
             }
             
+            /** Update updatedAt of post */
+            await Post.updateOne({ _id: comment.referenceId}, {$set: { updatedAt: new Date(moment().utc().format())} });
 
-            // console.log("+===================== this is it ==> ", users);
-            // const params = {
-            //     MessageBody: 'Hi',
-            //     QueueUrl: process.env.QUEUE_URL
-            // };
-           
             resolve(commentObj);
         } catch (e) {
             console.log(e);
@@ -260,6 +257,9 @@ async function deleteComment(_, { commentId, postId }, { headers, db, decodedTok
                 })
             }
 
+            /** Update updatedAt of post */
+            await Post.updateOne({ _id: postId}, {$set: { updatedAt: new Date(moment().utc().format())} });
+
             return resolve(c._id);
         } catch (e) {
             console.log(e);
@@ -316,6 +316,9 @@ async function updateComment(_, { commentId, postId, text }, { headers, db, deco
                     await helper.sendEmail({ to: [user.email]}, filePathToOtherUsers, payLoadToOtherUsers);
                 })
             }
+
+            /** Update updatedAt of post */
+            await Post.updateOne({ _id: postId}, {$set: { updatedAt: new Date(moment().utc().format())} });
 
             return resolve(c);
         } catch (e) {
