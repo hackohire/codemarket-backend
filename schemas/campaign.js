@@ -4,6 +4,7 @@ const graphQlCampaignSchema = `
     
     type Campaign {
         _id: String
+        label: String
         name: String
         companies: [Company]
         createdBy: User
@@ -14,6 +15,7 @@ const graphQlCampaignSchema = `
 
     type TrackingData {
         _id: ID
+        label: String
         eventType: String
         mail: Mail
         open: Open
