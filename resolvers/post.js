@@ -556,45 +556,45 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                     $match: condition
                 },
                 /** The below commented code is to fetch the comments related to the posts */
-                {
-                    $lookup: {
-                        from: 'comments',
-                        let: { status: "$status", reference_id: "$_id" },
-                        pipeline: [
-                            {
-                                $match:
-                                {
-                                    $expr:
-                                    {
-                                        $and:
-                                            [
-                                                { $ne: ["$status", "Deleted"] },
-                                                { $eq: ["$$reference_id", "$referenceId"] },
-                                                { $eq: ["$parentId", null] }
-                                            ]
-                                    }
-                                }
-                            },
-                            // {
-                            //     $lookup: {
-                            //         "from": "users",
-                            //         "let": { "created_by": "$createdBy" },
-                            //         pipeline: [
-                            //             { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
-                            //         ],
-                            //         as: "createdBy"
-                            //     }
-                            // },
-                            // {
-                            //     $unwind: {
-                            //         "path": "$createdBy",
-                            //         "preserveNullAndEmptyArrays": true
-                            //     }
-                            // },
-                        ],
-                        as: 'comments'
-                    }
-                },
+                // {
+                //     $lookup: {
+                //         from: 'comments',
+                //         let: { status: "$status", reference_id: "$_id" },
+                //         pipeline: [
+                //             {
+                //                 $match:
+                //                 {
+                //                     $expr:
+                //                     {
+                //                         $and:
+                //                             [
+                //                                 { $ne: ["$status", "Deleted"] },
+                //                                 { $eq: ["$$reference_id", "$referenceId"] },
+                //                                 { $eq: ["$parentId", null] }
+                //                             ]
+                //                     }
+                //                 }
+                //             },
+                //             // {
+                //             //     $lookup: {
+                //             //         "from": "users",
+                //             //         "let": { "created_by": "$createdBy" },
+                //             //         pipeline: [
+                //             //             { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
+                //             //         ],
+                //             //         as: "createdBy"
+                //             //     }
+                //             // },
+                //             // {
+                //             //     $unwind: {
+                //             //         "path": "$createdBy",
+                //             //         "preserveNullAndEmptyArrays": true
+                //             //     }
+                //             // },
+                //         ],
+                //         as: 'comments'
+                //     }
+                // },
                 {
                     $lookup: {
                         from: 'likes',
@@ -661,7 +661,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         tags: 1,
                         likeCount: { $size: '$likes' },
                         // comments: '$comments',
-                        commentCount: { $size: '$comments'},
+                        // commentCount: { $size: '$comments'},
                         createdAt: 1,
                         updatedAt: 1,
                         companies: 1,
