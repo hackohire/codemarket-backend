@@ -10,7 +10,7 @@ const graphQlCampaignSchema = `
         createdBy: User
         subject: String
         descriptionHTML: String
-        trackingData: [TrackingData]
+        emailData: [Email]
     }
 
     type TrackingData {

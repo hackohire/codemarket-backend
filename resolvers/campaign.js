@@ -14,6 +14,14 @@ async function getCampaignsWithTracking(_, { companyId, campaignId }, { headers,
                 },
                 {
                     $lookup: {
+                        from: 'users',
+                        localField: 'createdBy',
+                        foreignField: '_id',
+                        as: 'createdBy'
+                    }
+                },
+                {
+                    $lookup: {
                         from: 'emails',
                         localField: '_id',
                         foreignField: 'campaignId',
@@ -21,23 +29,26 @@ async function getCampaignsWithTracking(_, { companyId, campaignId }, { headers,
                     }
                 },
                 {
-                    $project: {
-                        _id: { $toString: "$_id" },
-                        name: 1,
-                        label: 1,
-                        descriptionHTML: 1,
-                        subject: 1,
-                        emailData: 1
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'email-tracking',
-                        localField: "_id",
-                        foreignField: "mail.tags.campaignId",
-                        as: 'traking-data'
-                    }
+                    $unwind: { path: '$createdBy', preserveNullAndEmptyArrays: true  }
                 }
+                // {
+                //     $project: {
+                //         _id: { $toString: "$_id" },
+                //         name: 1,
+                //         label: 1,
+                //         descriptionHTML: 1,
+                //         subject: 1,
+                //         emailData: 1
+                //     }
+                // },
+                // {
+                //     $lookup: {
+                //         from: 'email-tracking',
+                //         localField: "_id",
+                //         foreignField: "mail.tags.campaignId",
+                //         as: 'traking-data'
+                //     }
+                // }
             ]).toArray();
 
             return resolve(campaigns);
