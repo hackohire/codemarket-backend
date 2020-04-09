@@ -23,6 +23,8 @@ async function getCampaignsWithTracking(_, { companyId, campaignId }, { headers,
                         _id: { $toString: "$_id" },
                         name: 1,
                         label: 1,
+                        descriptionHTML: 1,
+                        subject: 1,
                         emailData: 1
                     }
                 },
