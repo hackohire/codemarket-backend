@@ -27,6 +27,8 @@ const graphQlEmailSchema = `
         comments: [Comment]
 
         slug: String
+
+        tracking: TrackingData
     }
 
     input EmailInput {
