@@ -17,7 +17,9 @@ const {
     DynamoDBEventProcessor,
     DynamoDBConnectionManager,
     DynamoDBSubscriptionManager,
+    DynamoDBEventStore,
     Server,
+    PubSub
 } = require('aws-lambda-graphql');
 const AWS = require('aws-sdk');
 
@@ -35,6 +37,10 @@ const dynamoDbClient = new AWS.DynamoDB.DocumentClient({
         }
         : {}),
 });
+
+const eventStore = new DynamoDBEventStore({ dynamoDbClient, eventsTable: process.env.EVENTS });
+
+const pubSub = new PubSub({ eventStore });
 
 const subscriptionManager = new DynamoDBSubscriptionManager({
     dynamoDbClient,
@@ -60,6 +66,9 @@ const connectionManager = new DynamoDBConnectionManager({
 
 /** Server, from which, websocket, http, and event handler can get created */
 const server = new Server({
+    context: {
+        pubSub,
+    },
     connectionManager,
     eventProcessor: new DynamoDBEventProcessor(),
     resolvers,
