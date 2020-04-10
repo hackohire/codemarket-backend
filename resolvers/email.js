@@ -60,15 +60,15 @@ async function sendEmail(_, { email }, { event, db, decodedToken }) {
                 const int = await new Email(email);
 
                 /** Save the email as a post too */
-                const emailPost = { ...email };
-                emailPost['name'] = emailPost.subject;
-                emailPost['connectedEmail'] = int._id;
-                const post = await new Post(emailPost);
-                await post.save();
+                // const emailPost = { ...email };
+                // emailPost['name'] = emailPost.subject;
+                // emailPost['connectedEmail'] = int._id;
+                // const post = await new Post(emailPost);
+                // await post.save();
 
 
                 /** Save the post slug into email also, because it can be required to fetch the post */
-                int['slug'] = post['slug'];
+                // int['slug'] = post['slug'];
                 await int.save().then(async (p) => {
                     p.populate('createdBy').execPopulate().then(async populatedEmail => {
                         resolve(populatedEmail);
