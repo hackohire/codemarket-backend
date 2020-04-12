@@ -17,6 +17,7 @@ const { pubSub } = require('../helpers/pubsub');
 // Jane add
 const { getQuote } = require('./quote');
 const { addHomework } = require('./homework');
+const { addHomework2 } = require('./homework2');
 // Jane add end
 module.exports = {
   Query: {
@@ -96,7 +97,9 @@ module.exports = {
 
     getQuote,
 
-    addHomework
+    addHomework,
+
+    addHomework2
     
   },
   Subscription: {

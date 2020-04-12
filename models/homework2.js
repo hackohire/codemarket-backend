@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 
-const homeworkSchema = new Schema(
+const homework2Schema = new Schema(
     {
         assignmentNo: String,
         title: String,
@@ -17,9 +17,9 @@ const homeworkSchema = new Schema(
 
 module.exports = () => {
     try {
-        return mongoose.model('homework');
+        return mongoose.model('homework2');
     }
     catch (e) {
-        return mongoose.model('homework', homeworkSchema);
+        return mongoose.model('homework2', homework2Schema);
     }
 };
