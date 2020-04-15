@@ -49,15 +49,15 @@ async function addContact(_, { contact }, { headers, db, event }) {
 }
 
 
-async function fetchContacts(_, { userId }) {
+async function fetchContacts(_,) {
     return new Promise(async (resolve, reject) => {
         try {
             /** Connect Database with the mongo db */
             conn = await connectToMongoDB();
 
             /** Find the tweets created by the user */
-            const all_contacts = await Contact.find().populate('email').exec();
-
+            const all_contacts = await Contact.find({}).exec();
+            console.log(all_contacts)
             return resolve(all_contacts);
         } catch (e) {
             console.log(e);

@@ -20,7 +20,11 @@ const graphQlContactSchema = `
     extend type Mutation {
         getContact(contact: ContactInput): Contact
         addContact(contact: ContactInput): Contact  
-        fetchContacts(contact: ContactInput): Contact
+       
+    }
+
+    extend type Query {
+        fetchContacts(contact: ContactInput): [Contact]
     }
 `
 

@@ -23,7 +23,7 @@ module.exports = {
 
     getAllPosts,
     fullSearch,
-    
+    fetchContacts,
     getAllProducts, getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
@@ -56,7 +56,7 @@ module.exports = {
     createUser,
     updateUser,
     authorize,
-    getContact,addContact, fetchContacts,
+    getContact,addContact,
     addToCollection,
     // addProduct,
     // updateProduct,
