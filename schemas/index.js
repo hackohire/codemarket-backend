@@ -11,6 +11,8 @@ const graphQlEmailSchema = require('./email');
 const commentSchema = require('./comment');
 const contactSchema = require('./contact');
 const graphQlPostTypeSchema = require('./post-type');
+const makemoneySchema = require('./MakeMoney');
+const graphQlCampaignSchema = require('./campaign');
 const schema = require('./schema');
 
 const schemaArray = [
@@ -27,7 +29,10 @@ const schemaArray = [
     graphQlEmailSchema,
     graphQlPostTypeSchema,
     commentSchema,
-    contactSchema
+    contactSchema,
+    makemoneySchema,
+    graphQlCampaignSchema,
+    commentSchema
 ];
 
 module.exports = schemaArray;

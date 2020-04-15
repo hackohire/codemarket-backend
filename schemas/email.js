@@ -19,11 +19,16 @@ const graphQlEmailSchema = `
         dateRange: [String]
 
         status: Status
+
+        campaignId: ID
+
         createdAt: String
         updatedAt: String
         comments: [Comment]
 
         slug: String
+
+        tracking: TrackingData
     }
 
     input EmailInput {
@@ -43,6 +48,8 @@ const graphQlEmailSchema = `
         dateRange: [String]
 
         status: Status
+
+        campaignId: ID
 
         createdAt: String
         updatedAt: String

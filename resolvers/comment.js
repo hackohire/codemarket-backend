@@ -5,9 +5,16 @@ const Product = require('./../models/product')();
 const Post = require('./../models/post')();
 const { pubSub } = require('../helpers/pubsub');
 const uniq = require('lodash/array').uniq;
+const unionBy = require('lodash/array').unionBy;
+const differenceWith = require('lodash/array').differenceWith;
+const isEqual = require('lodash/lang').isEqual;
+const map = require('lodash/collection').map;
+const partialRight = require('lodash/function').partialRight;
+const pick = require('lodash/object').pick;
 const forEach = require('lodash/collection').forEach;
 const Like = require('./../models/like')();
 var ObjectID = require('mongodb').ObjectID;
+var moment = require('moment');
 let conn;
 
 async function addComment(_, { comment }, { headers, db, decodedToken, context }) {
@@ -66,18 +73,50 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
 
             await pubSub.publish('COMMENT_ADDED', commentObj);
 
+            const allUsers = await helper.getUserAssociatedWithPost(comment.referenceId);
+
+            const mergedObjects = unionBy(allUsers[0].author, allUsers[0].collaborators, allUsers[0].commentators, allUsers[0].companyOwners, 'email');
+
+            var totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
+
+            console.log("These are total emails ==> ", totalEmails);
+            
             /** Send Email Only if comment type is post */
-            if (commentObj.type === 'post' || commentObj.type === 'product' || commentObj.type === 'dream-job') {
+            if (commentObj.type === 'post') {
                 data = await Post.findOne({ _id: commentObj.referenceId }).populate('createdBy').select('createdBy id name type slug description blockId blockSpecificComment').lean().exec();
                 let commentNoti = commentObj.toObject();
                 commentNoti['referencePost'] = data;
                 /** Alert Message Notification */
                 await pubSub.publish('LISTEN_NOTIFICATION', { comment: commentNoti, usersToBeNotified })
 
+                /** Send email to the users associated with the post (company owner, collaborators) except author and actual commentator */
+                const emailsOfOtherUsers = differenceWith(totalEmails, [{email: commentObj.createdBy.email, name: commentObj.createdBy.name}, {email: data.createdBy.email, name: data.createdBy.name}], isEqual);
+                console.log("These are final email ==> ", emailsOfOtherUsers);
+
+                const filePathToOtherUsers = basePath + 'email-template/common-template';
+                postLink = process.env.FRONT_END_URL + `post/${data.slug}?commentId=${commentObj._id}`;
+                
+                if (emailsOfOtherUsers && emailsOfOtherUsers.length > 0) {
+                    emailsOfOtherUsers.forEach(async (user) => {
+                        const payLoadToOtherUsers = {
+                            NAME: user.name,
+                            LINK: postLink,
+                            CONTENT: commentObj.createdBy.name + ' added a comment on your associated post. Please check the post for the latest update.',
+                            SUBJECT: 'New Comment!'
+                        };
+                        await helper.sendEmail({ to: [user.email]}, filePathToOtherUsers, payLoadToOtherUsers);
+                    })
+                }
+                
+
                 /** Don't send if the comment is added by post author */
                 if (commentObj.createdBy._id.toString() !== data.createdBy._id.toString()) {
-                    const commentType = commentObj.type === 'product' ? 'product' : commentObj.type === 'dream-job' ? 'dream-job' : 'post';
+                    const commentType = 'post';
                     postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?commentId=${commentObj._id}`;
+
+                    if(commentObj.blockId) {
+                        postLink = postLink.concat(`&blockId=${commentObj.blockId}`)
+                    }
 
                     /** Reference to the common email templates foler */
                     const filePathToAuthor = basePath + 'email-template/common-template';
@@ -103,6 +142,10 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                     await helper.sendEmail({ to: [commentObj.createdBy.email] }, filePathToCommentor, payLoadToCommentor);
                 }
             }
+            
+            /** Update updatedAt of post */
+            await Post.updateOne({ _id: comment.referenceId}, {$set: { updatedAt: new Date(moment().utc().format())} });
+
             resolve(commentObj);
         } catch (e) {
             console.log(e);
@@ -128,7 +171,7 @@ async function getCommentsByReferenceId(_, { referenceId }, { headers, db, decod
                 .populate('createdBy')
                 .populate({ path: 'children', match: { status: { $ne: 'Deleted' } }, populate: { path: 'createdBy' } }).exec();
             // subdiscussion = subdiscussion.sort('full_slug')
-            console.log(subdiscussion);
+            // console.log(subdiscussion);
             resolve(subdiscussion);
 
 
@@ -166,7 +209,7 @@ async function getComments(_, { commentId }, { headers, db, decodedToken }) {
     });
 }
 
-async function deleteComment(_, { commentId }, { headers, db, decodedToken }) {
+async function deleteComment(_, { commentId, postId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -181,6 +224,42 @@ async function deleteComment(_, { commentId }, { headers, db, decodedToken }) {
             let c = await Comment.findByIdAndUpdate(commentId, { status: 'Deleted' }).populate('createdBy').exec();
 
             await pubSub.publish('COMMENT_DELETED', c);
+
+             /**Get data regarding post */
+             const postData = await Post.findOne({ _id: postId }).populate('createdBy').select('createdBy id name type slug description blockId blockSpecificComment').lean().exec();
+
+             /**Get data regarding current comment */
+             const commentData = await Comment.findOne({ _id: commentId }).populate('createdBy').exec();
+
+             const allUsers = await helper.getUserAssociatedWithPost(postId);
+
+            const mergedObjects = unionBy(allUsers[0].author, allUsers[0].collaborators, allUsers[0].commentators, allUsers[0].companyOwners, 'email');
+
+            var totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
+            console.log("These are total emails ==> ", totalEmails);
+
+            /** Send email to the users associated with the post (company owner, collaborators) except author and actual commentator */
+            const emailsOfOtherUsers = differenceWith(totalEmails, [{email: commentData.createdBy.email, name: commentData.createdBy.name}], isEqual);
+            console.log("These are final emails ==> ", emailsOfOtherUsers);
+
+            const filePathToOtherUsers = basePath + 'email-template/common-template';
+            postLink = process.env.FRONT_END_URL + `post/${postData.slug}?commentId=${commentData._id}`;
+
+            if (emailsOfOtherUsers && emailsOfOtherUsers.length > 0) {
+                emailsOfOtherUsers.forEach(async (user) => {
+                    const payLoadToOtherUsers = {
+                        NAME: user.name,
+                        LINK: postLink,
+                        CONTENT: commentData.createdBy.name + ' deleted a comment on your associated post. Please check the post for the latest update.',
+                        SUBJECT: 'Comment Deleted!'
+                    };
+                    await helper.sendEmail({ to: [user.email]}, filePathToOtherUsers, payLoadToOtherUsers);
+                })
+            }
+
+            /** Update updatedAt of post */
+            await Post.updateOne({ _id: postId}, {$set: { updatedAt: new Date(moment().utc().format())} });
+
             return resolve(c._id);
         } catch (e) {
             console.log(e);
@@ -190,7 +269,7 @@ async function deleteComment(_, { commentId }, { headers, db, decodedToken }) {
 }
 
 
-async function updateComment(_, { commentId, text }, { headers, db, decodedToken }) {
+async function updateComment(_, { commentId, postId, text }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -201,10 +280,45 @@ async function updateComment(_, { commentId, text }, { headers, db, decodedToken
                 console.log('Using existing mongoose connection.');
             }
 
-
+            console.log("This is post id in update comenet ==> ", postId);
             let c = await Comment.findByIdAndUpdate(commentId, { text: text }, { new: true }).populate('createdBy').exec();
 
             await pubSub.publish('COMMENT_UPDATED', c);
+
+            /**Get data regarding post */
+            const postData = await Post.findOne({ _id: postId }).populate('createdBy').select('createdBy id name type slug description blockId blockSpecificComment').lean().exec();
+
+            /**Get data regarding current comment */
+            const commentData = await Comment.findOne({ _id: commentId }).populate('createdBy').exec();
+
+            const allUsers = await helper.getUserAssociatedWithPost(postId);
+
+            const mergedObjects = unionBy(allUsers[0].author, allUsers[0].collaborators, allUsers[0].commentators, allUsers[0].companyOwners, 'email');
+
+            var totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
+            console.log("These are total emails ==> ", totalEmails);
+
+            /** Send email to the users associated with the post (company owner, collaborators) except author and actual commentator */
+            const emailsOfOtherUsers = differenceWith(totalEmails, [{email: commentData.createdBy.email, name: commentData.createdBy.name}], isEqual);
+            console.log("These are final emails ==> ", emailsOfOtherUsers);
+
+            const filePathToOtherUsers = basePath + 'email-template/common-template';
+            postLink = process.env.FRONT_END_URL + `post/${postData.slug}?commentId=${commentData._id}`;
+
+            if (emailsOfOtherUsers && emailsOfOtherUsers.length > 0) {
+                emailsOfOtherUsers.forEach(async (user) => {
+                    const payLoadToOtherUsers = {
+                        NAME: user.name,
+                        LINK: postLink,
+                        CONTENT: commentData.createdBy.name + ' updated a comment on your associated post. Please check the post for the latest update.',
+                        SUBJECT: 'Comment Updated!'
+                    };
+                    await helper.sendEmail({ to: [user.email]}, filePathToOtherUsers, payLoadToOtherUsers);
+                })
+            }
+
+            /** Update updatedAt of post */
+            await Post.updateOne({ _id: postId}, {$set: { updatedAt: new Date(moment().utc().format())} });
 
             return resolve(c);
         } catch (e) {

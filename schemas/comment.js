@@ -49,14 +49,14 @@ const commentSchema = `
   extend type Query {
     getComments(commentId: String): Comment
     getCommentsByReferenceId(referenceId: String): [Comment]
-    deleteComment(commentId: String): String
+    deleteComment(commentId: String, postId: String): String
   
     fetchLatestCommentsForTheUserEngaged(pageOptions: PageOptionsInput, userId: ID): FetchLatestCommentsForTheUserEngagedResponse
   }
   
   extend type Mutation {
     addComment(comment: CommentInput): Comment
-    updateComment(commentId: String, text: [InputdescriptionBlock]): Comment
+    updateComment(commentId: String, postId: String, text: [InputdescriptionBlock]): Comment
   }
   
   type Subscription {

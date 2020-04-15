@@ -2,6 +2,8 @@ const nodemailer = require('nodemailer');
 var auth = require('./auth');
 const Tag = require('../models/tag')();
 const City = require('../models/city')();
+const Post = require('../models/post')();
+var ObjectId = require('mongodb').ObjectID;
 const Unit = require('../models/purchased_units')();
 const { EmailTemplate } = require('email-templates-v2');
 var string = require('lodash/string');
@@ -77,6 +79,10 @@ async function sendEmail(recepients, filePath, body) {
                 const renderedTemplate = await template.render(body);
 
                 const mailOptions = {
+                    // headers: {
+                    //     'X-SES-CONFIGURATION-SET': 'campaign',
+                    //     'X-SES-MESSAGE-TAGS': 'campaignId=5e8db413194f75696c162682'
+                    // },
                     from: process.env.FROM_EMAIL,
                     to: recepients.to,
                     cc: recepients.cc,
@@ -154,9 +160,96 @@ async function sendMessageToWebsocketClient(event, connectionId, postData, conn)
             } else {
                 return reject(e);
             }
-        }
-    });
 
+        }
+    })
+}
+
+async function getUserAssociatedWithPost(postId) {
+    const result = await Post.aggregate([
+        {
+            $match: { _id: ObjectId(postId)}
+        },
+        {
+           $lookup:
+                {
+                    from: 'comments',
+                    localField: "_id",
+                    foreignField: "referenceId",
+                    as: "commentData"
+                }
+        },
+        {
+           $lookup:
+                {
+                    from: 'companies',
+                    localField: "companies",
+                    foreignField: "_id",
+                    as: "companyData"
+                }
+        },
+        {
+            $lookup:
+                 {
+                     from: 'users',
+                     localField: "createdBy",
+                     foreignField: "_id",
+                     as: "author"
+                 }
+        },
+        {
+            $group:
+                {
+                    _id: "$_id",
+                    name: { $first: "$name"},
+                    type: { $first: "$type"},
+                    author: { $first: "$author"},
+                    collaborators: { $first: "$collaborators"},
+                    commentators: { $push: { ids: "$commentData.createdBy"}},
+                    comapnyCreators: { $push: { ids: "$companyData.createdBy"}}
+                }
+        },
+        {
+            $lookup:
+                {
+                    from: "users",
+                    localField: "collaborators",
+                    foreignField: "_id",
+                    as: "collaborators"
+                }
+        },
+        {
+            $lookup:
+                {
+                    from: "users",
+                    localField: "commentators.ids",
+                    foreignField: "_id",
+                    as: "commentators"
+                }
+        },
+        {
+            $lookup:
+                {
+                    from: "users",
+                    localField: "comapnyCreators.ids",
+                    foreignField: "_id",
+                    as: "companyOwners"
+                }
+        },
+        {
+            $project:
+                {
+                    name: 1,
+                    type: 1,
+                    author: 1,
+                    collaborators: 1,
+                    commentators: 1,
+                    companyOwners: 1
+                }
+        }
+    ]).exec();
+
+    return result;
 }
 
 module.exports = {
@@ -166,5 +259,5 @@ module.exports = {
     sendEmail,
     insertManyIntoPurchasedUnit,
     sendPostCreationEmail,
-    sendMessageToWebsocketClient
+    getUserAssociatedWithPost
 }

@@ -148,9 +148,11 @@ input InputdescriptionBlocks {
 
   link: String
   meta: MetaInput
+
+  createdBy: ID
 }
 
-union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock | DelimiterBlock
+union descriptionBlocks = CodeBlock | ImageBlock | ParagraphBlock | HeaderBlock | ListBlock | QuoteBlock | TableBlock | WarningBlock | EmbedBlock | LinkToolBlock | AttachesBlock
 
 type CodeBlock {
   type: String
@@ -163,14 +165,23 @@ type Code {
   language: String
 }
 
-type DelimiterBlock {
+type AttachesBlock {
   type: String
-  data: Delimiter
+  data: Attaches
   _id: ID
 }
 
-type Delimiter {
-  text: String
+type Attaches {
+  file: AttachFile
+  title: String
+  createdBy: User
+}
+
+type AttachFile {
+  name: String
+  url: String
+  size: Int
+  extension: String
 }
 
 type ImageBlock {
@@ -301,6 +312,9 @@ type URL {
 
 input URLInput {
   url: String
+  name: String
+  size: Int
+  extension: String
 }
 
 type Address {
@@ -350,8 +364,9 @@ type getAllPostsResponse {
 }
 
 input ReferenceObject {
-  referencePostId: String
-  connectedEvent: String
+  referencePostId: [ID]
+  connectedPosts: [ID]
+  postType: String
 }
 
 
@@ -360,7 +375,6 @@ type Query {
 
   getAllPosts(pageOptions: PageOptionsInput, type: String, reference: ReferenceObject, companyId: String, connectedWithUser: String, createdBy: String): getAllPostsResponse
 
-  getAllProducts: [Product]
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]
 
   findFromCollection(keyWord: String, searchCollection: String, type: String): [Tag]

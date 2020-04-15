@@ -1,18 +1,20 @@
 const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
-const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
+const { getListOfUsersWhoPurchased } = require('./product');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
 const { findFromCollection, addToCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch } = require('./post');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch, fetchFiles, getCountOfAllPost } = require('./post');
 const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
 const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
 const { sendEmail } = require('./email');
+const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
+const { getCampaignsWithTracking } = require('./campaign');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 const { getContact, addContact, fetchContacts } = require('./contact');
@@ -25,12 +27,14 @@ module.exports = {
     fullSearch,
     fetchContacts,
     getAllProducts, getListOfUsersWhoPurchased,
+
+    getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
 
     getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged,
 
-    getPostsByUserIdAndType, getPostById, getPostsByType,
+    getPostsByUserIdAndType, getPostById, getPostsByType, fetchFiles,
 
     findFromCollection,
 
@@ -51,12 +55,16 @@ module.exports = {
     getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer,
 
     fetchFields, fetchPostTypes,
+
+    getCampaignsWithTracking,
+    getCountOfAllPost,
   },
   Mutation: {
     createUser,
     updateUser,
     authorize,
     getContact,addContact,
+    addMakeMoney,
     addToCollection,
     // addProduct,
     // updateProduct,
@@ -207,7 +215,10 @@ module.exports = {
           return 'LinkToolBlock'
 
         case 'delimiter':
-          return 'DelimiterBlock'
+          return 'ParagraphBlock'
+
+        case 'attaches':
+          return 'AttachesBlock'
 
         default:
           console.log('default case')

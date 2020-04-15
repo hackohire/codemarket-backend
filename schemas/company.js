@@ -6,6 +6,7 @@ const graphQlCompanySchema = `
         name: String
         type: String
         description: [descriptionBlocks]
+        owners: [User]
         createdBy: User
         status: Status
         createdAt: String
@@ -32,6 +33,7 @@ const graphQlCompanySchema = `
         ideas: [InputdescriptionBlock]
         questions: [InputdescriptionBlock]
         createdBy: ID
+        owners: [UserInput]
         status: Status
         cities: [CityInput]
         location: LocationInput

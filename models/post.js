@@ -10,7 +10,54 @@ const postSchema = new Schema(
         name: String,
         description: [new Schema({
             type: String,
-            data: Schema.Types.Mixed,
+            data: {
+                text: String,
+                level: Number,
+                code: String,
+                language: String,
+
+                caption: String,
+                stretched: Boolean,
+                withBackground: Boolean,
+                withBorder: Boolean,
+
+                style: String,
+                items: [String],
+
+                alignment: String,
+
+                content: [[String]],
+
+                title: String,
+                message: String,
+
+                service: String,
+                source: String,
+                embed: String,
+                width: Number,
+                height: Number,
+
+                link: String,
+                meta: {
+                    title: String,
+                    description: String,
+                    domain: String,
+                    url: String,
+                    image: {
+                        url: String
+                    }
+                },
+                file: {
+                    url: String,
+                    name: String,
+                    size: Number,
+                    extension: String
+                },
+                createdBy: {
+                    type: Schema.Types.ObjectId,
+                    ref: "user", 
+                }
+            },
             status: {
                 type: String,
                 enum: ['Completed']
@@ -23,6 +70,8 @@ const postSchema = new Schema(
 
                 'competitive-advantage',   /** company post type */
 
+                'business',
+
                 'class',
 
                 'service',
@@ -30,6 +79,12 @@ const postSchema = new Schema(
                 'challenge',
 
                 'assignment',
+
+                'contact',
+
+                'note',
+
+                'question',
 
                 'email'                  /** Post type for Email */
             ],
@@ -102,11 +157,11 @@ const postSchema = new Schema(
         /** It will contain the url from where the post has been imported */
         referencePostUrl: String,
 
-
-        /** referencePostId right now using it for storing the id of a dream-job as reference in a job post
-         * Purpose is to connect jobs with dream-job
-         */
-        referencePostId: Schema.Types.ObjectId,
+        /** Array of ID of posts, a post is tied to */
+        connectedPosts: [{
+            type: Schema.Types.ObjectId,
+            ref: "post",
+        }],
 
         collaborators: [{
             type: Schema.Types.ObjectId,

@@ -209,34 +209,34 @@ async function getListOfUsersWhoPurchased(_, { productId }, { headers, db, decod
     });
 }
 
-async function getAllProducts(_, { headers, db, decodedToken }) {
-    return new Promise(async (resolve, reject) => {
-        try {
+// async function getAllProducts(_, { headers, db, decodedToken }) {
+//     return new Promise(async (resolve, reject) => {
+//         try {
 
-            if (!db) {
-                console.log('Creating new mongoose connection.');
-                conn = await connectToMongoDB();
-            } else {
-                console.log('Using existing mongoose connection.');
-            }
+//             if (!db) {
+//                 console.log('Creating new mongoose connection.');
+//                 conn = await connectToMongoDB();
+//             } else {
+//                 console.log('Using existing mongoose connection.');
+//             }
 
-            Post.find({ status: 'Published' }).populate('createdBy').populate('tags').exec((err, res) => {
+//             Post.find({ status: 'Published' }).populate('createdBy').populate('tags').exec((err, res) => {
 
-                if (err) {
-                    return reject(err)
-                }
+//                 if (err) {
+//                     return reject(err)
+//                 }
 
-                return resolve(res);
-            });
+//                 return resolve(res);
+//             });
 
 
 
-        } catch (e) {
-            console.log(e);
-            return reject(e);
-        }
-    });
-}
+//         } catch (e) {
+//             console.log(e);
+//             return reject(e);
+//         }
+//     });
+// }
 
 // async function deleteProduct(_, { productId }, { headers, db, decodedToken }) {
 //     return new Promise(async (resolve, reject) => {
@@ -272,7 +272,7 @@ async function getAllProducts(_, { headers, db, decodedToken }) {
 module.exports = {
     // addProduct,
     // updateProduct,
-    getAllProducts,
+    // getAllProducts,
     // getProductsByUserId,
     // getProductById,
     // deleteProduct,

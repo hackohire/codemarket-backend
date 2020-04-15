@@ -8,6 +8,7 @@ provider:
   # websocketsApiName: codemarket-videochat-socket
   # websocketsApiRouteSelectionExpression: $request.body.action
   environment:
+
     MONGODB_URL: ${file(env.yml):${self:provider.stage}.MONGODB_URL}
     MONGODB_DBNAME: ${file(env.yml):${self:provider.stage}.MONGODB_DBNAME}
     AWS_ACCESSKEY_ID: ${file(env.yml):${self:provider.stage}.AWS_ACCESSKEY_ID}
@@ -22,13 +23,13 @@ provider:
     SMTP_USER: ${file(env.yml):${self:provider.stage}.SMTP_USER}
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
-    SOCKET_URL: ${file(env.yml):${self:provider.stage}.SOCKET_URL}
     STRIPE_SECRET_KEY: ${file(env.yml):${self:provider.stage}.STRIPE_SECRET_KEY}
 
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
     EVENTS: ${self:service}-${self:provider.stage}-Events
     SUBSCRIPTION_OPERATIONS: ${self:service}-${self:provider.stage}-SubscriptionOperations
+
 
 functions:
   
@@ -65,6 +66,7 @@ functions:
               - x-requested-with
             allowCredentials: false 
 
+            
   webSocketHandler:
     handler: handler.handleWebSocket
     events:
@@ -98,6 +100,17 @@ functions:
           path: createCheckoutSession
           method: POST
           cors: true
+
+  emailCampaignEvent:
+    handler: handler.emailCampaignEvent
+    events:
+      - http:
+          path: emailCampaignEvent
+          method: POST
+          cors: true
+
+      - sns:
+        arn: 'campaign'
 
   getCheckoutSession:
     handler: handler.getCheckoutSession
@@ -171,6 +184,12 @@ functions:
 
 resources:
   Resources:
+
+    # MyTopic:
+    #   Type: AWS::SNS::Topic
+    #   Properties:
+    #     TopicName: campaign
+
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
       Type: "AWS::ApiGateway::GatewayResponse"
