@@ -1,7 +1,7 @@
 const { gql } = require('apollo-server-lambda');
 
 const homeworkSchema = `
- type AssignmentFields {
+ type HomeworkFields {
      _id: ID
      createAt: String
      updatedAt: String
@@ -11,7 +11,7 @@ const homeworkSchema = `
      detailDescription: String
  }
 
- input AssignmentFieldsInput {
+ input HomeworkFieldsInput {
      _id: ID
      createdAt: String
      updatedAt: String
@@ -22,7 +22,7 @@ const homeworkSchema = `
  }
 
  extend type Mutation {
-     addHomework(assignment:AssignmentFieldsInput) : AssignmentFields
+     addHomework(homework:HomeworkFieldsInput) : HomeworkFields
  }
 `
 
