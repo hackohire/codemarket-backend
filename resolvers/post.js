@@ -477,7 +477,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
         try {
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'updatedAt';
-            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : -1 };
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
 
             if (!db) {
                 console.log('Creating new mongoose connection.');
@@ -667,7 +667,9 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         companies: 1,
                         connectedPosts: 1,
                         collaborators: 1,
-                        assignees: 1
+                        assignees: 1,
+                        email: 1,
+                        phone: 1
                     }
                 },
                 {
