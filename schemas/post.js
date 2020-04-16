@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-lambda');
+
 
 const graphQlPostSchema = `
     type Post {
@@ -164,4 +164,4 @@ const graphQlPostSchema = `
     }
 `
 
-module.exports = gql(graphQlPostSchema);
+module.exports = graphQlPostSchema;

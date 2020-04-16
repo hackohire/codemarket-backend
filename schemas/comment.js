@@ -1,5 +1,3 @@
-const { gql } = require('apollo-server-lambda')
-
 const commentSchema = `
   
   type Comment {
@@ -66,4 +64,4 @@ const commentSchema = `
   }
 `;
 
-module.exports = gql(commentSchema);
+module.exports = commentSchema;

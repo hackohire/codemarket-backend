@@ -11,7 +11,7 @@ const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
 global.basePath = __dirname + '/';
-// const { makeExecutableSchema } = require('graphql-tools');
+const { makeExecutableSchema } = require('graphql-tools');
 
 const {
     DynamoDBEventProcessor,
@@ -58,19 +58,20 @@ const connectionManager = new DynamoDBConnectionManager({
     connectionsTable: process.env.CONNECTIONS
 });
 
+const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+})
+
 /** Server, from which, websocket, http, and event handler can get created */
 const server = new Server({
     connectionManager,
     eventProcessor: new DynamoDBEventProcessor(),
-    resolvers,
+    schema,
+    // resolvers,
     subscriptionManager,
-    typeDefs,
+    // typeDefs,
 });
-
-// const schema = makeExecutableSchema({
-//     typeDefs,
-//     resolvers,
-// })
 
 // const server = new ApolloServer({
 //     cors: true,

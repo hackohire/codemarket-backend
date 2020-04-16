@@ -1,5 +1,5 @@
 
-const { gql } = require('apollo-server-lambda');
+
 
 const graphQlPurchaseSchema = `
     type Transaction {
@@ -56,5 +56,5 @@ const graphQlPurchaseSchema = `
     }
 `
 
-module.exports = gql(graphQlPurchaseSchema);
+module.exports = graphQlPurchaseSchema;
 
