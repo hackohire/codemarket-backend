@@ -156,8 +156,8 @@ const graphQlPostSchema = `
     }
     extend type Mutation {
         addPost(post: PostInput): Post
-        updatePost(post: PostInput): Post
-        deletePost(postId: String): Boolean
+        updatePost(post: PostInput, updatedBy: UserInput): Post
+        deletePost(postId: String, deletedBy: UserInput): Boolean
 
         rsvpEvent(userId: String, eventId: String): RsvpEventResponse
         cancelRSVP(userId: String, eventId: String): Post
