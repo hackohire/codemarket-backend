@@ -145,6 +145,12 @@ const graphQlPostSchema = `
         count: Int
     }
 
+    type emailPhoneCount {
+        _id: String,
+        emailCount: String,
+        phoneCount: String
+    }
+
     extend type Query {
         getPostsByType(postType: String): [Post]
         getPostsByUserIdAndType(userId: String, status: String, postType: String, pageOptions: PageOptionsInput): GetPostsByUserIdAndTypeResponse
@@ -152,6 +158,7 @@ const graphQlPostSchema = `
         fullSearch(searchString: String): [Post]
         fetchFiles(blockType: String, userId: String): [AttachesBlock]
         getCountOfAllPost(userId: String, companyId: String, reference: ReferenceObject): [getCountAllPost]
+        getEmailPhoneCountForContact(type: String): [emailPhoneCount]
         myRSVP(userId: String): [Post]
     }
     extend type Mutation {
