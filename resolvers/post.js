@@ -685,7 +685,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                     },
                 },
 
-            ])
+            ]).collation({ locale: 'en' })
                 // .sort(sort)
                 // .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
                 // .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
@@ -894,11 +894,120 @@ async function getCountOfAllPost(_, { userId, companyId, reference }, { headers,
     });
 };
 
+async function getEmailPhoneCountForContact(_, { type }, {header, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            
+            const result = await Post.aggregate([
+                {
+                    $match: { type: type }
+                },
+                {
+                    $project:
+                        {
+                            type: 1,
+                            emailData:
+                                {
+                                    $filter: 
+                                        {
+                                            input: "$email",
+                                            as: "e",
+                                            cond: { $ne: ["$$e", ""]}
+                                        }
+                                },
+                            phoneData:
+                                {
+                                    $filter: 
+                                        {
+                                            input: "$phone",
+                                            as: "p",
+                                            cond: { $ne: ["$$p", ""]}
+                                        }
+                                }
+                        }
+                },
+                {
+                    $group:
+                        {
+                            _id: "$type",
+                            emailData : 
+                                {
+                                   $push:
+                                    {
+                                         $cond: [
+                                          { $and : [ { $gt: [{$size: "$emailData"}, 0] }]},
+                                            "$_id",
+                                            0
+                                          ]
+                                     } 
+                                        
+                                },
+                            phoneData : 
+                                {
+                                   $push:
+                                    {
+                                         $cond: [
+                                          { $and : [ { $gt: [{$size: "$phoneData"}, 0] }]},
+                                            "$_id",
+                                            0
+                                          ]
+                                     } 
+                                        
+                                }
+                        }
+                },
+                {
+                    $project:
+                        {
+                            _id: 1,
+                            emailCount : 
+                                { 
+                                    $size: 
+                                        { 
+                                            $filter:
+                                                {
+                                                    input: "$emailData",
+                                                    as: "ed",
+                                                    cond: { $ne: ["$$ed", 0]}
+                                                }
+                                        }
+                                },
+                            phoneCount : 
+                                { 
+                                    $size: 
+                                        { 
+                                            $filter:
+                                                {
+                                                    input: "$phoneData",
+                                                    as: "pd",
+                                                    cond: { $ne: ["$$pd", 0]}
+                                                }
+                                        }
+                                }
+                        }
+                }
+            ]).exec();
+
+            return await resolve(result);
+        } catch (err) {
+            console.log(err);
+            return reject(err);
+        }
+    });
+}
+
 module.exports = {
     getAllPosts,
     fetchFiles,
     fullSearch,
-
+    getEmailPhoneCountForContact,
     addPost,
     getPostsByUserIdAndType,
     getPostById,
