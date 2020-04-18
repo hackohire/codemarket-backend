@@ -42,7 +42,7 @@ const graphQlPostSchema = `
         connectedPosts: [Post]
         collaborators: [User]
         assignees: [User]
-
+        clients: [User]
         phone: [String]
         email: [String]
         birthDate: String
@@ -90,6 +90,7 @@ const graphQlPostSchema = `
         
         collaborators: [UserInput]
         assignees: [UserInput]
+        clients: [UserInput]
 
         phone: [String]
         email: [String]
