@@ -48,6 +48,8 @@ const graphQlPostSchema = `
         birthDate: String
         address: String
         website: String
+
+        descriptionHTML: String
     }
 
     input PostInput {
@@ -94,6 +96,8 @@ const graphQlPostSchema = `
         birthDate: String
         address: String
         website: String
+
+        descriptionHTML: String
     }
 
     type Location {

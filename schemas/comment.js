@@ -19,6 +19,8 @@ const commentSchema = `
 
     referenceCompany: Company
     referencePost: Post
+
+    textHTML: String
   }
   
   input CommentInput {
@@ -37,6 +39,8 @@ const commentSchema = `
   
     blockSpecificComment: Boolean
     blockId: ID
+
+    textHTML: String
   }
 
   type FetchLatestCommentsForTheUserEngagedResponse {
@@ -54,7 +58,7 @@ const commentSchema = `
   
   extend type Mutation {
     addComment(comment: CommentInput): Comment
-    updateComment(commentId: String, postId: String, text: [InputdescriptionBlock]): Comment
+    updateComment(commentId: String, postId: String, text: [InputdescriptionBlock], textHTML: String): Comment
   }
   
   type Subscription {

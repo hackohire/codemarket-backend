@@ -102,7 +102,8 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                             NAME: user.name,
                             LINK: postLink,
                             CONTENT: `${commentObj.createdBy.name} added a comment on "${data.name}" post. Please check the post for the latest update.`,
-                            SUBJECT: `${commentObj.createdBy.name} has added a New Comment!`
+                            SUBJECT: `${commentObj.createdBy.name} has added a New Comment!`,
+                            HTML_CONTENT: `${comment.textHTML}`
                         };
                         await helper.sendEmail({ to: [user.email]}, filePathToOtherUsers, payLoadToOtherUsers);
                     })
@@ -269,7 +270,7 @@ async function deleteComment(_, { commentId, postId }, { headers, db, decodedTok
 }
 
 
-async function updateComment(_, { commentId, postId, text }, { headers, db, decodedToken }) {
+async function updateComment(_, { commentId, postId, text, textHTML }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -311,7 +312,8 @@ async function updateComment(_, { commentId, postId, text }, { headers, db, deco
                         NAME: user.name,
                         LINK: postLink,
                         CONTENT: `${commentData.createdBy.name}updated a comment on "${postData.name}". Please check the post for the latest update.`,
-                        SUBJECT: `${commentData.createdBy.name} has updated a Comment!`
+                        SUBJECT: `${commentData.createdBy.name} has updated a Comment!`,
+                        HTML_CONTENT: `${textHTML}`
                     };
                     await helper.sendEmail({ to: [user.email]}, filePathToOtherUsers, payLoadToOtherUsers);
                 })

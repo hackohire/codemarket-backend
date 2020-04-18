@@ -180,7 +180,9 @@ const postSchema = new Schema(
         email: [String],
         birthDate: String,
         address: String,
-        website: String
+        website: String,
+
+        descriptionHTML: String
 
 
     },
