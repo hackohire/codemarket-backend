@@ -55,7 +55,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('jobProfile')
                     .populate('collaborators')
                     .populate('assignees')
-
+                    .populate('clients')
                     .execPopulate().then(async populatedPost => {
 
                         /** Send email notification to the post creator */
@@ -69,7 +69,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                                 const payLoad = {
                                     NAME: u.name,
                                     LINK: productLink,
-                                    CONTENT: `You have been added as a collaborator on "${post.name}" by ${post.createdBy.name}. Please Click here to check the details.`,
+                                    CONTENT: `You have been added as a collaborator on "${post.name}" by ${populatedPost.createdBy.name}. Please Click here to check the details.`,
                                     SUBJECT: `Collaborator Rights Given`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
@@ -78,16 +78,16 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                             console.log(populatedPost.collaborators);
                         }
 
-                        /** Send email notification to the assignee */
-                        if (post.status === 'Published' && populatedPost && populatedPost.assignees && populatedPost.assignees.length) {
+                        /** Send email notification to the clients */
+                        if (post.status === 'Published' && populatedPost && populatedPost.clients && populatedPost.clients.length) {
                             const filePath = basePath + 'email-template/common-template';
                             const productLink = `${process.env.FRONT_END_URL}post/${populatedPost.slug}`;
-                            populatedPost.assignees.forEach(async (u) => {
+                            populatedPost.clients.forEach(async (u) => {
                                 const payLoad = {
                                     NAME: u.name,
                                     LINK: productLink,
-                                    CONTENT: `An assignment "${post.name}" has been assigned to you by ${post.createdBy.name}. Please Click here to check the details.`,
-                                    SUBJECT: `New Assignment assigned to you`
+                                    CONTENT: `You have been added as a client in "${post.name}" by ${populatedPost.createdBy.name}. Please Click here to check the details.`,
+                                    SUBJECT: `Client Rights Given`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
                                 await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
@@ -169,6 +169,7 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                 .populate('jobProfile')
                 .populate('collaborators')
                 .populate('assignees')
+                .populate('clients')
                 .populate('users')
                 .populate('connectedPosts')
 
@@ -238,6 +239,7 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 .populate('jobProfile')
                 .populate('collaborators')
                 .populate('assignees')
+                .populate('clients')
                 // .populate('users')
 
                 .exec((err, res) => {
@@ -295,7 +297,7 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                         const allUserAfterPostSave = await helper.getUserAssociatedWithPost(post._id);
 
                         /**Send email to author, company owners and  commentators only. Beacuse are sending email to collaborator differently.*/
-                        const mergedObjects = unionBy(allUserAfterPostSave[0].author, allUserAfterPostSave[0].collaborators, allUserAfterPostSave[0].commentators, allUserAfterPostSave[0].companyOwners, 'email');
+                        const mergedObjects = unionBy(allUserAfterPostSave[0].author, allUserAfterPostSave[0].collaborators, allUserAfterPostSave[0].commentators, allUserAfterPostSave[0].companyOwners, allUserAfterPostSave[0].clients, 'email');
                         
                         const totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
 
@@ -334,25 +336,25 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                             console.log(collaboratorsToSendEmail);
                         }
 
-                        if (res && post.assignees && post.assignees.length) {
-                            const assigneesAfterUpdate = await res.toObject();
-                            const assigneesBeforeUpdate = (await postTemp.populate('assignees').execPopulate()).toObject();
-                            const assiggneesToSendEmail = differenceBy(assigneesAfterUpdate.assignees, assigneesBeforeUpdate.assignees, 'email');
+                        // if (res && post.assignees && post.assignees.length) {
+                        //     const assigneesAfterUpdate = await res.toObject();
+                        //     const assigneesBeforeUpdate = (await postTemp.populate('assignees').execPopulate()).toObject();
+                        //     const assiggneesToSendEmail = differenceBy(assigneesAfterUpdate.assignees, assigneesBeforeUpdate.assignees, 'email');
 
-                            const filePath = basePath + 'email-template/common-template';
-                            const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
-                            assiggneesToSendEmail.forEach(async (u) => {
-                                const payLoad = {
-                                    NAME: u.name,
-                                    LINK: productLink,
-                                    CONTENT: `A "${res.type} ${res.name}" has been assigned to you by ${res.createdBy.name}. Please Click here to check the details.`,
-                                    SUBJECT: `New Assignment ${res.name} assigned to you`
-                                    // TYPE: type ? type : string.capitalize(post.type)
-                                };
-                                await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
-                            })
-                            console.log(assiggneesToSendEmail);
-                        }
+                        //     const filePath = basePath + 'email-template/common-template';
+                        //     const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
+                        //     assiggneesToSendEmail.forEach(async (u) => {
+                        //         const payLoad = {
+                        //             NAME: u.name,
+                        //             LINK: productLink,
+                        //             CONTENT: `A "${res.type} ${res.name}" has been assigned to you by ${res.createdBy.name}. Please Click here to check the details.`,
+                        //             SUBJECT: `New Assignment ${res.name} assigned to you`
+                        //             // TYPE: type ? type : string.capitalize(post.type)
+                        //         };
+                        //         await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
+                        //     })
+                        //     console.log(assiggneesToSendEmail);
+                        // }
 
                         return resolve(d);
                     });

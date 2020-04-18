@@ -63,7 +63,7 @@ async function sendEmail(recepients, filePath, body) {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!process.env.IS_OFFLINE || true) {
+            if (!process.env.IS_OFFLINE) {
                 const transporter = await nodemailer.createTransport({
                     host: process.env.SMTP_HOST,
                     port: process.env.SMTP_PORT,
@@ -174,6 +174,7 @@ async function getUserAssociatedWithPost(postId) {
                     name: { $first: "$name"},
                     type: { $first: "$type"},
                     author: { $first: "$author"},
+                    clients: { $first: "$clients"},
                     collaborators: { $first: "$collaborators"},
                     commentators: { $push: { ids: "$commentData.createdBy"}},
                     comapnyCreators: { $push: { ids: "$companyData.createdBy"}}
@@ -186,6 +187,15 @@ async function getUserAssociatedWithPost(postId) {
                     localField: "collaborators",
                     foreignField: "_id",
                     as: "collaborators"
+                }
+        },
+        {
+            $lookup:
+                {
+                    from: "users",
+                    localField: "clients",
+                    foreignField: "_id",
+                    as: "clients"
                 }
         },
         {
@@ -214,7 +224,8 @@ async function getUserAssociatedWithPost(postId) {
                     author: 1,
                     collaborators: 1,
                     commentators: 1,
-                    companyOwners: 1
+                    companyOwners: 1,
+                    clients: 1
                 }
         }
     ]).exec();
