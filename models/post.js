@@ -167,6 +167,10 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         }],
+        clients: [{
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }],
         assignees: [{
             type: Schema.Types.ObjectId,
             ref: "user",
