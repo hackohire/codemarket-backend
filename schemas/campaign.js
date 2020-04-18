@@ -1,5 +1,3 @@
-const { gql } = require("apollo-server-lambda");
-
 const graphQlCampaignSchema = `
     
     type Campaign {
@@ -68,4 +66,4 @@ const graphQlCampaignSchema = `
 
 `;
 
-module.exports = gql(graphQlCampaignSchema);
+module.exports = graphQlCampaignSchema;

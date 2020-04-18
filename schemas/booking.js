@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-lambda');
+
 
 const graphQlBookingSchema = `
     type Booking {
@@ -36,4 +36,4 @@ const graphQlBookingSchema = `
     }
 `
 
-module.exports = gql(graphQlBookingSchema);
+module.exports = graphQlBookingSchema;

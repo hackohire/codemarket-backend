@@ -1,5 +1,3 @@
-const { gql } = require('apollo-server-lambda')
-
 const schema = `
 
 type Product {
@@ -385,7 +383,7 @@ type Mutation {
 }
 `
 
-module.exports = gql(schema);
+module.exports = schema;
 
 // getProductById(productId: String): Product
 // getProductsByUserId(userId: String, status: String): [Product]

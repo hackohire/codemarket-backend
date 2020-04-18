@@ -90,7 +90,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                 await pubSub.publish('LISTEN_NOTIFICATION', { comment: commentNoti, usersToBeNotified })
 
                 /** Send email to the users associated with the post (company owner, collaborators) except author and actual commentator */
-                const emailsOfOtherUsers = differenceWith(totalEmails, [{email: commentObj.createdBy.email, name: commentObj.createdBy.name}, {email: data.createdBy.email, name: data.createdBy.name}], isEqual);
+                const emailsOfOtherUsers = differenceWith(totalEmails, [{email: commentObj.createdBy.email, name: commentObj.createdBy.name}], isEqual);
                 console.log("These are final email ==> ", emailsOfOtherUsers);
 
                 const filePathToOtherUsers = basePath + 'email-template/common-template';
@@ -101,8 +101,8 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                         const payLoadToOtherUsers = {
                             NAME: user.name,
                             LINK: postLink,
-                            CONTENT: commentObj.createdBy.name + ' added a comment on your associated post. Please check the post for the latest update.',
-                            SUBJECT: 'New Comment!'
+                            CONTENT: `${commentObj.createdBy.name} added a comment on "${data.name}" post. Please check the post for the latest update.`,
+                            SUBJECT: `${commentObj.createdBy.name} has added a New Comment!`
                         };
                         await helper.sendEmail({ to: [user.email]}, filePathToOtherUsers, payLoadToOtherUsers);
                     })
@@ -110,37 +110,37 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                 
 
                 /** Don't send if the comment is added by post author */
-                if (commentObj.createdBy._id.toString() !== data.createdBy._id.toString()) {
-                    const commentType = 'post';
-                    postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?commentId=${commentObj._id}`;
+                // if (commentObj.createdBy._id.toString() !== data.createdBy._id.toString()) {
+                //     const commentType = 'post';
+                //     postLink = process.env.FRONT_END_URL + `${commentType}/${data.slug}?commentId=${commentObj._id}`;
 
-                    if(commentObj.blockId) {
-                        postLink = postLink.concat(`&blockId=${commentObj.blockId}`)
-                    }
+                //     if(commentObj.blockId) {
+                //         postLink = postLink.concat(`&blockId=${commentObj.blockId}`)
+                //     }
 
-                    /** Reference to the common email templates foler */
-                    const filePathToAuthor = basePath + 'email-template/common-template';
-                    const filePathToCommentor = basePath + 'email-template/common-template';
+                //     /** Reference to the common email templates foler */
+                //     const filePathToAuthor = basePath + 'email-template/common-template';
+                //     const filePathToCommentor = basePath + 'email-template/common-template';
 
-                    /** Creating dynamic varibales such as link, subject and email content */
-                    const payLoadToAuthor = {
-                        NAME: data.createdBy.name,
-                        LINK: postLink,
-                        // COMMENTOR_NAME: commentObj.createdBy.name,
-                        CONTENT: commentObj.createdBy.name + ' added a comment on your post.',
-                        SUBJECT: 'New Comment!'
-                    };
-                    const payLoadToCommentor = {
-                        NAME: commentObj.createdBy.name,
-                        LINK: postLink,
-                        CONTENT: 'Thank you for commenting. This will add a value to our platform.',
-                        SUBJECT: 'Comment Added!'
-                    };
+                //     /** Creating dynamic varibales such as link, subject and email content */
+                //     const payLoadToAuthor = {
+                //         NAME: data.createdBy.name,
+                //         LINK: postLink,
+                //         // COMMENTOR_NAME: commentObj.createdBy.name,
+                //         CONTENT: commentObj.createdBy.name + ' added a comment on your post.',
+                //         SUBJECT: 'New Comment!'
+                //     };
+                //     const payLoadToCommentor = {
+                //         NAME: commentObj.createdBy.name,
+                //         LINK: postLink,
+                //         CONTENT: 'Thank you for commenting. This will add a value to our platform.',
+                //         SUBJECT: 'Comment Added!'
+                //     };
 
-                    /** Sending the email */
-                    await helper.sendEmail({ to: [data.createdBy.email] }, filePathToAuthor, payLoadToAuthor);
-                    await helper.sendEmail({ to: [commentObj.createdBy.email] }, filePathToCommentor, payLoadToCommentor);
-                }
+                //     /** Sending the email */
+                //     await helper.sendEmail({ to: [data.createdBy.email] }, filePathToAuthor, payLoadToAuthor);
+                //     await helper.sendEmail({ to: [commentObj.createdBy.email] }, filePathToCommentor, payLoadToCommentor);
+                // }
             }
             
             /** Update updatedAt of post */
@@ -250,8 +250,8 @@ async function deleteComment(_, { commentId, postId }, { headers, db, decodedTok
                     const payLoadToOtherUsers = {
                         NAME: user.name,
                         LINK: postLink,
-                        CONTENT: commentData.createdBy.name + ' deleted a comment on your associated post. Please check the post for the latest update.',
-                        SUBJECT: 'Comment Deleted!'
+                        CONTENT: `${commentData.createdBy.name} deleted a comment on "${postData.name}". Please check the post for the latest update.`,
+                        SUBJECT: `${commentData.createdBy.name} has deleted a Comment!`
                     };
                     await helper.sendEmail({ to: [user.email]}, filePathToOtherUsers, payLoadToOtherUsers);
                 })
@@ -303,15 +303,15 @@ async function updateComment(_, { commentId, postId, text }, { headers, db, deco
             console.log("These are final emails ==> ", emailsOfOtherUsers);
 
             const filePathToOtherUsers = basePath + 'email-template/common-template';
-            postLink = process.env.FRONT_END_URL + `post/${postData.slug}?commentId=${commentData._id}`;
+            const postLink = process.env.FRONT_END_URL + `post/${postData.slug}?commentId=${commentData._id}`;
 
             if (emailsOfOtherUsers && emailsOfOtherUsers.length > 0) {
                 emailsOfOtherUsers.forEach(async (user) => {
                     const payLoadToOtherUsers = {
                         NAME: user.name,
                         LINK: postLink,
-                        CONTENT: commentData.createdBy.name + ' updated a comment on your associated post. Please check the post for the latest update.',
-                        SUBJECT: 'Comment Updated!'
+                        CONTENT: `${commentData.createdBy.name}updated a comment on "${postData.name}". Please check the post for the latest update.`,
+                        SUBJECT: `${commentData.createdBy.name} has updated a Comment!`
                     };
                     await helper.sendEmail({ to: [user.email]}, filePathToOtherUsers, payLoadToOtherUsers);
                 })

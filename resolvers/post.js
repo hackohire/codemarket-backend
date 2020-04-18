@@ -258,7 +258,7 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
     });
 }
 
-async function updatePost(_, { post }, { headers, db, decodedToken }) {
+async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -295,7 +295,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                         const allUserAfterPostSave = await helper.getUserAssociatedWithPost(post._id);
 
                         /**Send email to author, company owners and  commentators only. Beacuse are sending email to collaborator differently.*/
-                        const mergedObjects = unionBy(allUserAfterPostSave[0].author, allUserAfterPostSave[0].commentators, allUserAfterPostSave[0].companyOwners, 'email');
+                        const mergedObjects = unionBy(allUserAfterPostSave[0].author, allUserAfterPostSave[0].collaborators, allUserAfterPostSave[0].commentators, allUserAfterPostSave[0].companyOwners, 'email');
                         
                         const totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
 
@@ -306,8 +306,8 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                                 const payLoad = {
                                     NAME: u.name,
                                     LINK: productLink,
-                                    CONTENT: `The Post "${res.name}" is updated. Please check it for latest update`,
-                                    SUBJECT: `Post Upated!`
+                                    CONTENT: `The Post "${res.name}" is updated by ${updatedBy.name}. Please check it for latest update`,
+                                    SUBJECT: `${updatedBy.name} updated the post "${res.name}"`
                                 };
 
                                 await helper.sendEmail({to: [u.email]}, filePath, payLoad)
@@ -326,7 +326,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                                     NAME: u.name,
                                     LINK: productLink,
                                     CONTENT: `You have been added as a collaborator on "${res.name}" by ${res.createdBy.name}. Please Click here to check the details.`,
-                                    SUBJECT: `Collaborator Rights Given`
+                                    SUBJECT: `Collaborator Rights Given on ${res.name}`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
                                 await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
@@ -346,7 +346,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
                                     NAME: u.name,
                                     LINK: productLink,
                                     CONTENT: `A "${res.type} ${res.name}" has been assigned to you by ${res.createdBy.name}. Please Click here to check the details.`,
-                                    SUBJECT: `New Assignment assigned to you`
+                                    SUBJECT: `New Assignment ${res.name} assigned to you`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
                                 await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
@@ -368,7 +368,7 @@ async function updatePost(_, { post }, { headers, db, decodedToken }) {
 
 
 
-async function deletePost(_, { postId }, { headers, db, decodedToken }) {
+async function deletePost(_, { postId, deletedBy }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -394,7 +394,7 @@ async function deletePost(_, { postId }, { headers, db, decodedToken }) {
                          NAME: u.name,
                         //  LINK: productLink,
                          CONTENT: `The Post "${postData.name}" is deleted. Please check it for latest update`,
-                         SUBJECT: `Post Deleted!`
+                         SUBJECT: `${deletedBy.name} deleted the post ${postData.name}`
                      };
 
                      await helper.sendEmail({to: [u.email]}, filePath, payLoad)
