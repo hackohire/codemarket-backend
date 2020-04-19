@@ -8,8 +8,8 @@ const quoteSchema = `
 
      name: String
      email: String
-     zipCode: String
-     age: String
+     zipCode: Int
+     age: Int
      sex: String
      coverageAmount: String
      termLength: String
@@ -23,8 +23,8 @@ const quoteSchema = `
 
     name: String
     email: String
-    zipCode: String
-    age: String
+    zipCode: Int
+    age: Int
     sex: String
     coverageAmount: String
     termLength: String

@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const homeworkSchema = new Schema(
     {
-        assignmentNo: String,
+        assignmentNo: Number,
         title: String,
         detailDescription: String
     },

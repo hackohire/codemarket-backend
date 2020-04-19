@@ -6,7 +6,7 @@ const homeworkSchema = `
      createAt: String
      updatedAt: String
 
-     assignmentNo: String
+     assignmentNo: Int
      title: String 
      detailDescription: String
  }
@@ -16,7 +16,7 @@ const homeworkSchema = `
      createdAt: String
      updatedAt: String
 
-     assignmentNo: String
+     assignmentNo: Int
      title: String
      detailDescription: String
  }

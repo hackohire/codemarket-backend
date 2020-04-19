@@ -5,8 +5,8 @@ const quoteSchema = new Schema(
     {
         name: String,
         email: String,
-        zipCode: String,
-        age: String,
+        zipCode: Number,
+        age: Number,
         sex: String,
         coverageAmount: String,
         termLength: String,
