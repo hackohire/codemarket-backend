@@ -70,7 +70,8 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                                     NAME: u.name,
                                     LINK: productLink,
                                     CONTENT: `You have been added as a collaborator on "${post.name}" by ${populatedPost.createdBy.name}. Please Click here to check the details.`,
-                                    SUBJECT: `Collaborator Rights Given`
+                                    SUBJECT: `Collaborator Rights Given`,
+                                    HTML_CONTENT: post.descriptionHTML ? `${post.descriptionHTML}` : ``
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
                                 await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
@@ -87,7 +88,8 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                                     NAME: u.name,
                                     LINK: productLink,
                                     CONTENT: `You have been added as a client in "${post.name}" by ${populatedPost.createdBy.name}. Please Click here to check the details.`,
-                                    SUBJECT: `Client Rights Given`
+                                    SUBJECT: `Client Rights Given`,
+                                    HTML_CONTENT: post.descriptionHTML ? `${post.descriptionHTML}` : ``
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
                                 await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
@@ -309,7 +311,8 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                                     NAME: u.name,
                                     LINK: productLink,
                                     CONTENT: `The Post "${res.name}" is updated by ${updatedBy.name}. Please check it for latest update`,
-                                    SUBJECT: `${updatedBy.name} updated the post "${res.name}"`
+                                    SUBJECT: `${updatedBy.name} updated the post "${res.name}"`,
+                                    HTML_CONTENT: post.descriptionHTML ? `${post.descriptionHTML}` : ``
                                 };
 
                                 await helper.sendEmail({to: [u.email]}, filePath, payLoad)

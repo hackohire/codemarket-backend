@@ -51,7 +51,7 @@ const commentSchema = `
   extend type Query {
     getComments(commentId: String): Comment
     getCommentsByReferenceId(referenceId: String): [Comment]
-    deleteComment(commentId: String, postId: String): String
+    deleteComment(commentId: String, postId: String, textHTML: String): String
   
     fetchLatestCommentsForTheUserEngaged(pageOptions: PageOptionsInput, userId: ID): FetchLatestCommentsForTheUserEngagedResponse
   }
