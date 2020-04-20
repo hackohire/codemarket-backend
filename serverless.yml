@@ -83,14 +83,6 @@ functions:
           arn:
             Fn::GetAtt: [EventsDynamoDBTable, StreamArn]
 
-  hello:
-    handler: handler1.hello
-    events:
-      - http:
-          path: hello
-          method: GET
-          cors: true
-
   checkoutSessionCompleted:
     handler: handler.checkoutSessionCompleted
     events:
