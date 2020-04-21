@@ -25,8 +25,7 @@ module.exports = {
 
     getAllPosts,
     fullSearch,
-    fetchContacts,
-    getAllProducts, getListOfUsersWhoPurchased,
+    fetchContacts, getListOfUsersWhoPurchased,
 
     getListOfUsersWhoPurchased,
     // getProductsByUserId,
