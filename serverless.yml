@@ -1,4 +1,4 @@
-service: jane
+service: jane1
 
 provider:
   name: aws
