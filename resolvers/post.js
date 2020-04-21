@@ -23,6 +23,7 @@ const unionBy = require('lodash/array').unionBy;
 const map = require('lodash/collection').map;
 const partialRight = require('lodash/function').partialRight;
 const pick = require('lodash/object').pick;
+var moment = require('moment');
 
 let conn;
 
@@ -60,6 +61,9 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
 
                         /** Send email notification to the post creator */
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
+
+                        /** Save Activity */
+                        await helper.saveActivity(populatedPost.createdBy._id, null, 'ADD_POST');
 
                         /** Send email notification to the collaborators */
                         if (post.status === 'Published' && populatedPost && populatedPost.collaborators && populatedPost.collaborators.length) {
@@ -297,6 +301,8 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                     .execPopulate().then(async (d) => {
 
                         const allUserAfterPostSave = await helper.getUserAssociatedWithPost(post._id);
+                        /** Save Activity */
+                        await helper.saveActivity(updatedBy._id, null, 'UPDATE_POST');
 
                         /**Send email to author, company owners and  commentators only. Beacuse are sending email to collaborator differently.*/
                         const mergedObjects = unionBy(allUserAfterPostSave[0].author, allUserAfterPostSave[0].collaborators, allUserAfterPostSave[0].commentators, allUserAfterPostSave[0].companyOwners, allUserAfterPostSave[0].clients, 'email');

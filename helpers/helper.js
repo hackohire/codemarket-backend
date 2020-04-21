@@ -5,11 +5,12 @@ const City = require('../models/city')();
 const Post = require('../models/post')();
 var ObjectId = require('mongodb').ObjectID;
 const Unit = require('../models/purchased_units')();
+const Activity = require('../models/activity-track')();
 const { EmailTemplate } = require('email-templates-v2');
 var string = require('lodash/string');
 const AWS = require('aws-sdk');
 const util = require('util');
-
+var moment = require('moment');
 
 async function checkIfUserIsAdmin(decodedToken) {
     const isUserAdmin = new Promise((resolve, reject) => {
@@ -63,7 +64,7 @@ async function sendEmail(recepients, filePath, body) {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!process.env.IS_OFFLINE || true) {
+            if (!process.env.IS_OFFLINE) {
                 const transporter = await nodemailer.createTransport({
                     host: process.env.SMTP_HOST,
                     port: process.env.SMTP_PORT,
@@ -111,7 +112,6 @@ async function sendEmail(recepients, filePath, body) {
 }
 
 async function sendPostCreationEmail(post, type = '') {
-    console.log("*********** ", post);
     const filePath = basePath + 'email-template/common-template';
     var productLink = process.env.FRONT_END_URL + `${post.type === 'product' ? 'product' : 'post'}/${post.slug}`;
     const payLoad = {
@@ -235,6 +235,20 @@ async function getUserAssociatedWithPost(postId) {
     return result;
 }
 
+async function saveActivity(by, commentId, action) {
+    const activityObj = {
+        by,
+        commentId,
+        activityDate: new Date(moment().utc().format()),
+        action
+    };
+
+    const activityData = new Activity(activityObj);
+    console.log("****** ==> ", activityData);
+    await activityData.save();
+    return true;
+}
+
 module.exports = {
     checkIfUserIsAdmin,
     insertManyIntoTags,
@@ -242,5 +256,6 @@ module.exports = {
     sendEmail,
     insertManyIntoPurchasedUnit,
     sendPostCreationEmail,
-    getUserAssociatedWithPost
+    getUserAssociatedWithPost,
+    saveActivity
 }

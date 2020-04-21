@@ -12,12 +12,12 @@ const activitySchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         },
-        date: {
+        activityDate: {
             type: Date,
         },
         action: {
             type: String,
-            enum: ['addComment', 'addPost', 'updatePost', 'updateComment', 'deleteComment', 'deletePost', 'addCollaborator'],
+            enum: ['ADD_COMMENT', 'ADD_POST', 'UPDATE_POST', 'UPDATE_COMMENT', 'DELETE_COMMENT', 'DELETE_POST', 'ADD_COLLABORATOR'],
             default: ''
         },
 

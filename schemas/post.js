@@ -50,6 +50,7 @@ const graphQlPostSchema = `
         website: String
 
         descriptionHTML: String
+        activities: [Activities]
     }
 
     input PostInput {
@@ -99,6 +100,21 @@ const graphQlPostSchema = `
         website: String
 
         descriptionHTML: String
+        activities: [ActivitiesInput]
+    }
+
+    type Activities {
+        action: String
+        activityDate: String
+        by: User
+        commentId: ID
+    }
+
+    input ActivitiesInput {
+        action: String
+        activityDate: String
+        by: UserInput
+        commentID: ID
     }
 
     type Location {
