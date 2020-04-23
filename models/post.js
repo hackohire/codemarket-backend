@@ -170,6 +170,10 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         }],
+        clients: [{
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }],
         assignees: [{
             type: Schema.Types.ObjectId,
             ref: "user",
@@ -183,7 +187,9 @@ const postSchema = new Schema(
         email: [String],
         birthDate: String,
         address: String,
-        website: String
+        website: String,
+
+        descriptionHTML: String
 
 
     },

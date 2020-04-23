@@ -24,6 +24,7 @@ provider:
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
     STRIPE_SECRET_KEY: ${file(env.yml):${self:provider.stage}.STRIPE_SECRET_KEY}
+    IS_OFFLINE: ${file(env.yml):${self:provider.stage}.IS_OFFLINE}
 
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
@@ -101,6 +102,17 @@ functions:
           method: POST
           cors: true
 
+  emailCampaignEvent:
+    handler: handler.emailCampaignEvent
+    events:
+      - http:
+          path: emailCampaignEvent
+          method: POST
+          cors: true
+
+      - sns:
+        arn: 'campaign'
+
   getCheckoutSession:
     handler: handler.getCheckoutSession
     events:
@@ -173,6 +185,12 @@ functions:
 
 resources:
   Resources:
+
+    # MyTopic:
+    #   Type: AWS::SNS::Topic
+    #   Properties:
+    #     TopicName: campaign
+
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
       Type: "AWS::ApiGateway::GatewayResponse"
@@ -284,7 +302,7 @@ custom:
           - dynamoDBStreamHandler
 
   serverless-offline:
-    port: 3200
+    httpPort: 3200
 
   customDomain:
     domainName: ${self:service}-${self:provider.stage}.codemarket.io

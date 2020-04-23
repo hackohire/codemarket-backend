@@ -11,7 +11,7 @@ const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
 global.basePath = __dirname + '/';
-// const { makeExecutableSchema } = require('graphql-tools');
+const { makeExecutableSchema } = require('graphql-tools');
 
 const {
     DynamoDBEventProcessor,
@@ -58,19 +58,20 @@ const connectionManager = new DynamoDBConnectionManager({
     connectionsTable: process.env.CONNECTIONS
 });
 
+const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+})
+
 /** Server, from which, websocket, http, and event handler can get created */
 const server = new Server({
     connectionManager,
     eventProcessor: new DynamoDBEventProcessor(),
-    resolvers,
+    schema,
+    // resolvers,
     subscriptionManager,
-    typeDefs,
+    // typeDefs,
 });
-
-// const schema = makeExecutableSchema({
-//     typeDefs,
-//     resolvers,
-// })
 
 // const server = new ApolloServer({
 //     cors: true,
@@ -443,6 +444,39 @@ const fetchLinkMeta = async (event, context) => {
     })
 }
 
+const emailCampaignEvent = async (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let conn = await connectToMongoDB();
+        
+            // console.log('Received event:', JSON.stringify(event, null, 2));
+        
+            const message = event.Records[0].Sns.Message;
+            
+            console.log('From SNS:', message);
+        
+            const parsedMessage = JSON.parse(message);
+        
+            console.log('parsedMessage', parsedMessage)
+        
+            const savedEvent = await conn.collection('emails').updateOne(
+                { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), to: parsedMessage.mail.destination[0]},
+                { $set: { tracking: parsedMessage }}
+            )
+        
+            // const savedEvent = await conn.collection('email-tracking').insertOne(parsedMessage);
+        
+            console.log('Saved Email Tracking Event', savedEvent)
+        
+            return resolve(message);
+        } catch (err) {
+            console.log("this is errror ==> ", err);
+            return reject(err);
+        }
+    })
+};
+
+
 /** Function to fetch the HTML Content of the webpage based on the given link */
 const fetchArticleByLink = (event, context) => {
     return new Promise(async (resolve, reject) => {
@@ -526,5 +560,6 @@ module.exports = {
     attachCardAndCreateSubscription,
     getCouponByName,
     fetchLinkMeta,
-    fetchArticleByLink
+    fetchArticleByLink,
+    emailCampaignEvent
 };
