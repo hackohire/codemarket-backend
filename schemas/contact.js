@@ -11,7 +11,7 @@ const contactSchema = `
         firstName: String
         lastName: String
         email: String
-        phone: Int
+        phone: String
         address: String
         showDate: String
     }
@@ -24,7 +24,7 @@ const contactSchema = `
         firstName: String
         lastName: String
         email: String
-        phone: Int
+        phone: String
         address: String
         showDate: String
     }
