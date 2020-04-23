@@ -110,8 +110,8 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                     const { html, subject } = result;
                     const mailOptions = {
                         headers: {
-                            'X-SES-CONFIGURATION-SET': 'campaign',
-                            'X-SES-MESSAGE-TAGS': 'campaignId=5e9088de5b227244642612f1'
+                            'X-SES-CONFIGURATION-SET': 'dro-email-campaign',
+                            'X-SES-MESSAGE-TAGS': 'campaignId=5ea19354d5a86192bf883106'
                         },
                         from: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         to: toEmail,
