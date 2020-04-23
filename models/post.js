@@ -86,7 +86,10 @@ const postSchema = new Schema(
 
                 'question',
 
-                'email'                  /** Post type for Email */
+                'email',
+                
+                'review',
+                /** Post type for Email */
             ],
         },
         featuredImage: String,
