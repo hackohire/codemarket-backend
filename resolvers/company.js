@@ -22,7 +22,11 @@ async function addCompany(_, { company }, { headers, db, event }) {
 
             const int = await new Company(company);
 
-            const checkIfExists = await Company.find({ $text: { $search: company.name } }).populate('createdBy').populate('cities').exec();
+            var regExp = new RegExp("^" + company.name + "$", 'gi');
+
+            const checkIfExists = await Company.find({ name: { $regex: regExp } }).populate('createdBy').populate('cities').exec();
+
+            // const checkIfExists = await Company.find({ $text: { $search: company.name } }).populate('createdBy').populate('cities').exec();
 
             if (checkIfExists.length) {
                 console.log(checkIfExists);

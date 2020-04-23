@@ -79,6 +79,10 @@ async function sendEmail(recepients, filePath, body) {
                 const renderedTemplate = await template.render(body);
 
                 const mailOptions = {
+                    // headers: {
+                    //     'X-SES-CONFIGURATION-SET': 'campaign',
+                    //     'X-SES-MESSAGE-TAGS': 'campaignId=5e8db413194f75696c162682'
+                    // },
                     from: process.env.FROM_EMAIL,
                     to: recepients.to,
                     cc: recepients.cc,
@@ -170,6 +174,7 @@ async function getUserAssociatedWithPost(postId) {
                     name: { $first: "$name"},
                     type: { $first: "$type"},
                     author: { $first: "$author"},
+                    clients: { $first: "$clients"},
                     collaborators: { $first: "$collaborators"},
                     commentators: { $push: { ids: "$commentData.createdBy"}},
                     comapnyCreators: { $push: { ids: "$companyData.createdBy"}}
@@ -182,6 +187,15 @@ async function getUserAssociatedWithPost(postId) {
                     localField: "collaborators",
                     foreignField: "_id",
                     as: "collaborators"
+                }
+        },
+        {
+            $lookup:
+                {
+                    from: "users",
+                    localField: "clients",
+                    foreignField: "_id",
+                    as: "clients"
                 }
         },
         {
@@ -210,7 +224,8 @@ async function getUserAssociatedWithPost(postId) {
                     author: 1,
                     collaborators: 1,
                     commentators: 1,
-                    companyOwners: 1
+                    companyOwners: 1,
+                    clients: 1
                 }
         }
     ]).exec();

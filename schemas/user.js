@@ -1,5 +1,5 @@
 
-const { gql } = require('apollo-server-lambda');
+
 
 const graphQlUserSchema = `
 type User {
@@ -90,5 +90,5 @@ type User {
   }
 `
 
-module.exports = gql(graphQlUserSchema);
+module.exports = graphQlUserSchema;
 
