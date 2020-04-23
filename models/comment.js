@@ -52,6 +52,8 @@ const commentSchema = new Schema(
             default: false
         },
         blockId: Schema.Types.ObjectId,
+
+        textHTML: String
     },
     {
         timestamps: true,

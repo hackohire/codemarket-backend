@@ -24,6 +24,7 @@ provider:
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
     STRIPE_SECRET_KEY: ${file(env.yml):${self:provider.stage}.STRIPE_SECRET_KEY}
+    IS_OFFLINE: ${file(env.yml):${self:provider.stage}.IS_OFFLINE}
 
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
@@ -309,7 +310,7 @@ custom:
           - dynamoDBStreamHandler
 
   serverless-offline:
-    port: 3200
+    httpPort: 3200
 
   customDomain:
     domainName: ${self:service}-${self:provider.stage}.codemarket.io

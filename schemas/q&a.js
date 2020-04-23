@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-lambda');
+
 
 const questionAndAnswerSchema = `
 type QuestionAndAnswer {
@@ -38,4 +38,4 @@ input QuestionAndAnswerInput {
   }
   `
 
-  module.exports = gql(questionAndAnswerSchema);
+  module.exports = questionAndAnswerSchema;
