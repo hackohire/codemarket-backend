@@ -95,11 +95,14 @@ async function sendEmail(recepients, filePath, body) {
                 const emailSent = await transporter.sendMail(mailOptions);
 
                 if (emailSent) {
+                    console.log("Email is sent ==> ", emailSent);
                     return resolve(true);
                 } else {
+                    console.log("Email is Fail ==> ", emailSent);
                     return reject(false);
                 }
             } else {
+                console.log("This is in else ==> ");
                 resolve(true);
             }
 
