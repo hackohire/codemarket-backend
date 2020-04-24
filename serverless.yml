@@ -301,7 +301,7 @@ custom:
           - dynamoDBStreamHandler
 
   serverless-offline:
-    port: 3200
+    httpPort: 3200
 
   customDomain:
     domainName: ${self:service}.codemarket.io

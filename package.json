@@ -13,9 +13,9 @@
   "license": "ISC",
   "devDependencies": {
     "eslint": "^5.16.0",
-    "serverless": "^1.53.0",
+    "serverless": "^1.67.3",
     "serverless-dynamodb-local": "^0.2.38",
-    "serverless-offline": "^5.11.0",
+    "serverless-offline": "^6.1.4",
     "serverless-plugin-offline-dynamodb-stream": "^1.0.19"
   },
   "dependencies": {
