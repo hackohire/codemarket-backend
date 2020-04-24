@@ -34,6 +34,10 @@ const contactSchema = `
         
     }
 
+    extend type Query {
+        fetchcontact(contact: contactInput): [contact]
+    }
+
 `
 
 module.exports = gql(contactSchema);

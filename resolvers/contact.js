@@ -23,8 +23,26 @@ async function addcontact(_, { contact }, { headers }) {
     });
 }
 
+async function fetchcontact(_,) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            /** Connect Database with the mongo db */
+            conn = await connectToMongoDB();
+
+            /** Find the tweets created by the user */
+            const contactList = await Contact.find({}).exec();
+            console.log(contactList)
+            return resolve(contactList);
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 
 
 module.exports = {
-    addcontact
+    addcontact,
+    fetchcontact
 }
