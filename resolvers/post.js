@@ -23,6 +23,7 @@ const unionBy = require('lodash/array').unionBy;
 const map = require('lodash/collection').map;
 const partialRight = require('lodash/function').partialRight;
 const pick = require('lodash/object').pick;
+const contactModel = require('../models/contact')();
 
 let conn;
 
@@ -1005,6 +1006,22 @@ async function getEmailPhoneCountForContact(_, { type }, {header, db, decodedTok
     });
 }
 
+async function saveContact(_, { }, {header, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const { contacts } = require('./contacts');
+            console.log(contacts[0]);
+            const contactData = new contactModel(contacts[0]);
+            await contactData.save();
+            console.log(contactData);
+            resolve(true);
+        } catch (err) {
+            console.log(err);
+            reject(false);
+        }
+    })
+}
+
 module.exports = {
     getAllPosts,
     fetchFiles,
@@ -1016,5 +1033,6 @@ module.exports = {
     getPostsByType,
     updatePost,
     deletePost,
-    getCountOfAllPost
+    getCountOfAllPost,
+    saveContact
 }

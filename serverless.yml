@@ -120,6 +120,14 @@ functions:
           path: getCheckoutSession
           method: POST
           cors: true
+  
+  saveContact:
+    handler: resolvers/post.saveContact
+    events:
+      - http:
+          path: saveContact
+          method: GET
+          cors: true
 
   createStripeUser:
     handler: handler.createStripeUser
