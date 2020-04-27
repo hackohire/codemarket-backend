@@ -282,7 +282,7 @@ async function updateComment(_, { commentId, postId, text, textHTML }, { headers
             }
 
             console.log("This is post id in update comenet ==> ", postId);
-            let c = await Comment.findByIdAndUpdate(commentId, { text: text }, { new: true }).populate('createdBy').exec();
+            let c = await Comment.findByIdAndUpdate(commentId, { text: text, textHTML: textHTML }, { new: true }).populate('createdBy').exec();
 
             await pubSub.publish('COMMENT_UPDATED', c);
 

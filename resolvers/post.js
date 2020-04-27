@@ -659,6 +659,7 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         name: 1,
                         type: 1,
                         description: 1,
+                        descriptionHTML: 1,
                         slug: 1,
                         createdBy: { $arrayElemAt: ['$createdBy', 0] },
                         tags: 1,
