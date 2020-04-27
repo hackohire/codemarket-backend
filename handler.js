@@ -10,6 +10,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
+var moment = require('moment');
 global.basePath = __dirname + '/';
 const { makeExecutableSchema } = require('graphql-tools');
 
@@ -461,7 +462,7 @@ const emailCampaignEvent = async (event, context) => {
         
             const savedEvent = await conn.collection('emails').updateOne(
                 { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), to: parsedMessage.mail.destination[0]},
-                { $set: { tracking: parsedMessage }}
+                { $set: { tracking: parsedMessage, updatedAt: new Date(moment().utc().format()) }}
             )
         
             // const savedEvent = await conn.collection('email-tracking').insertOne(parsedMessage);
