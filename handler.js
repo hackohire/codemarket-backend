@@ -462,7 +462,7 @@ const emailCampaignEvent = async (event, context) => {
         
             const savedEvent = await conn.collection('emails').updateOne(
                 { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), to: parsedMessage.mail.destination[0]},
-                { $set: { tracking: parsedMessage, updatedAt: new Date(moment().utc().format()) }}
+                { $push: { tracking: parsedMessage }}
             )
         
             // const savedEvent = await conn.collection('email-tracking').insertOne(parsedMessage);

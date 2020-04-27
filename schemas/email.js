@@ -28,7 +28,7 @@ const graphQlEmailSchema = `
 
         slug: String
 
-        tracking: TrackingData
+        tracking: [TrackingData]
     }
 
     input EmailInput {
