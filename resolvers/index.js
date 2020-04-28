@@ -18,6 +18,7 @@ const { getCampaignsWithTracking } = require('./campaign');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 const {addformJson, fetchformJson} = require('./FormJson');
+const {addformData, fetchformData} = require('./FormData');
 module.exports = {
   Query: {
     hello: () => 'Hello world!',
@@ -29,7 +30,7 @@ module.exports = {
     fetchMakeMoney,
 
     getListOfUsersWhoPurchased,
-    fetchformJson,
+    fetchformJson,fetchformData,
     // getProductsByUserId,
     // getProductById,
 
@@ -67,7 +68,7 @@ module.exports = {
     authorize,
     addMakeMoney,
     addToCollection,
-    addformJson,
+    addformJson,addformData,
     // addProduct,
     // updateProduct,
     // deleteProduct,
