@@ -6,7 +6,7 @@ const { findFromCollection, addToCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch, fetchFiles, getCountOfAllPost } = require('./post');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch, fetchFiles, getCountOfAllPost, getEmailPhoneCountForContact, saveContact } = require('./post');
 const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
 const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
@@ -14,7 +14,7 @@ const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
-const { getCampaignsWithTracking } = require('./campaign');
+const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 module.exports = {
@@ -55,6 +55,8 @@ module.exports = {
 
     getCampaignsWithTracking,
     getCountOfAllPost,
+    getEmailPhoneCountForContact,
+    getCampaignEmails
   },
   Mutation: {
     createUser,
@@ -121,13 +123,19 @@ module.exports = {
     onCommentUpdated: {
       resolve: (rootValue) => {
         // root value is the payload from sendMessage mutation
+        // console.log('RooooooooooooooooT Value MAin', rootValue);
         return rootValue;
       },
       subscribe: withFilter(
         pubSub.subscribe('COMMENT_UPDATED'),
         (rootValue, args) => {
           // this can be async too :)
+          // console.log('postIDDDDDDD  Outer', args.postId);
+          // console.log('RooooooooooooooooT Value  Outer', rootValue);
           if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId || args.userId === rootValue.userReferenceId) {
+            // console.log('=========================================================');
+            // console.log('postIDDDDDDD', args.postId);
+            // console.log('RooooooooooooooooT Value', rootValue);
             return true;
           }
 

@@ -1,5 +1,3 @@
-const { gql } = require("apollo-server-lambda");
-
 const graphQlCampaignSchema = `
     
     type Campaign {
@@ -10,6 +8,7 @@ const graphQlCampaignSchema = `
         createdBy: User
         subject: String
         descriptionHTML: String
+        count: Int
         emailData: [Email]
     }
 
@@ -62,10 +61,16 @@ const graphQlCampaignSchema = `
         descriptionHTML: String
     }
 
+    type getEmailResponse {
+        emails: [Email]
+        total: Int
+      }
+
     extend type Query {
-        getCampaignsWithTracking(companyId: String): [Campaign]
+        getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String): [Campaign]
+        getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
     }
 
 `;
 
-module.exports = gql(graphQlCampaignSchema);
+module.exports = graphQlCampaignSchema;

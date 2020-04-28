@@ -5,11 +5,12 @@ const City = require('../models/city')();
 const Post = require('../models/post')();
 var ObjectId = require('mongodb').ObjectID;
 const Unit = require('../models/purchased_units')();
+const Activity = require('../models/activity-track')();
 const { EmailTemplate } = require('email-templates-v2');
 var string = require('lodash/string');
 const AWS = require('aws-sdk');
 const util = require('util');
-
+var moment = require('moment');
 
 async function checkIfUserIsAdmin(decodedToken) {
     const isUserAdmin = new Promise((resolve, reject) => {
@@ -95,11 +96,14 @@ async function sendEmail(recepients, filePath, body) {
                 const emailSent = await transporter.sendMail(mailOptions);
 
                 if (emailSent) {
+                    console.log("Email is sent ==> ", emailSent);
                     return resolve(true);
                 } else {
+                    console.log("Email is Fail ==> ", emailSent);
                     return reject(false);
                 }
             } else {
+                console.log("This is in else ==> ");
                 resolve(true);
             }
 
@@ -118,7 +122,8 @@ async function sendPostCreationEmail(post, type = '') {
         // PRODUCTNAME: post.name,
         LINK: productLink,
         CONTENT: `A ${type ? type : string.capitalize(post.type)} "${post.name}" has been created. Please Click here to check the details.`,
-        SUBJECT: `${type ? type : string.capitalize(post.type)} Created`
+        SUBJECT: `${type ? type : string.capitalize(post.type)} Created`,
+        HTML_CONTENT: post.descriptionHTML ? `${post.descriptionHTML}` : ``
         // TYPE: type ? type : string.capitalize(post.type)
     };
     await sendEmail({to: [post.createdBy.email]}, filePath, payLoad);
@@ -174,6 +179,7 @@ async function getUserAssociatedWithPost(postId) {
                     name: { $first: "$name"},
                     type: { $first: "$type"},
                     author: { $first: "$author"},
+                    clients: { $first: "$clients"},
                     collaborators: { $first: "$collaborators"},
                     commentators: { $push: { ids: "$commentData.createdBy"}},
                     comapnyCreators: { $push: { ids: "$companyData.createdBy"}}
@@ -186,6 +192,15 @@ async function getUserAssociatedWithPost(postId) {
                     localField: "collaborators",
                     foreignField: "_id",
                     as: "collaborators"
+                }
+        },
+        {
+            $lookup:
+                {
+                    from: "users",
+                    localField: "clients",
+                    foreignField: "_id",
+                    as: "clients"
                 }
         },
         {
@@ -214,12 +229,27 @@ async function getUserAssociatedWithPost(postId) {
                     author: 1,
                     collaborators: 1,
                     commentators: 1,
-                    companyOwners: 1
+                    companyOwners: 1,
+                    clients: 1
                 }
         }
     ]).exec();
 
     return result;
+}
+
+async function saveActivity(by, commentId, action) {
+    const activityObj = {
+        by,
+        commentId,
+        activityDate: new Date(moment().utc().format()),
+        action
+    };
+
+    const activityData = new Activity(activityObj);
+    console.log("****** ==> ", activityData);
+    await activityData.save();
+    return true;
 }
 
 module.exports = {
@@ -229,5 +259,6 @@ module.exports = {
     sendEmail,
     insertManyIntoPurchasedUnit,
     sendPostCreationEmail,
-    getUserAssociatedWithPost
+    getUserAssociatedWithPost,
+    saveActivity
 }

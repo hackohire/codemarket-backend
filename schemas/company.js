@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-lambda');
+
 
 const graphQlCompanySchema = `
     type Company {
@@ -88,4 +88,4 @@ const graphQlCompanySchema = `
     }
 `
 
-module.exports = gql(graphQlCompanySchema);
+module.exports = graphQlCompanySchema;

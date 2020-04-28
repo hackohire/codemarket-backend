@@ -1,5 +1,5 @@
 
-const { gql } = require('apollo-server-lambda');
+
 
 const graphQlSubscriptionSchema = `
 
@@ -81,5 +81,5 @@ const graphQlSubscriptionSchema = `
     }
 `
 
-module.exports = gql(graphQlSubscriptionSchema);
+module.exports = graphQlSubscriptionSchema;
 

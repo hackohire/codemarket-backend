@@ -10,8 +10,9 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
+var moment = require('moment');
 global.basePath = __dirname + '/';
-// const { makeExecutableSchema } = require('graphql-tools');
+const { makeExecutableSchema } = require('graphql-tools');
 
 const {
     DynamoDBEventProcessor,
@@ -64,6 +65,11 @@ const connectionManager = new DynamoDBConnectionManager({
     connectionsTable: process.env.CONNECTIONS
 });
 
+const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+})
+
 /** Server, from which, websocket, http, and event handler can get created */
 const server = new Server({
     context: {
@@ -71,15 +77,11 @@ const server = new Server({
     },
     connectionManager,
     eventProcessor: new DynamoDBEventProcessor(),
-    resolvers,
+    schema,
+    // resolvers,
     subscriptionManager,
-    typeDefs,
+    // typeDefs,
 });
-
-// const schema = makeExecutableSchema({
-//     typeDefs,
-//     resolvers,
-// })
 
 // const server = new ApolloServer({
 //     cors: true,
@@ -469,7 +471,7 @@ const emailCampaignEvent = async (event, context) => {
         
             const savedEvent = await conn.collection('emails').updateOne(
                 { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), to: parsedMessage.mail.destination[0]},
-                { $set: { tracking: parsedMessage }}
+                { $push: { tracking: parsedMessage }}
             )
         
             // const savedEvent = await conn.collection('email-tracking').insertOne(parsedMessage);
