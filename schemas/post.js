@@ -108,6 +108,8 @@ const graphQlPostSchema = `
         activityDate: String
         by: User
         commentId: ID
+        postId: ID
+        message: String
     }
 
     input ActivitiesInput {
@@ -115,6 +117,8 @@ const graphQlPostSchema = `
         activityDate: String
         by: UserInput
         commentID: ID
+        postId: ID
+        message: String
     }
 
     type Location {
