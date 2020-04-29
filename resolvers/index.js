@@ -17,6 +17,8 @@ const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType
 const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
+const {addformJson, fetchformJson} = require('./FormJson');
+const {addformData, fetchformData} = require('./FormData');
 module.exports = {
   Query: {
     hello: () => 'Hello world!',
@@ -24,7 +26,7 @@ module.exports = {
 
     getAllPosts,
     fullSearch,
-
+    fetchformJson,fetchformData,
     getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
@@ -67,7 +69,7 @@ module.exports = {
     // addProduct,
     // updateProduct,
     // deleteProduct,
-
+    addformJson,addformData,
 
     addComment,
     updateComment,
