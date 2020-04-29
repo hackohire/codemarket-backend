@@ -64,7 +64,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
 
                         /** Save Activity */
-                        // await helper.saveActivity(populatedPost.createdBy._id, null, 'ADD_POST');
+                        await helper.saveActivity('ADD_POST', populatedPost.createdBy._id, null, populatedPost._id, null);
 
                         /** Send email notification to the collaborators */
                         if (post.status === 'Published' && populatedPost && populatedPost.collaborators && populatedPost.collaborators.length) {
@@ -302,8 +302,9 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                     .execPopulate().then(async (d) => {
 
                         const allUserAfterPostSave = await helper.getUserAssociatedWithPost(post._id);
+                        
                         /** Save Activity */
-                        // await helper.saveActivity(updatedBy._id, null, 'UPDATE_POST');
+                        await helper.saveActivity('UPDATE_POST', updatedBy._id, null, post._id, null);
 
                         /**Send email to author, company owners and  commentators only. Beacuse are sending email to collaborator differently.*/
                         const mergedObjects = unionBy(allUserAfterPostSave[0].author, allUserAfterPostSave[0].collaborators, allUserAfterPostSave[0].commentators, allUserAfterPostSave[0].companyOwners, allUserAfterPostSave[0].clients, 'email');
@@ -330,6 +331,14 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                             const collaboratorsAfterUpdate = await res.toObject();
                             const collaboratorsBeforeUpdate = (await postTemp.populate('collaborators').execPopulate()).toObject();
                             const collaboratorsToSendEmail = differenceBy(collaboratorsAfterUpdate.collaborators, collaboratorsBeforeUpdate.collaborators, 'email');
+
+                            const collaboratorsIds = collaboratorsToSendEmail.map(u => u._id);
+
+                            console.log(collaboratorsAfterUpdate, "--> ", collaboratorsBeforeUpdate, '-->', collaboratorsIds);
+                            if (collaboratorsIds.length > 0) {
+                                /** Save Activity */
+                                await helper.saveActivity('ADD_COLLABORATOR', updatedBy._id, null, post._id, collaboratorsIds);
+                            }
 
                             const filePath = basePath + 'email-template/common-template';
                             const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
@@ -664,6 +673,127 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                     }
                 },
                 {
+                    $lookup: {
+                        from : 'activities',
+                        // localField: '_id',
+                        // foreignField: 'postId',
+                        let: { pId: '$_id'},
+                        pipeline: [
+                                {
+                                    $match:
+                                    {
+                                        $expr:
+                                        {
+                                            $and:
+                                                [
+                                                    { $eq: ["$$pId", "$postId"] }
+                                                ]
+                                        },
+                                        action: { $in: ['ADD_COMMENT', 'UPDATE_POST', 'UPDATE_COMMENT', 'DELETE_COMMENT', 'ADD_COLLABORATOR']}
+                                    },
+                                },
+                                {
+                                $lookup:
+                                    {
+                                        from: 'users',
+                                        localField: 'by',
+                                        foreignField: '_id',
+                                        as: 'by'
+                                    }
+                                },
+                                {
+                                    $unwind: {
+                                        "path": "$by",
+                                        "preserveNullAndEmptyArrays": true
+                                    }
+                                },
+                                {
+                                    $sort: { createdAt: -1 }
+                                },
+                                {
+                                    $lookup: {
+                                        from: 'users',
+                                        localField: 'collaboratorId',
+                                        foreignField: '_id',
+                                        as: 'collaboratorId'
+                                    }
+                                },
+                                {
+                                    $addFields: {
+                                       collaboratorName: "$collaboratorId.name"
+                                    }
+                               },
+                               {
+                                   $addFields: {
+                                       collaboratorName: {
+                                               '$reduce': {
+                                                   'input': '$collaboratorName',
+                                                   'initialValue': '',
+                                                   'in': {
+                                                       '$concat': [
+                                                           '$$value',
+                                                           {'$cond': [{'$eq': ['$$value', '']}, '', ', ']}, 
+                                                           '$$this']
+                                                   }
+                                               }
+                                           }
+                                       }
+                                    
+                               },
+                                {
+                                    $project: {
+                                        _id: 1,
+                                        action: 1,
+                                        by: 1,
+                                        commentId: 1,
+                                        postId: 1,
+                                        activityDate: 1,
+                                        collaboratorId: 1,
+                                        collaboratorName: 1,
+                                        message: {
+                                            $switch:
+                                                {
+                                                    branches: [
+                                                            {
+                                                                case: { $eq: ["$action", "UPDATE_POST"]},
+                                                                then: { $concat: ["$by.name", " has updated this post"]}
+                                                            },
+                                                            {
+                                                                case: { $eq: ["$action", "ADD_COMMENT"]},
+                                                                then: { $concat: ["$by.name", " has added comment in this post"]}
+                                                            },
+                                                            {
+                                                                case: { $eq: ["$action", "UPDATE_COMMENT"]},
+                                                                then: { $concat: ["$by.name", " has updated comment in this post"]}
+                                                            },
+                                                            {
+                                                                case: { $eq: ["$action", "DELETE_COMMENT"]},
+                                                                then: { $concat: ["$by.name", " has deleted comment in this post"]}
+                                                            },
+                                                            {
+                                                                case: { $eq: ["$action", "DELETE_POST"]},
+                                                                then: { $concat: ["$by.name", " has deleted this post"]}
+                                                            },
+                                                            // {
+                                                            //     case: { $eq: ["$action", "ADD_COLLABORATOR"]},
+                                                            //     then: { $concat: ["$by.name", " has added collaborator in this post."]}
+                                                            // },
+                                                            {
+                                                                case: { $eq: ["$action", "ADD_COLLABORATOR"]},
+                                                                then: { $concat: ["$by.name", " has added ", "$collaboratorName"," as a collaborators in this post"]}
+                                                            },
+                                                        ],
+                                                    default: null
+                                            }
+                                        }
+                                    }
+                                    
+                                }
+                            ],
+                        as: 'activities'
+                    }
+                },
+                {
                     $project: {
                         name: 1,
                         type: 1,
@@ -682,7 +812,8 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         collaborators: 1,
                         assignees: 1,
                         email: 1,
-                        phone: 1
+                        phone: 1,
+                        activities: 1
                     }
                 },
                 {
