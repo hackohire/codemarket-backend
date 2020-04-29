@@ -10,8 +10,16 @@ const activitySchema = new Schema(
         },
         commentId: {
             type: Schema.Types.ObjectId,
-            ref: "user",
+            ref: "comments",
         },
+        postId: {
+            type: Schema.Types.ObjectId,
+            ref: "posts",
+        },
+        collaboratorId: [{
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }],
         activityDate: {
             type: Date,
         },
