@@ -238,10 +238,12 @@ async function getUserAssociatedWithPost(postId) {
     return result;
 }
 
-async function saveActivity(by, commentId, action) {
+async function saveActivity(action, by, commentId, postId, collaboratorId) {
     const activityObj = {
         by,
         commentId,
+        postId,
+        collaboratorId,
         activityDate: new Date(moment().utc().format()),
         action
     };

@@ -89,6 +89,9 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                 /** Alert Message Notification */
                 await pubSub.publish('LISTEN_NOTIFICATION', { comment: commentNoti, usersToBeNotified })
 
+                /** Save Activity */
+                await helper.saveActivity('ADD_COMMENT', c.createdBy, commentObj._id, commentObj.referenceId, null);
+
                 /** Send email to the users associated with the post (company owner, collaborators) except author and actual commentator */
                 const emailsOfOtherUsers = differenceWith(totalEmails, [{email: commentObj.createdBy.email, name: commentObj.createdBy.name}], isEqual);
                 console.log("These are final email ==> ", emailsOfOtherUsers);
@@ -232,6 +235,9 @@ async function deleteComment(_, { commentId, postId, textHTML }, { headers, db, 
              /**Get data regarding current comment */
              const commentData = await Comment.findOne({ _id: commentId }).populate('createdBy').exec();
 
+             /** Save Activity */
+            await helper.saveActivity('DELETE_COMMENT', commentData.createdBy._id, commentId, postId, null);
+
              const allUsers = await helper.getUserAssociatedWithPost(postId);
 
             const mergedObjects = unionBy(allUsers[0].author, allUsers[0].collaborators, allUsers[0].commentators, allUsers[0].clients, allUsers[0].companyOwners, 'email');
@@ -299,6 +305,9 @@ async function updateComment(_, { commentId, postId, text, textHTML }, { headers
 
             var totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
             console.log("These are total emails ==> ", totalEmails);
+
+            /** Save Activity */
+            await helper.saveActivity('UPDATE_COMMENT', commentData.createdBy._id, commentId, postId, null);
 
             /** Send email to the users associated with the post (company owner, collaborators) except author and actual commentator */
             const emailsOfOtherUsers = differenceWith(totalEmails, [{email: commentData.createdBy.email, name: commentData.createdBy.name}], isEqual);
