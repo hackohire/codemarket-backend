@@ -28,6 +28,7 @@
     "graphql": "^15.0.0",
     "graphql-subscriptions": "^1.1.0",
     "graphql-tools": "^4.0.6",
+    "i": "^0.3.6",
     "jsonwebtoken": "^8.5.1",
     "jwk-to-pem": "^2.0.1",
     "lodash": "^4.17.14",
@@ -35,9 +36,11 @@
     "mongoose": "^5.5.14",
     "mongoose-slug-updater": "^3.1.4",
     "nodemailer": "^6.3.0",
+    "npm": "^6.14.4",
     "sanitize-html": "^1.20.0",
+    "serverless-domain-manager": "^3.3.1",
     "stripe": "^7.1.0",
-    "url-metadata": "^2.4.0",
-    "serverless-domain-manager": "^3.3.1"
+    "twilio": "^3.43.0",
+    "url-metadata": "^2.4.0"
   }
 }
