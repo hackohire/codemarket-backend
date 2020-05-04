@@ -15,6 +15,7 @@ const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
 const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
+const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 module.exports = {
@@ -100,7 +101,9 @@ module.exports = {
 
     sendEmail,
 
-    addPostType, updatePostType, deletePostType
+    addPostType, updatePostType, deletePostType,
+
+    addHelpGrowBusiness
   },
   Subscription: {
     onCommentAdded: {
