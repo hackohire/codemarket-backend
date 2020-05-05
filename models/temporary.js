@@ -12,6 +12,7 @@ const helpBusinessGrow = new Schema(
         website: String,
         lastName: String,
         mobileNumber: String,
+        city: String,
         businessAreas: [{
             type: Schema.Types.ObjectId,
             ref: "tag",

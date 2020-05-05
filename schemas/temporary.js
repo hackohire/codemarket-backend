@@ -8,6 +8,7 @@ type HelpGrowYourBusineess {
     mobileNumber: Float
     businessAreas: [Tag]
     email: String
+    city: String
   }
   
   input HelpGrowYourBusineessInput {
@@ -19,6 +20,7 @@ type HelpGrowYourBusineess {
     mobileNumber: Float
     businessAreas: [TagInput]
     email: String
+    city: String
   }
 
   extend type Mutation {
