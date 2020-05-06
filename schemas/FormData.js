@@ -5,7 +5,8 @@ type formData {
     updatedAt: String
 
     formname: String
-    jsonstring: String
+    formDataJson: JSON
+    connectedFormStructureId: ID
 }
 
 input formDataInput {
@@ -14,7 +15,8 @@ input formDataInput {
     updatedAt: String
 
     formname: String
-    jsonstring: String
+    formDataJson: JSON
+    connectedFormStructureId: ID
 }
 
 extend type Mutation {

@@ -20,7 +20,11 @@ const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 const {addformJson, fetchformJson} = require('./FormJson');
 const {addformData, fetchformData} = require('./FormData');
+const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
+
 module.exports = {
+  JSON: GraphQLJSON,
+  JSONObject: GraphQLJSONObject,
   Query: {
     hello: () => 'Hello world!',
     getUsers, getUsersAndBugFixesCount, getUserById,

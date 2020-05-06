@@ -4,7 +4,11 @@ const { Schema } = mongoose;
 const formDataSchema = new Schema(
     {
         formname: String,
-        jsonstring: String
+        formDataJson: Object,
+        connectedFormStructureId: {
+            type: Schema.Types.ObjectId,
+            ref: "form-structure",
+        }
     },
     {
         timestamps: true, /** Will automatically create, createdAt & updatedAt fields */

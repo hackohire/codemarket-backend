@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const formJsonSchema = new Schema(
     {
         formname: String,
-        jsonstring: String
+        formStructureJSON: Object
     },
     {
         timestamps: true, /** Will automatically create, createdAt & updatedAt fields */
@@ -13,8 +13,8 @@ const formJsonSchema = new Schema(
 
 module.exports = () => {
     try {
-        return mongoose.model('formJson');
+        return mongoose.model('form-structure');
     } catch (e) {
-        return mongoose.model('formJson', formJsonSchema);
+        return mongoose.model('form-structure', formJsonSchema);
     }
 };
