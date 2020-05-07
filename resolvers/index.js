@@ -15,16 +15,23 @@ const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
 const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
+const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
+const {addformJson, fetchformJson} = require('./FormJson');
+const {addformData, fetchformData} = require('./FormData');
+const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
+
 module.exports = {
+  JSON: GraphQLJSON,
+  JSONObject: GraphQLJSONObject,
   Query: {
     hello: () => 'Hello world!',
     getUsers, getUsersAndBugFixesCount, getUserById,
 
     getAllPosts,
     fullSearch,
-
+    fetchformJson,fetchformData,
     getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
@@ -67,7 +74,7 @@ module.exports = {
     // addProduct,
     // updateProduct,
     // deleteProduct,
-
+    addformJson,addformData,
 
     addComment,
     updateComment,
@@ -100,7 +107,9 @@ module.exports = {
 
     sendEmail,
 
-    addPostType, updatePostType, deletePostType
+    addPostType, updatePostType, deletePostType,
+
+    addHelpGrowBusiness
   },
   Subscription: {
     onCommentAdded: {

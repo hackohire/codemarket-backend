@@ -1,4 +1,8 @@
+
+
 const schema = `
+scalar JSON
+scalar JSONObject
 
 type Product {
   _id: ID
