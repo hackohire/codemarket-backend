@@ -23,6 +23,7 @@ extend type Mutation {
 
 extend type Query {
     fetchformJson(formJson: formJsonInput): [formJson]
+    fetchFormStructureById(formId: String): formJson
 }
 `
 

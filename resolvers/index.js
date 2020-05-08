@@ -18,7 +18,7 @@ const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
-const {addformJson, fetchformJson} = require('./FormJson');
+const {addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
 const {addformData, fetchformData} = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
 
@@ -31,7 +31,7 @@ module.exports = {
 
     getAllPosts,
     fullSearch,
-    fetchformJson,fetchformData,
+    fetchformJson, fetchformData, fetchFormStructureById,
     getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
