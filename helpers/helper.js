@@ -110,13 +110,13 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                     const { html, subject } = result;
                     const mailOptions = {
                         headers: {
-                            'X-SES-CONFIGURATION-SET': 'dro-email-campaign',
-                            'X-SES-MESSAGE-TAGS': 'campaignId=5ea19354d5a86192bf883106'
+                            'X-SES-CONFIGURATION-SET': 'la2050',
+                            'X-SES-MESSAGE-TAGS': 'campaignId=5eb01f437dbc34330797a131'
                         },
                         from: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         to: toEmail,
-                        // cc: fromEmail,
-                        // bcc: 'sumi@codemarket.io',
+                        // cc: "mysumifoods@gmail.com",
+                        bcc: ['mysumifoods@gmail.com'],
                         replyTo: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         subject: subject,
                         html: html,
