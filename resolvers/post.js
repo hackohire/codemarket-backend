@@ -298,6 +298,7 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                     .populate('collaborators')
                     .populate('assignees')
                     .populate('users')
+                    .populate('clients')
 
                     .execPopulate().then(async (d) => {
 
