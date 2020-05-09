@@ -1,18 +1,19 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const formDataSchema = new Schema(
+const bankFormDataRefSchema = new Schema(
     {
         formname: String,
-        formDataJson: Object,
-        connectedFormStructureId: {
+        connectedFormStructureId: 
+         {
             type: Schema.Types.ObjectId,
             ref: "form-structure",
         },
-        company: {
+        connectedFormDataId: {
             type: Schema.Types.ObjectId,
-            ref: "company",
+            ref: "formData",
         },
+        companyName: String
     },
     {
         timestamps: true, /** Will automatically create, createdAt & updatedAt fields */
@@ -21,8 +22,8 @@ const formDataSchema = new Schema(
 
 module.exports = () => {
     try {
-        return mongoose.model('formData');
+        return mongoose.model('bankFormDataRef');
     } catch (e) {
-        return mongoose.model('formData', formDataSchema);
+        return mongoose.model('bankFormDataRef', bankFormDataRefSchema);
     }
 };

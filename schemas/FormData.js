@@ -7,6 +7,7 @@ type formData {
     formname: String
     formDataJson: JSON
     connectedFormStructureId: ID
+    company: Company
 }
 
 input formDataInput {
@@ -17,6 +18,7 @@ input formDataInput {
     formname: String
     formDataJson: JSON
     connectedFormStructureId: ID
+    company: CompanyInput
 }
 
 extend type Mutation {
@@ -25,7 +27,7 @@ extend type Mutation {
 
 extend type Query {
     fetchformData(formname: String, formData: formDataInput): [formData]
-}
-`
+    fetchformDataById(_id: String, connectedFormStructureId: String, formData: formDataInput): [formData]
+}`
 
 module.exports = formDataSchema;

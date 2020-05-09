@@ -1,19 +1,19 @@
 const connectToMongoDB = require('../helpers/db');
-const FormJson = require('./../models/FormJson')(); /** Impoer Tweet mongoose model */
+const BankFormDataRef = require('./../models/bankFormDataRef')(); /** Impoer Tweet mongoose model */
 
 let conn;
 
-async function addformJson(_, { formJson }, { headers }) {
+async function addBankFormDataRef(_, { bankFormDataRef }, { headers }) {
     return new Promise(async (resolve, reject) => {
         try {
             /** Connect Database with the mongo db */
             conn = await connectToMongoDB();
 
             /** This will convert quote object into the mongoose quote model */
-            const int = new FormJson(formJson);
+            const int = new BankFormDataRef(bankFormDataRef);
 
             /** Here we save the quote document into the database */
-            await int.save(formJson).then(async (p) => {
+            await int.save(bankFormDataRef).then(async (p) => {
                 console.log(p)
                 return resolve(p);
             });
@@ -24,16 +24,17 @@ async function addformJson(_, { formJson }, { headers }) {
     });
 }
 
-async function fetchformJson(_,) {
+async function getBankFormDataRefByCompanyName(_,{companyName}) {
     return new Promise(async (resolve, reject) => {
         try {
             /** Connect Database with the mongo db */
             conn = await connectToMongoDB();
 
             /** Find the tweets created by the user */
-            const formJsonList = await FormJson.find({}).exec();
-            console.log(formJsonList)
-            return resolve(formJsonList);
+            let condition = {'companyName': companyName}
+            const bankFormDataRefList = await BankFormDataRef.find(condition).exec();
+            console.log(bankFormDataRefList)
+            return resolve(bankFormDataRefList);
         } catch (e) {
             console.log(e);
             return reject(e);
@@ -43,6 +44,6 @@ async function fetchformJson(_,) {
 
 
 module.exports = {
-    addformJson,
-    fetchformJson
+    addBankFormDataRef,
+    getBankFormDataRefByCompanyName
 }

@@ -19,8 +19,9 @@ const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 const {addformJson, fetchformJson} = require('./FormJson');
-const {addformData, fetchformData} = require('./FormData');
+const {addformData, fetchformData,fetchformDataById} = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
+const {addBankFormDataRef,getBankFormDataRefByCompanyName} = require('./bankFormData');
 
 module.exports = {
   JSON: GraphQLJSON,
@@ -31,10 +32,11 @@ module.exports = {
 
     getAllPosts,
     fullSearch,
-    fetchformJson,fetchformData,
+    fetchformJson,fetchformData,fetchformDataById,
     getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
+    getBankFormDataRefByCompanyName,
 
     getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged,
 
@@ -75,6 +77,7 @@ module.exports = {
     // updateProduct,
     // deleteProduct,
     addformJson,addformData,
+    addBankFormDataRef,
 
     addComment,
     updateComment,

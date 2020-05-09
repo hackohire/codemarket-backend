@@ -15,7 +15,7 @@ async function addformData(_, { formData }, { headers }) {
             /** Here we save the quote document into the database */
             await int.save(formData).then(async (p) => {
                 console.log(p)
-                resolve(p);
+                return resolve(p);
             });
         } catch (e) {
             console.log(e);
@@ -42,8 +42,25 @@ async function fetchformData(_,{formname}) {
     });
 }
 
+async function fetchformDataById(_,{_id,connectedFormStructureId}) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            /** Connect Database with the mongo db */
+            conn = await connectToMongoDB();
+            let condition = {'company': _id, 'connectedFormStructureId':connectedFormStructureId}
+            const formDataList = await FormData.find(condition).exec();
+            console.log(formDataList)
+            return resolve(formDataList);
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 
 module.exports = {
     addformData,
-    fetchformData
+    fetchformData,
+    fetchformDataById
 }
