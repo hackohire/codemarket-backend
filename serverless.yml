@@ -1,4 +1,4 @@
-service: nonprofitapi
+service: jaydipapi
 
 provider:
   name: aws
