@@ -1,4 +1,4 @@
-service: la2050api
+service: nonprofitapi
 
 provider:
   name: aws
