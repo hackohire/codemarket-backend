@@ -1,4 +1,4 @@
-service: jaydipapi
+service: jigneshapi
 
 provider:
   name: aws
