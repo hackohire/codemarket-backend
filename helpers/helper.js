@@ -111,9 +111,9 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                     const mailOptions = {
                         headers: {
                             'X-SES-CONFIGURATION-SET': 'la2050',
-                            'X-SES-MESSAGE-TAGS': 'campaignId=5eb01f437dbc34330797a131'
+                            'X-SES-MESSAGE-TAGS': 'campaignId=5eb95a652b638810be5ee0f3'
                         },
-                        from: fromEmail ? fromEmail : process.env.FROM_EMAIL,
+                        from: '"Therapy Therapist" <sumi@codemarket.io>',
                         to: toEmail,
                         // cc: "mysumifoods@gmail.com",
                         bcc: ['mysumifoods@gmail.com'],
