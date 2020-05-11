@@ -22,6 +22,7 @@ const {addformData, fetchformData,fetchformDataById} = require('./FormData');
 const {addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
 const {addBankFormDataRef,getBankFormDataRefByCompanyName} = require('./bankFormData');
+const {fetchHomeBuyerProgram,addHomeBuyerProgram} = require('./homeBuyerProgram');
 
 module.exports = {
   JSON: GraphQLJSON,
@@ -32,6 +33,7 @@ module.exports = {
 
     getAllPosts,
     fullSearch,
+    fetchHomeBuyerProgram,
     fetchformJson, fetchformData, fetchFormStructureById,fetchformDataById,
     getListOfUsersWhoPurchased,
     // getProductsByUserId,
@@ -73,6 +75,7 @@ module.exports = {
     authorize,
     addMakeMoney,
     addToCollection,
+    addHomeBuyerProgram,
     // addProduct,
     // updateProduct,
     // deleteProduct,

@@ -17,6 +17,7 @@ const schema = require('./schema');
 const formJsonSchema = require('./FormJson');
 const formDataSchema = require('./FormData');
 const bankFormDataRef = require('./bankFormDataRef');
+const homeBuyerProgram = require('./homeBuyerProgram');
 
 const schemaArray = [
     schema,
@@ -38,7 +39,8 @@ const schemaArray = [
     formJsonSchema,
     formDataSchema,
     graphQlHelpBusinessGrowSchema,
-    bankFormDataRef
+    bankFormDataRef,
+    homeBuyerProgram
 ];
 
 module.exports = schemaArray;

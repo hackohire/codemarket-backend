@@ -1,4 +1,5 @@
 const connectToMongoDB = require('../helpers/db');
+const helper = require('../helpers/helper');
 const FormData = require('./../models/FormData')(); /** Impoer Tweet mongoose model */
 
 let conn;
@@ -8,6 +9,7 @@ async function addformData(_, { formData }, { headers }) {
         try {
             /** Connect Database with the mongo db */
             conn = await connectToMongoDB();
+            let formDataObj;
 
             /** This will convert quote object into the mongoose quote model */
             const int = new FormData(formData);
@@ -15,8 +17,18 @@ async function addformData(_, { formData }, { headers }) {
             /** Here we save the quote document into the database */
             await int.save(formData).then(async (p) => {
                 console.log(p)
+                formDataObj = p.formDataJson;
                 return resolve(p);
             });
+            const filePath = basePath + 'email-template/common-template';
+            const payLoadToOtherUsers = {
+                NAME: formDataObj.firstName,
+                CONTENT: `First Name : ${formDataObj.firstName }  , Last Name : ${formDataObj.lastName} ,   Email :  ${formDataObj.email} ,  Estimated  ${formDataObj.estimatedPurchasePrice}`,
+                SUBJECT: `New Subscriber Details : ${formDataObj.firstName }`
+            };
+            await helper.sendEmail({ to: "mayurshin.vaghela43@gmail.com"}, filePath, payLoadToOtherUsers);
+
+
         } catch (e) {
             console.log(e);
             return reject(e);
