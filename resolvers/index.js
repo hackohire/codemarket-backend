@@ -18,11 +18,11 @@ const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
-const {addformData, fetchformData,fetchformDataById} = require('./FormData');
+const { addformData, fetchformData,fetchformDataById, fetchFormDataByFormId } = require('./FormData');
 const {addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
-const {addBankFormDataRef,getBankFormDataRefByCompanyName} = require('./bankFormData');
-const {fetchHomeBuyerProgram,addHomeBuyerProgram} = require('./homeBuyerProgram');
+const {addBankFormDataRef,getBankFormDataRefByCompanyName,} = require('./bankFormData');
+const {fetchHomeBuyerProgram, addHomeBuyerProgram} = require('./homeBuyerProgram');
 
 module.exports = {
   JSON: GraphQLJSON,
@@ -34,7 +34,7 @@ module.exports = {
     getAllPosts,
     fullSearch,
     fetchHomeBuyerProgram,
-    fetchformJson, fetchformData, fetchFormStructureById,fetchformDataById,
+    fetchformJson, fetchformData, fetchFormStructureById, fetchformDataById, fetchFormDataByFormId,
     getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
