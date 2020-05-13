@@ -59,9 +59,9 @@ const companySchema = new Schema(
     },
 );
 
-// companySchema.index({'name': 'text', }, {
-//     "language_override": "javascript"
-// });
+companySchema.index({'name': 'text', }, {
+    "language_override": "javascript"
+});
 
 module.exports = () => {
     try {
