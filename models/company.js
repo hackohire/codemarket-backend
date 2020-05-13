@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-
+const slug = require('mongoose-slug-updater');
+mongoose.plugin(slug, { truncate: 0 });
 
 const companySchema = new Schema(
     {
         name: String,
         cover: String,
+        slug: { type: String, slug: 'name' },
         type: {
             type: String,
             enum: ['non-profit', 'local-business', 'startup', 'smb', 'school', 'government', ''],
