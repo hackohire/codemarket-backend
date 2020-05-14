@@ -36,6 +36,7 @@ const schemaArray = [
     graphQlCampaignSchema,
     graphQlChatSchema,
     commentSchema,
+    formJsonSchema,
     formDataSchema,
     graphQlHelpBusinessGrowSchema
 ];
