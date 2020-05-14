@@ -190,6 +190,14 @@ functions:
               - x-requested-with
             allowCredentials: false
 
+  sendEmailToUadtedPost:
+    handler: handler.sendEmailToUadtedPost
+    events:
+      - http:
+          path: sendEmailToUadtedPost
+          method: GET
+          cors: true
+
 
 resources:
   Resources:

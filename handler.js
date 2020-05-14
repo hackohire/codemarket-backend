@@ -11,6 +11,8 @@ const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
 var moment = require('moment');
+const Post = require('./models/post')();
+var CronJob = require('cron').CronJob;
 global.basePath = __dirname + '/';
 const { makeExecutableSchema } = require('graphql-tools');
 
@@ -73,6 +75,73 @@ const server = new Server({
     subscriptionManager,
     // typeDefs,
 });
+
+
+// Cron job for email sending
+var job = new CronJob('0 19 * * *', async ()=> {
+    console.log('CronJob INDIA');
+    
+
+    try {
+        await connectToMongoDB();
+        const today = moment().startOf('day');
+        console.log("today", today);
+        const posts = await Post.find({ status: "Published",updatedAt: {
+          $gte: today.toDate(),
+          $lte: moment(today).endOf('day').toDate()
+        } })
+          .populate("collaborators")
+          .populate("createdBy")
+          .exec();
+        console.log("posts", posts);
+  
+        posts.forEach(async (post) => {
+          if (post && post.collaborators && post.collaborators.length) {
+            const filePath = basePath + "email-template/common-template";
+            const productLink = `${process.env.FRONT_END_URL}post/${post.slug}`;
+            console.log("post.collaborators", post.collaborators);
+            post.collaborators.forEach(async (u) => {
+              const payLoad = {
+                NAME: u.name,
+                LINK: productLink,
+                CONTENT: `You have been added as a collaborator on "${post.name}" by ${post.createdBy.name}. Please Click here to check the details.`,
+                SUBJECT: `Collaborator Rights Given`,
+                HTML_CONTENT: post.descriptionHTML
+                  ? `${post.descriptionHTML}`
+                  : ``,
+                // TYPE: type ? type : string.capitalize(post.type)
+              };
+              await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
+            });
+          }
+        });
+      } catch (e) {
+        console.log('error',e);
+      }
+    
+  }, null, true, 'Asia/Kolkata');
+job.start();
+
+// var job2 = new CronJob('* * * * * *', function() {
+//     console.log('CronJob US');
+//   }, null, true, 'America/Los_Angeles');
+// job2.start();
+
+
+  // Teest function for cron job
+  const sendEmailToUadtedPost = async (event, context) => {
+    return new Promise(async (resolve, reject) => {
+      return resolve({
+          statusCode: 200,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Credentials": true,
+          },
+          body: JSON.stringify({status:'good'}),
+        });
+    });
+  };
+
 
 // const server = new ApolloServer({
 //     cors: true,
@@ -557,6 +626,7 @@ module.exports = {
     checkoutSessionCompleted,
     createCheckoutSession,
     getCheckoutSession,
+    sendEmailToUadtedPost,
     createStripeUser,
     attachCardAndCreateSubscription,
     getCouponByName,
