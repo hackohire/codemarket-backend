@@ -1,0 +1,8 @@
+phases:
+  install:
+    runtime-versions:
+      nodejs: 10
+  build:
+    commands:
+      - npm install
+      - serverless deploy --stage vc
