@@ -1,4 +1,4 @@
-service: inc5000api
+service: manufactureapi
 
 provider:
   name: aws
