@@ -1,4 +1,4 @@
-service: vcapi
+service: inc5000api
 
 provider:
   name: aws
