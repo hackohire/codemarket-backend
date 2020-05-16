@@ -1,9 +1,10 @@
-service: codemarketapi
+service: vcapi
 
 provider:
   name: aws
   runtime: nodejs10.x
   region: us-east-1
+  versionFunctions: false
   stage: ${opt:stage, 'dev'}
   # websocketsApiName: codemarket-videochat-socket
   # websocketsApiRouteSelectionExpression: $request.body.action
@@ -290,7 +291,7 @@ plugins:
   - serverless-plugin-offline-dynamodb-stream
   - serverless-offline
   - serverless-domain-manager
-
+  - serverless-prune-plugin
 custom:
   dynamodb:
     stages:
@@ -317,7 +318,7 @@ custom:
     httpPort: 3200
 
   customDomain:
-    domainName: ${self:service}-${self:provider.stage}.codemarket.io
+    domainName: ${self:service}.codemarket.io
     basePath: ''
     certificateName: 'codemarket.io'
     createRoute53Record:	false
