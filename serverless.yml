@@ -1,4 +1,4 @@
-service: womenbizapi
+service: patentsapi
 
 provider:
   name: aws
