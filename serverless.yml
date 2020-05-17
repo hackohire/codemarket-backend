@@ -1,4 +1,4 @@
-service: manufactureapi
+service: bankapi
 
 provider:
   name: aws
