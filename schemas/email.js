@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-lambda');
+// const { gql } = require('graphql');
 
 const graphQlEmailSchema = `
     type Email {
@@ -27,6 +27,8 @@ const graphQlEmailSchema = `
         comments: [Comment]
 
         slug: String
+
+        tracking: [TrackingData]
     }
 
     input EmailInput {
@@ -61,4 +63,4 @@ const graphQlEmailSchema = `
     }
 `
 
-module.exports = gql(graphQlEmailSchema);
+module.exports = graphQlEmailSchema;

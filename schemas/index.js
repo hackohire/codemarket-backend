@@ -12,7 +12,11 @@ const commentSchema = require('./comment');
 const graphQlPostTypeSchema = require('./post-type');
 const makemoneySchema = require('./MakeMoney');
 const graphQlCampaignSchema = require('./campaign');
+const graphQlChatSchema = require('./chat');
+const graphQlHelpBusinessGrowSchema = require('./temporary');
 const schema = require('./schema');
+const formJsonSchema = require('./FormJson');
+const formDataSchema = require('./FormData');
 
 const schemaArray = [
     schema,
@@ -30,7 +34,11 @@ const schemaArray = [
     commentSchema,
     makemoneySchema,
     graphQlCampaignSchema,
-    commentSchema
+    graphQlChatSchema,
+    commentSchema,
+    formJsonSchema,
+    formDataSchema,
+    graphQlHelpBusinessGrowSchema
 ];
 
 module.exports = schemaArray;

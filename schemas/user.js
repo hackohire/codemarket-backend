@@ -1,5 +1,5 @@
 
-const { gql } = require('apollo-server-lambda');
+
 
 const graphQlUserSchema = `
 type User {
@@ -14,6 +14,7 @@ type User {
     stackoverflow_url: String
     portfolio_links: [String]
     location: String
+    slug: String
     avatar: String
     cover: String
     roles: [String]
@@ -29,6 +30,7 @@ type User {
     name: String
     email: String
     sub: String
+    slug: String
     email_verified: Boolean
     programming_languages: [String]
     github_url: String
@@ -90,5 +92,5 @@ type User {
   }
 `
 
-module.exports = gql(graphQlUserSchema);
+module.exports = graphQlUserSchema;
 
