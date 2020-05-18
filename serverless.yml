@@ -1,4 +1,4 @@
-service: incomeapi
+service: artapi
 
 provider:
   name: aws
