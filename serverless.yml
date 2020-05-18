@@ -1,4 +1,4 @@
-service: researchapi
+service: incomeapi
 
 provider:
   name: aws
