@@ -111,10 +111,10 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                     const mailOptions = {
                         headers: {
                             'X-SES-CONFIGURATION-SET': 'la2050',
-                            'X-SES-MESSAGE-TAGS': 'campaignId=5eba2cd2611b9311e408500c'
+                            'X-SES-MESSAGE-TAGS': 'campaignId=5ec2b13d9cca356bf8822fc7'
                         },
                         // from: '"Therapy Therapist" <sumi@codemarket.io>',
-                        from: '"Referral Partnership" <sumi@codemarket.io>',
+                        from: '"100,000 Businesses" <sumi@codemarket.io>',
                         to: toEmail,
                         // cc: "mysumifoods@gmail.com",
                         bcc: ['mysumifoods@gmail.com'],
