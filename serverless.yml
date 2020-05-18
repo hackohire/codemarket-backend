@@ -1,4 +1,4 @@
-service: patentsapi
+service: researchapi
 
 provider:
   name: aws
