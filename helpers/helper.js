@@ -111,13 +111,15 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                     const mailOptions = {
                         headers: {
                             'X-SES-CONFIGURATION-SET': 'la2050',
-                            'X-SES-MESSAGE-TAGS': 'campaignId=5ec2b13d9cca356bf8822fc7'
+                            // 'X-SES-MESSAGE-TAGS': 'campaignId=5ec3e8d0a1587b4ade4b1015' // city
+                            'X-SES-MESSAGE-TAGS': 'campaignId=5ec3db9ea1587b4ade4b1013' // linkedin
+                            // 'X-SES-MESSAGE-TAGS': 'campaignId=5ec3db9ea1587b4ade4b1014' // cocsm
                         },
                         // from: '"Therapy Therapist" <sumi@codemarket.io>',
-                        from: '"100,000 Businesses" <sumi@codemarket.io>',
+                        from: '"100,0000 Businesses" <sumi@codemarket.io>',
                         to: toEmail,
                         // cc: "mysumifoods@gmail.com",
-                        bcc: ['mysumifoods@gmail.com'],
+                        // bcc: ['mysumifoods@gmail.com'],
                         replyTo: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         subject: subject,
                         html: html,
