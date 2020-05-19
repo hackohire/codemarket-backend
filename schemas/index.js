@@ -38,7 +38,8 @@ const schemaArray = [
     commentSchema,
     formJsonSchema,
     formDataSchema,
-    graphQlHelpBusinessGrowSchema
+    graphQlHelpBusinessGrowSchema,
+    formJsonSchema
 ];
 
 module.exports = schemaArray;
