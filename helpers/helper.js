@@ -115,8 +115,8 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                             'X-SES-MESSAGE-TAGS': 'campaignId=5ec3db9ea1587b4ade4b1013' // linkedin
                             // 'X-SES-MESSAGE-TAGS': 'campaignId=5ec3db9ea1587b4ade4b1014' // cocsm
                         },
-                        // from: '"Therapy Therapist" <sumi@codemarket.io>',
-                        from: '"100,0000 Businesses" <sumi@codemarket.io>',
+                        from: '"LinkedIn Message" <sumi@codemarket.io>', // Linkedin
+                        // from: '"100,000 Businesses" <sumi@codemarket.io>',
                         to: toEmail,
                         // cc: "mysumifoods@gmail.com",
                         // bcc: ['mysumifoods@gmail.com'],
