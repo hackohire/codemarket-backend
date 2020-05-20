@@ -113,6 +113,14 @@ functions:
       - sns:
         arn: 'campaign'
 
+  saveImage:
+    handler: handler.saveImage
+    events:
+      - http:
+          path: saveImage
+          method: POST
+          cors: true
+
   getCheckoutSession:
     handler: handler.getCheckoutSession
     events:

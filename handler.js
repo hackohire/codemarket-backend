@@ -11,6 +11,8 @@ const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
 var moment = require('moment');
+const fs = require('fs');
+
 global.basePath = __dirname + '/';
 const { makeExecutableSchema } = require('graphql-tools');
 
@@ -27,6 +29,8 @@ AWS.config.update({
     accessKeyId: process.env.AWS_ACCESSKEY_ID,
     region: 'us-east-1'
 });
+
+const s3 = new AWS.S3();
 
 /** serverless offline support */
 const dynamoDbClient = new AWS.DynamoDB.DocumentClient({
@@ -543,6 +547,53 @@ const fetchArticleByLink = (event, context) => {
 }
 
 
+const saveImage = (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        try{
+
+            /** parse body */
+            let body;
+            try {
+                body = JSON.parse(event);
+            } catch (e) {
+                body = {};
+            }
+
+            let buffer = new Buffer(event.body, 'base64'); 
+            // var params = JSON.parse(event.body);
+            console.log(buffer, body);
+
+            var s3Params = {
+              Bucket: 'common-local-files',
+              Body: buffer,
+              ContentDisposition: "inline",
+              Key:  'test.png',
+              ContentType: 'png',
+              ACL: 'public-read',
+            };
+
+            // var uploadURL = await s3.getSignedUrl('putObject', s3Params);
+            // console.log("URL == > ", uploadURL);
+            s3.putObject(s3Params, (err) => {
+                if (err) {
+                    console.log("err ==> ", err);
+                    return false;
+                } else {
+
+                    console.log("Sucecses == > ", `https://common-local-files.s3.amazonaws.com/${s3Params.Key}`);
+                }
+
+                // return {
+                //     key,
+                //     url: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${key}`,
+                // };
+            });
+        }catch(e){
+            console.log("Err ==> ", e);
+            reject(e);
+        }
+    });
+};
 
 module.exports = {
     // graphqlHandler,
@@ -562,5 +613,6 @@ module.exports = {
     getCouponByName,
     fetchLinkMeta,
     fetchArticleByLink,
-    emailCampaignEvent
+    emailCampaignEvent,
+    saveImage
 };
