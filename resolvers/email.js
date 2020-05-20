@@ -52,7 +52,7 @@ async function sendEmail(_, { email }, { event, db, decodedToken }) {
                 HTML_CONTENT: email.descriptionHTML,
                 SUBJECT: email.subject
             };
-            const emailSent = await helper.sendEmail([email.to], templateFilepath, payload);
+            const emailSent = await helper.sendEmail([email.to], templateFilepath, payload, email.city ? email.city : '');
 
             if (emailSent) {
 

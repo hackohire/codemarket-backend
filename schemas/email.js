@@ -11,7 +11,7 @@ const graphQlEmailSchema = `
         subject: String
         description: [descriptionBlocks]
         descriptionHTML: String
-
+        city: String
         createdBy: User
 
         companies: [Company]
@@ -54,7 +54,7 @@ const graphQlEmailSchema = `
         createdAt: String
         updatedAt: String
         comments: [CommentInput]
-
+        city: String
         slug: String
     }    
 

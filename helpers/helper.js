@@ -89,7 +89,7 @@ async function sendEmailWithStaticContent(event, context) {
 
 }
 
-async function sendEmail(toEmail, filePath, body, fromEmail = '') {
+async function sendEmail(toEmail, filePath, body, city, fromEmail = '') {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -111,15 +111,14 @@ async function sendEmail(toEmail, filePath, body, fromEmail = '') {
                     const mailOptions = {
                         headers: {
                             'X-SES-CONFIGURATION-SET': 'la2050',
-                            // 'X-SES-MESSAGE-TAGS': 'campaignId=5ec3e8d0a1587b4ade4b1015' // city
-                            'X-SES-MESSAGE-TAGS': 'campaignId=5ec3db9ea1587b4ade4b1013' // linkedin
-                            // 'X-SES-MESSAGE-TAGS': 'campaignId=5ec3db9ea1587b4ade4b1014' // cocsm
+                            'X-SES-MESSAGE-TAGS': 'campaignId=5ec3e8d0a1587b4ade4b1015' // city
                         },
-                        from: '"LinkedIn Message" <sumi@codemarket.io>', // Linkedin
-                        // from: '"100,000 Businesses" <sumi@codemarket.io>',
+                            // 'X-SES-MESSAGE-TAGS': 'campaignId=5ec3e8d0a1587b4ade4b1015' // city
+                        // from: '"Santa Monica Chamber of Commerce" <sumi@codemarket.io>',
+                        from: `"${city}, City" <sumi@codemarket.io>`,
                         to: toEmail,
                         // cc: "mysumifoods@gmail.com",
-                        // bcc: ['mysumifoods@gmail.com'],
+                        bcc: ['mysumifoods@gmail.com'],
                         replyTo: fromEmail ? fromEmail : process.env.FROM_EMAIL,
                         subject: subject,
                         html: html,
