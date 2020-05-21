@@ -295,10 +295,6 @@ resources:
         StreamSpecification:
           StreamViewType: NEW_IMAGE
 
-    learnSQS:
-      Type: "AWS::SQS::Queue"
-      Properties:
-        QueueName: learnSQS.fifo
 plugins:
   - serverless-dynamodb-local
   - serverless-plugin-offline-dynamodb-stream
