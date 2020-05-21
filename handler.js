@@ -544,6 +544,13 @@ const fetchArticleByLink = (event, context) => {
 
 
 
+const receiveMessageFromQueue = (event, context) => {
+    return new Promise((resolve, reject) => {
+        console.log("This is event ", event);
+        console.log("this is context " , context);
+        resolve(true);
+    });
+}
 module.exports = {
     // graphqlHandler,
     handler: server.createHttpHandler({
@@ -562,5 +569,6 @@ module.exports = {
     getCouponByName,
     fetchLinkMeta,
     fetchArticleByLink,
+    receiveMessageFromQueue,
     emailCampaignEvent
 };

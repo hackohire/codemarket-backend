@@ -142,6 +142,15 @@ functions:
           method: POST
           cors: true
 
+  receiveMessageFromQueue:
+    handler: handler.receiveMessageFromQueue
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - learnSQS.fifo
+              - Arn
+
   attachCardAndCreateSubscription:
     handler: handler.attachCardAndCreateSubscription
     events:
@@ -286,6 +295,10 @@ resources:
         StreamSpecification:
           StreamViewType: NEW_IMAGE
 
+    learnSQS.fifo:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: learnSQS.fifo
 plugins:
   - serverless-dynamodb-local
   - serverless-plugin-offline-dynamodb-stream
