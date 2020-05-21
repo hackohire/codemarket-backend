@@ -142,15 +142,6 @@ functions:
           method: POST
           cors: true
 
-  receiveMessageFromQueue:
-    handler: handler.receiveMessageFromQueue
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - "learnSQS.fifo"
-              - Arn
-
   attachCardAndCreateSubscription:
     handler: handler.attachCardAndCreateSubscription
     events:
