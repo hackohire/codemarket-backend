@@ -6,9 +6,8 @@ const { findFromCollection, addToCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch, fetchFiles, getCountOfAllPost, getEmailPhoneCountForContact, saveContact } = require('./post');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, fetchFiles, getCountOfAllPost, getEmailPhoneCountForContact, saveContact } = require('./post');
 const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
-const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
 const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
@@ -22,6 +21,7 @@ const { pubSub } = require('../helpers/pubsub');
 const {addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
 const {addformData, fetchformData} = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
+const { generateCkEditorToken } = require('./auth');
 
 module.exports = {
   JSON: GraphQLJSON,
@@ -51,8 +51,6 @@ module.exports = {
 
     getMembershipSubscriptionsByUserId,
 
-    myRSVP,
-
     getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, getListOfUsersInACompany, getEventsByCompanyId,
 
     getBookingList,
@@ -72,6 +70,7 @@ module.exports = {
     createUser,
     updateUser,
     authorize,
+    generateCkEditorToken,
     addMakeMoney,
     addToCollection,
     // addProduct,
@@ -84,6 +83,7 @@ module.exports = {
 
     addPost,
     updatePost,
+    updatePostContent,
     deletePost,
 
     addTransaction,
@@ -97,10 +97,6 @@ module.exports = {
     inviteMembersToSubscription,
     cancelSubscription,
     acceptInvitation,
-
-    rsvpEvent,
-
-    cancelRSVP,
 
     addCompany, updateCompany, deleteCompany,
 
