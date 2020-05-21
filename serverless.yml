@@ -148,7 +148,7 @@ functions:
       - sqs:
           arn:
             Fn::GetAtt:
-              - "learnSQS.fifo"
+              - learnSQS
               - Arn
 
   attachCardAndCreateSubscription:
