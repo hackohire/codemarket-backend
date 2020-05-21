@@ -142,6 +142,15 @@ functions:
           method: POST
           cors: true
 
+  receiveMessageFromQueue:
+    handler: handler.receiveMessageFromQueue
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - normal
+              - Arn
+
   attachCardAndCreateSubscription:
     handler: handler.attachCardAndCreateSubscription
     events:
