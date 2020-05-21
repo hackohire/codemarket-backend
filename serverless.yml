@@ -295,7 +295,7 @@ resources:
         StreamSpecification:
           StreamViewType: NEW_IMAGE
 
-    learnSQS.fifo:
+    learnSQS:
       Type: "AWS::SQS::Queue"
       Properties:
         QueueName: learnSQS.fifo
