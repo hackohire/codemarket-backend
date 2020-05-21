@@ -212,7 +212,10 @@ resources:
     #   Type: AWS::SNS::Topic
     #   Properties:
     #     TopicName: campaign
-
+    normal:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: "normal"
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
       Type: "AWS::ApiGateway::GatewayResponse"
