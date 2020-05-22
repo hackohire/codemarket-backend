@@ -545,7 +545,7 @@ const fetchArticleByLink = (event, context) => {
 
 
 const receiveMessageFromQueue = (event, context) => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         console.log("This is event ", event);
         console.log("this is context " , context);
         try {
