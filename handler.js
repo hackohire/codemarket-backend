@@ -561,7 +561,7 @@ const receiveMessageFromQueue = (event, context) => {
                 secure: true
             });
             console.log("This is transporter ==> ", transporter);
-            const emailSent = await transporter.sendMail(JSON.parse(event.body));
+            const emailSent = await transporter.sendMail(JSON.parse(event.Records[0].body));
 
             if (emailSent) {
                 console.log("Email is sent ==> ", emailSent);
