@@ -548,7 +548,32 @@ const receiveMessageFromQueue = (event, context) => {
     return new Promise((resolve, reject) => {
         console.log("This is event ", event);
         console.log("this is context " , context);
-        resolve(true);
+        try {
+            const transporter = await nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: process.env.SMTP_PORT,
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASSWORD
+                },
+                debug: true,
+                secure: true
+            });
+            console.log("This is transporter ==> ", transporter);
+            const emailSent = await transporter.sendMail(JSON.parse(event.body));
+
+            if (emailSent) {
+                console.log("Email is sent ==> ", emailSent);
+                return resolve(true);
+            } else {
+                console.log("Email is Fail ==> ", emailSent);
+                return reject(false);
+            }
+
+        } catch (err) {
+            console.log(err);
+            return reject(false);
+        }
     });
 }
 module.exports = {
