@@ -1,6 +1,7 @@
 // const { ApolloServer } = require('apollo-server-lambda');
 const typeDefs = require('./schemas');
 const resolvers = require('./resolvers');
+const nodemailer = require('nodemailer');
 const connectToMongoDB = require('./helpers/db');
 // const auth = require('./helpers/auth');
 const Cart = require('./models/cart')();
