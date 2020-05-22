@@ -578,14 +578,14 @@ const receiveMessageFromQueue = (event, context) => {
     });
 }
 
-const testCron = (event, context) => {
-    return new Promise(async (resolve, reject) => {
-        console.log("Batch Is ==> ", process.env.BATCH);
-        console.log("*********** NEW CRON ************");
-        console.log("Current Time ==> ", new Date(moment().utc().format()));
-        resolve(true);
-    });
-}
+// const testCron = (event, context) => {
+//     return new Promise(async (resolve, reject) => {
+//         console.log("Batch Is ==> ", process.env.BATCH);
+//         console.log("*********** NEW CRON ************");
+//         console.log("Current Time ==> ", new Date(moment().utc().format()));
+//         resolve(true);
+//     });
+// }
 
 const testCron1 = (event, context) => {
     return new Promise(async (resolve, reject) => {
@@ -613,7 +613,7 @@ module.exports = {
     fetchLinkMeta,
     fetchArticleByLink,
     receiveMessageFromQueue,
-    testCron,
+    // testCron,
     testCron1,
     emailCampaignEvent
 };
