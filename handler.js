@@ -12,6 +12,7 @@ const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
 var moment = require('moment');
+const Contact = require('./models/contact')();
 global.basePath = __dirname + '/';
 const { makeExecutableSchema } = require('graphql-tools');
 
@@ -590,7 +591,38 @@ const receiveMessageFromQueue = (event, context) => {
 const testCron1 = (event, context) => {
     return new Promise(async (resolve, reject) => {
         console.log("*********** NEW est CRON ************");
-        console.log("Current Time ==> ", new Date(moment().utc().format()));
+        let conn = await connectToMongoDB();
+
+        const result = await Contact.aggregate([
+            {
+                $match: {
+                    batch: 'new_therapist'        
+                }
+            },
+            {
+                $project: {
+                    companyName: 1,
+                    // cityName: 1,
+                    // name: 1,
+                    // OrganizatinName : 1,
+                    // proposalName: 1,
+                    email: {
+                         $filter: {
+                                input: "$email",
+                                as: "e",
+                                cond: { $eq: ["$$e.status", true]}
+                            }
+                    }
+                }
+               
+            },
+            {
+                $match: {
+                    email: { $gt: {$size : 0}}
+                },
+            }
+        ]).exec();
+        
         resolve(true);
     });
 }
