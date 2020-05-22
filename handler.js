@@ -581,7 +581,7 @@ const receiveMessageFromQueue = (event, context) => {
 const testCron = (event, context) => {
     return new Promise(async (resolve, reject) => {
         console.log("Batch Is ==> ", process.env.BATCH);
-        console.log("*********** CRON ************");
+        console.log("*********** NEW CRON ************");
         console.log("Current Time ==> ", new Date(moment().utc().format()));
         resolve(true);
     });
