@@ -133,6 +133,11 @@ functions:
           path: saveContact
           method: GET
           cors: true
+  
+  testCron:
+    handler: handler.testCron
+    events:
+      - schedule: cron(* * * * * *)
 
   createStripeUser:
     handler: handler.createStripeUser
