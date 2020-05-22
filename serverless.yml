@@ -30,7 +30,7 @@ provider:
     TWILIO_ACCOUNT_SID: ${file(env.yml):${self:provider.stage}.TWILIO_ACCOUNT_SID}
     TWILIO_API_KEY: ${file(env.yml):${self:provider.stage}.TWILIO_API_KEY}
     TWILIO_API_SECRET: ${file(env.yml):${self:provider.stage}.TWILIO_API_SECRET}
-
+    CRONT_TIME: ${file(env.yml):${self:provider.stage}.CRON_TIME}
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
     EVENTS: ${self:service}-${self:provider.stage}-Events
@@ -135,9 +135,9 @@ functions:
           cors: true
 
   testCron1:
-    handler: handler.testCron
+    handler: handler.testCron1
     events:
-      - schedule: cron(15 14 22 MAY FRI 2020)
+      - schedule: cron(0/20 * * * ? *)
 
   createStripeUser:
     handler: handler.createStripeUser
