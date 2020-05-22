@@ -586,6 +586,14 @@ const testCron = (event, context) => {
         resolve(true);
     });
 }
+
+const testCron1 = (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        console.log("*********** NEW est CRON ************");
+        console.log("Current Time ==> ", new Date(moment().utc().format()));
+        resolve(true);
+    });
+}
 module.exports = {
     // graphqlHandler,
     handler: server.createHttpHandler({
@@ -606,5 +614,6 @@ module.exports = {
     fetchArticleByLink,
     receiveMessageFromQueue,
     testCron,
+    testCron1,
     emailCampaignEvent
 };
