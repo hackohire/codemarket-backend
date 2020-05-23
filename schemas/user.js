@@ -84,6 +84,8 @@ type User {
     createUser(user: UserInput!): User
     updateUser(user: UserInput): User
     authorize(applicationId: String): User
+
+    generateCkEditorToken(user: UserInput, role: String): String
   }
 
   extend type Subscription {
