@@ -592,7 +592,7 @@ const receiveMessageFromQueue = (event, context) => {
 //     });
 // }
 
-const testCron1 = (event, context) => {
+const testCron2 = (event, context) => {
     return new Promise(async (resolve, reject) => {
         console.log("*********** NEW est CRON ************");
         let conn = await connectToMongoDB();
@@ -692,7 +692,7 @@ const testCron1 = (event, context) => {
                                     console.log("Success while sending ==> ", data);
                                 }
                             });  
-                            
+
                         }, i * 1000);
                     })
                 }, I * 1000);
@@ -723,6 +723,7 @@ module.exports = {
     fetchArticleByLink,
     receiveMessageFromQueue,
     // testCron,
-    testCron1,
+    // testCron1,
+    testCron2,
     emailCampaignEvent
 };
