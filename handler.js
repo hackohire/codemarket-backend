@@ -625,7 +625,7 @@ const testCron1 = (event, context) => {
                         email: { $gt: {$size : 0}}
                     },
                 }
-            ]).exec();
+            ]).toArray();
             
             console.log("After Query Result ---> ", result);
         }
