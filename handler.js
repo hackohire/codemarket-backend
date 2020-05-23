@@ -593,8 +593,11 @@ const testCron1 = (event, context) => {
         console.log("*********** NEW est CRON ************");
         let conn = await connectToMongoDB();
 
+        console.log("process.env.MONGODB_URL  ==> ", process.env.MONGODB_URL);
+        let result = [];
+        
         if (process.env.MONGODB_URL) {
-            const result = await Contact.aggregate([
+            result = await conn.collection('contacts').aggregate([
                 {
                     $match: {
                         batch: 'new_therapist'        
@@ -624,9 +627,9 @@ const testCron1 = (event, context) => {
                 }
             ]).exec();
             
-            console.log("Result ---> ", result);
+            console.log("After Query Result ---> ", result);
         }
-        resolve(true);
+        await resolve(true);
     });
 }
 module.exports = {
