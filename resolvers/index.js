@@ -22,6 +22,7 @@ const { pubSub } = require('../helpers/pubsub');
 const {addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
 const {addformData, fetchformData} = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
+const {createVideoToken} = require('./videoCall');
 
 module.exports = {
   JSON: GraphQLJSON,
@@ -67,6 +68,7 @@ module.exports = {
     getCampaignEmails,
     // Chat Resolver
     createdToken,
+    createVideoToken
   },
   Mutation: {
     createUser,
