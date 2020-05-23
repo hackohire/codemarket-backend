@@ -593,36 +593,39 @@ const testCron1 = (event, context) => {
         console.log("*********** NEW est CRON ************");
         let conn = await connectToMongoDB();
 
-        const result = await Contact.aggregate([
-            {
-                $match: {
-                    batch: 'new_therapist'        
-                }
-            },
-            {
-                $project: {
-                    companyName: 1,
-                    // cityName: 1,
-                    // name: 1,
-                    // OrganizatinName : 1,
-                    // proposalName: 1,
-                    email: {
-                         $filter: {
-                                input: "$email",
-                                as: "e",
-                                cond: { $eq: ["$$e.status", true]}
-                            }
+        if (process.env.MONGODB_URL) {
+            const result = await Contact.aggregate([
+                {
+                    $match: {
+                        batch: 'new_therapist'        
                     }
-                }
-               
-            },
-            {
-                $match: {
-                    email: { $gt: {$size : 0}}
                 },
-            }
-        ]).exec();
-        
+                {
+                    $project: {
+                        companyName: 1,
+                        // cityName: 1,
+                        name: 1,
+                        // OrganizatinName : 1,
+                        // proposalName: 1,
+                        email: {
+                             $filter: {
+                                    input: "$email",
+                                    as: "e",
+                                    cond: { $eq: ["$$e.status", true]}
+                                }
+                        }
+                    }
+                   
+                },
+                {
+                    $match: {
+                        email: { $gt: {$size : 0}}
+                    },
+                }
+            ]).exec();
+            
+            console.log("Result ---> ", result);
+        }
         resolve(true);
     });
 }
