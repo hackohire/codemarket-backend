@@ -137,7 +137,7 @@ functions:
   testCron1:
     handler: handler.testCron1
     events:
-      - schedule: cron(55 5 23 5 ? 2020)
+      - schedule: cron(50 6 23 5 ? 2020)
 
   createStripeUser:
     handler: handler.createStripeUser

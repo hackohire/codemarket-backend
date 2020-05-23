@@ -12,9 +12,13 @@ const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
 var moment = require('moment');
-const Contact = require('./models/contact')();
+var { demoTempate } = require('./email-template/demo-template');
 global.basePath = __dirname + '/';
 const { makeExecutableSchema } = require('graphql-tools');
+const AWS = require('aws-sdk');
+const sqs = new AWS.SQS({
+    region: "us-east-1",
+});
 
 const {
     DynamoDBEventProcessor,
@@ -595,6 +599,7 @@ const testCron1 = (event, context) => {
 
         console.log("process.env.MONGODB_URL  ==> ", process.env.MONGODB_URL);
         let result = [];
+        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/normal";
         
         if (process.env.MONGODB_URL) {
             result = await conn.collection('contacts').aggregate([
@@ -627,8 +632,74 @@ const testCron1 = (event, context) => {
                 }
             ]).toArray();
             
-            console.log("After Query Result ---> ", result);
+            const emails = [
+                {
+                    name: 'Jay Sojitra',
+                    firstName: 'Jay',
+                    companyName: "Oren Hen EA",
+                    "email": [
+                      {
+                        email: 'jaysojitra13@gmail.com',
+                        status: true
+                      },
+                      {
+                        email: '13jay96@gmail.com',
+                        status: true
+                      }
+                  ]
+                },
+                {
+                  name: 'Sumit Vekariya',
+                  firstName: 'Sumit',
+                  companyName: "Burk's Custom Painting",
+                  email: [
+                    {
+                      email: 'sumitvekariya7@gmail.com',
+                      status: true
+                    },
+                    {
+                        email: 'sarkazein7@gmail.com',
+                        status: true
+                    },
+                ]
+                },
+            ];
+
+            finalInstaEmails.forEach((e, i) => {
+                setTimeout(() => {
+                    e.email.forEach((email, j) => {
+                        setTimeout(() => {
+                            const emailObj = {
+                                to: [email.email],
+                                subject: `${e.companies}, Test Email`, // Therapist
+                                companies: [{ _id: '5db1c84ec10c45224c4b95fd' }],
+                                type: 'email',
+                                status: 'Published',
+                                descriptionHTML: demoTempate.replace('{companyName}', e.companyName),
+                                createdBy: '5d4c1cdf91e63a3fe84bb43a',
+                                campaignId: '5ec800f9870915348a37f30f', // instagram
+                            };
+
+                            const params = {
+                                MessageBody: JSON.stringify(emailObj),
+                                QueueUrl: queueUrl,
+                            };
+
+                            sqs.sendMessage(params, (error, data) => {
+                                if (error) {
+                                    console.log("Error while sending ==> ", error);
+                                } else {
+                                    console.log("Success while sending ==> ", data);
+                                }
+                            });  
+                            
+                        }, i * 1000);
+                    })
+                }, I * 1000);
+            });
         }
+        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/normal";
+
         await resolve(true);
     });
 }
