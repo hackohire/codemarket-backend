@@ -65,12 +65,23 @@ const graphQlCampaignSchema = `
         emails: [Email]
         total: Int
       }
+    
+    type csvData {
+        data: JSON
+    }
+
+    input csvInputData {
+        data: JSON
+    }
 
     extend type Query {
         getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String): [Campaign]
         getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
     }
 
+    extend type Mutation {
+        getCsvFileData(data: [JSON]): [csvData]
+    }
 `;
 
 module.exports = graphQlCampaignSchema;

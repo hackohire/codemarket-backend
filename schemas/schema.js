@@ -3,7 +3,7 @@
 const schema = `
 scalar JSON
 scalar JSONObject
-
+scalar Upload
 type Product {
   _id: ID
   type: String

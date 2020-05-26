@@ -1,4 +1,4 @@
-export const demoTempate = `<html>
+const demoTempate = `<html>
 
 <head>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:100" rel="stylesheet" />

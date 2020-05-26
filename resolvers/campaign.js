@@ -1,6 +1,10 @@
 const connectToMongoDB = require('../helpers/db');
 var ObjectID = require('mongodb').ObjectID;
 const Emails = require('../models/email')();
+const Contact = require('../models/contact')();
+const EmailValidator = require('email-deep-validator');
+const emailValidator = new EmailValidator();
+
 let conn;
 
 async function getCampaignsWithTracking(_, { pageOptions, companyId, campaignId }, { headers, db, decodedToken }) {
@@ -110,7 +114,75 @@ async function getCampaignEmails(_, { pageOptions, campaignId }, { headers, db, 
     });
 }
 
+async function getCsvFileData(_, {data}, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+
+        if (!db) {
+            console.log('Creating new mongoose connection.');
+            conn = await connectToMongoDB();
+        } else {
+            console.log('Using existing mongoose connection.');
+        }
+
+        async function validEmail(emails) {
+            return new Promise((resolve, reject) => {
+                var emailObj = [];
+                async function run1(data, index) {
+                    if (index < data.length) {
+                            emailValidator.verify(data[index]).then(async (res) => {
+                                if (res.wellFormed && res.validDomain) {
+                                    console.log("true email ==> ", data[index]);
+                                    emailObj.push({email: data[index], status: true});
+                                } else {
+                                    console.log("false email ==> ", data[index]);
+                                    emailObj.push({email: data[index], status: false});
+                                }
+                                index += 1;
+                                await run1(data, index);
+                            })
+                            .catch(async (err) => {
+                                emailObj.push({email: data[index], status: true});
+                                index += 1;
+                                await run1(data, index);
+                            });
+                    } else {
+                        resolve(emailObj);
+                    }
+                }
+                run1(emails, 0)
+            })
+        }
+    
+        async function run(data, index) {
+            if (index < data.length) {
+                console.log("CURRENT" ,index);
+                validEmail(data[index].email).then(async (e) => {
+                    data[index].email = e;
+                    
+                    
+                    const result = new Contact(data[index]);
+                    console.log(result);
+                    
+                    result.save().then(async () => {
+                        index += 1;
+                        await run(data, index);
+                    })
+                    // console.log("Resutl ==> ", data[index]);
+                }).catch(err => {
+                    console.log("ee", index, err);
+                });
+                // data.email = result;
+            } else {
+                console.log("Over and out !!!");
+                resolve(true);
+            }
+        }
+        run(data, 0)
+    })
+}
+
 module.exports = {
     getCampaignsWithTracking,
-    getCampaignEmails
+    getCampaignEmails,
+    getCsvFileData
 }

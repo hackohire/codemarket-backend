@@ -13,7 +13,7 @@ const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
-const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
+const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData } = require('./campaign');
 const {createdToken} = require('./chat');
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
@@ -23,10 +23,12 @@ const {addformData, fetchformData} = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
 const {createVideoToken} = require('./videoCall');
 const { generateCkEditorToken } = require('./auth');
+const { GraphQLUpload } = require('graphql-upload');
 
 module.exports = {
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
+  Upload: GraphQLUpload,
   Query: {
     hello: () => 'Hello world!',
     getUsers, getUsersAndBugFixesCount, getUserById,
@@ -110,7 +112,8 @@ module.exports = {
 
     addPostType, updatePostType, deletePostType,
 
-    addHelpGrowBusiness
+    addHelpGrowBusiness,
+    getCsvFileData
   },
   Subscription: {
     onCommentAdded: {

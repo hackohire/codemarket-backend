@@ -12,10 +12,14 @@ const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
 var moment = require('moment');
-var { demoTempate } = require('./email-template/demo-template');
+// var { demoTempate } = require('./email-template/demo-template');
 global.basePath = __dirname + '/';
 const { makeExecutableSchema } = require('graphql-tools');
 const AWS = require('aws-sdk');
+const EmailValidator = require('email-deep-validator');
+const emailValidator = new EmailValidator();
+const Contact = require('./models/contact')();
+
 const sqs = new AWS.SQS({
     region: "us-east-1",
 });
@@ -582,14 +586,59 @@ const receiveMessageFromQueue = (event, context) => {
     });
 }
 
-// const testCron = (event, context) => {
-//     return new Promise(async (resolve, reject) => {
-//         console.log("Batch Is ==> ", process.env.BATCH);
-//         console.log("*********** NEW CRON ************");
-//         console.log("Current Time ==> ", new Date(moment().utc().format()));
-//         resolve(true);
-//     });
-// }
+const validateEmail = (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        console.log("Data Is ==> ", process.env.BATCH);
+        const emailData = JSON.parse(event.Records[0].body);
+
+        async function validEmail(emails) {
+            return new Promise((resolve, reject) => {
+                var emailObj = [];
+                async function run1(data, index) {
+                    if (index < data.length) {
+                            emailValidator.verify(data[index]).then(async (res) => {
+                                if (res.wellFormed && res.validDomain) {
+                                    console.log("true email ==> ", data[index]);
+                                    emailObj.push({email: data[index], status: true});
+                                } else {
+                                    console.log("false email ==> ", data[index]);
+                                    emailObj.push({email: data[index], status: false});
+                                }
+                                index += 1;
+                                await run1(data, index);
+                            })
+                            .catch(async (err) => {
+                                emailObj.push({email: data[index], status: false});
+                                index += 1;
+                                await run1(data, index);
+                            });
+                    } else {
+                        resolve(emailObj);
+                    }
+                }
+                run1(emails, 0)
+            })
+        }
+
+        async function run(data, index) {
+            validEmail(data.email).then(async (e) => {
+                data.email = e;
+                console.log("This is data before save ==>", data);
+
+                const result = new Contact(data);
+                console.log("This is result ==>", result);
+                
+                result.save().then(async () => {
+                    resolve(true);
+                })
+            }).catch(err => {
+                console.log("ee", index, err);
+            });
+        }
+        run(emailData, 0)
+
+    });
+}
 
 const testCron2 = (event, context) => {
     return new Promise(async (resolve, reject) => {
@@ -674,7 +723,7 @@ const testCron2 = (event, context) => {
                                 companies: [{ _id: '5db1c84ec10c45224c4b95fd' }],
                                 type: 'email',
                                 status: 'Published',
-                                descriptionHTML: demoTempate.replace('{companyName}', e.companyName),
+                                // descriptionHTML: demoTempate.replace('{companyName}', e.companyName),
                                 createdBy: '5d4c1cdf91e63a3fe84bb43a',
                                 campaignId: '5ec800f9870915348a37f30f', // instagram
                             };
@@ -697,7 +746,6 @@ const testCron2 = (event, context) => {
                 }, I * 1000);
             });
         }
-        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/normal";
 
         await resolve(true);
     });
@@ -721,7 +769,7 @@ module.exports = {
     fetchLinkMeta,
     fetchArticleByLink,
     receiveMessageFromQueue,
-    // testCron,
+    validateEmail,
     // testCron1,
     testCron2,
     emailCampaignEvent
