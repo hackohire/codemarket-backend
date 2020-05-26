@@ -6,25 +6,34 @@ const { findFromCollection, addToCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch, fetchFiles, getCountOfAllPost, getEmailPhoneCountForContact } = require('./post');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, fetchFiles, getCountOfAllPost, getEmailPhoneCountForContact, saveContact } = require('./post');
 const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
-const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
 const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
-const { getCampaignsWithTracking } = require('./campaign');
+const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
+const {createdToken} = require('./chat');
+const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
+const {addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
+const {addformData, fetchformData} = require('./FormData');
+const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
+const {createVideoToken} = require('./videoCall');
+const { generateCkEditorToken } = require('./auth');
+
 module.exports = {
+  JSON: GraphQLJSON,
+  JSONObject: GraphQLJSONObject,
   Query: {
     hello: () => 'Hello world!',
     getUsers, getUsersAndBugFixesCount, getUserById,
 
     getAllPosts,
     fullSearch,
-
+    fetchformJson, fetchformData, fetchFormStructureById,
     getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
@@ -43,8 +52,6 @@ module.exports = {
 
     getMembershipSubscriptionsByUserId,
 
-    myRSVP,
-
     getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, getListOfUsersInACompany, getEventsByCompanyId,
 
     getBookingList,
@@ -55,24 +62,30 @@ module.exports = {
 
     getCampaignsWithTracking,
     getCountOfAllPost,
-    getEmailPhoneCountForContact
+    getEmailPhoneCountForContact,
+    getCampaignEmails,
+    // Chat Resolver
+    createdToken,
+    createVideoToken
   },
   Mutation: {
     createUser,
     updateUser,
     authorize,
+    generateCkEditorToken,
     addMakeMoney,
     addToCollection,
     // addProduct,
     // updateProduct,
     // deleteProduct,
-
+    addformJson,addformData,
 
     addComment,
     updateComment,
 
     addPost,
     updatePost,
+    updatePostContent,
     deletePost,
 
     addTransaction,
@@ -87,10 +100,6 @@ module.exports = {
     cancelSubscription,
     acceptInvitation,
 
-    rsvpEvent,
-
-    cancelRSVP,
-
     addCompany, updateCompany, deleteCompany,
 
     scheduleCall,
@@ -99,7 +108,9 @@ module.exports = {
 
     sendEmail,
 
-    addPostType, updatePostType, deletePostType
+    addPostType, updatePostType, deletePostType,
+
+    addHelpGrowBusiness
   },
   Subscription: {
     onCommentAdded: {
@@ -122,19 +133,19 @@ module.exports = {
     onCommentUpdated: {
       resolve: (rootValue) => {
         // root value is the payload from sendMessage mutation
-        console.log('RooooooooooooooooT Value MAin', rootValue);
+        // console.log('RooooooooooooooooT Value MAin', rootValue);
         return rootValue;
       },
       subscribe: withFilter(
         pubSub.subscribe('COMMENT_UPDATED'),
         (rootValue, args) => {
           // this can be async too :)
-          console.log('postIDDDDDDD  Outer', args.postId);
-          console.log('RooooooooooooooooT Value  Outer', rootValue);
+          // console.log('postIDDDDDDD  Outer', args.postId);
+          // console.log('RooooooooooooooooT Value  Outer', rootValue);
           if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId || args.userId === rootValue.userReferenceId) {
-            console.log('=========================================================');
-            console.log('postIDDDDDDD', args.postId);
-            console.log('RooooooooooooooooT Value', rootValue);
+            // console.log('=========================================================');
+            // console.log('postIDDDDDDD', args.postId);
+            // console.log('RooooooooooooooooT Value', rootValue);
             return true;
           }
 

@@ -75,7 +75,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
 
             const allUsers = await helper.getUserAssociatedWithPost(comment.referenceId);
 
-            const mergedObjects = unionBy(allUsers[0].author, allUsers[0].collaborators, allUsers[0].commentators, allUsers[0].companyOwners, 'email');
+            const mergedObjects = unionBy(allUsers[0].author, allUsers[0].collaborators, allUsers[0].commentators, allUsers[0].clients, allUsers[0].companyOwners, 'email');
 
             var totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
 
@@ -88,6 +88,9 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                 commentNoti['referencePost'] = data;
                 /** Alert Message Notification */
                 await pubSub.publish('LISTEN_NOTIFICATION', { comment: commentNoti, usersToBeNotified })
+
+                /** Save Activity */
+                await helper.saveActivity('ADD_COMMENT', c.createdBy, commentObj._id, commentObj.referenceId, null);
 
                 /** Send email to the users associated with the post (company owner, collaborators) except author and actual commentator */
                 const emailsOfOtherUsers = differenceWith(totalEmails, [{email: commentObj.createdBy.email, name: commentObj.createdBy.name}], isEqual);
@@ -210,7 +213,7 @@ async function getComments(_, { commentId }, { headers, db, decodedToken }) {
     });
 }
 
-async function deleteComment(_, { commentId, postId }, { headers, db, decodedToken }) {
+async function deleteComment(_, { commentId, postId, textHTML }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -232,9 +235,12 @@ async function deleteComment(_, { commentId, postId }, { headers, db, decodedTok
              /**Get data regarding current comment */
              const commentData = await Comment.findOne({ _id: commentId }).populate('createdBy').exec();
 
+             /** Save Activity */
+            await helper.saveActivity('DELETE_COMMENT', commentData.createdBy._id, commentId, postId, null);
+
              const allUsers = await helper.getUserAssociatedWithPost(postId);
 
-            const mergedObjects = unionBy(allUsers[0].author, allUsers[0].collaborators, allUsers[0].commentators, allUsers[0].companyOwners, 'email');
+            const mergedObjects = unionBy(allUsers[0].author, allUsers[0].collaborators, allUsers[0].commentators, allUsers[0].clients, allUsers[0].companyOwners, 'email');
 
             var totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
             console.log("These are total emails ==> ", totalEmails);
@@ -252,7 +258,8 @@ async function deleteComment(_, { commentId, postId }, { headers, db, decodedTok
                         NAME: user.name,
                         LINK: postLink,
                         CONTENT: `${commentData.createdBy.name} deleted a comment on "${postData.name}". Please check the post for the latest update.`,
-                        SUBJECT: `${commentData.createdBy.name} has deleted a Comment!`
+                        SUBJECT: `${commentData.createdBy.name} has deleted a Comment!`,
+                        HTML_CONTENT: `${textHTML}`
                     };
                     await helper.sendEmail({ to: [user.email]}, filePathToOtherUsers, payLoadToOtherUsers);
                 })
@@ -282,7 +289,7 @@ async function updateComment(_, { commentId, postId, text, textHTML }, { headers
             }
 
             console.log("This is post id in update comenet ==> ", postId);
-            let c = await Comment.findByIdAndUpdate(commentId, { text: text }, { new: true }).populate('createdBy').exec();
+            let c = await Comment.findByIdAndUpdate(commentId, { text: text, textHTML: textHTML }, { new: true }).populate('createdBy').exec();
 
             await pubSub.publish('COMMENT_UPDATED', c);
 
@@ -294,10 +301,13 @@ async function updateComment(_, { commentId, postId, text, textHTML }, { headers
 
             const allUsers = await helper.getUserAssociatedWithPost(postId);
 
-            const mergedObjects = unionBy(allUsers[0].author, allUsers[0].collaborators, allUsers[0].commentators, allUsers[0].companyOwners, 'email');
+            const mergedObjects = unionBy(allUsers[0].author, allUsers[0].collaborators, allUsers[0].commentators, allUsers[0].clients, allUsers[0].companyOwners, 'email');
 
             var totalEmails = map(mergedObjects, partialRight(pick, ['email', 'name']));
             console.log("These are total emails ==> ", totalEmails);
+
+            /** Save Activity */
+            await helper.saveActivity('UPDATE_COMMENT', commentData.createdBy._id, commentId, postId, null);
 
             /** Send email to the users associated with the post (company owner, collaborators) except author and actual commentator */
             const emailsOfOtherUsers = differenceWith(totalEmails, [{email: commentData.createdBy.email, name: commentData.createdBy.name}], isEqual);

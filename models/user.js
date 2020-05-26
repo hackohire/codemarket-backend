@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const slug = require('mongoose-slug-updater');
+mongoose.plugin(slug, { truncate: 0 });
+
 const { Schema } = mongoose;
 
 const currentJobDetails = new Schema(
@@ -29,6 +32,7 @@ const userSchema = new Schema(
         },
         email_verified: Boolean,
         phone: String,
+        slug: { type: String, slug: ['name', '_id'] },
         programming_languages: { type: Array, default: [] },
         github_url: String,
         linkedin_url: String,

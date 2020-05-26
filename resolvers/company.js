@@ -122,7 +122,7 @@ async function getCompaniesByUserIdAndType(_, { userId, companyType }, { headers
     });
 }
 
-async function getCompanyById(_, { companyId }, { headers, db, decodedToken }) {
+async function getCompanyById(_, { slug }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -133,17 +133,16 @@ async function getCompanyById(_, { companyId }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            Company.findById(companyId).populate('createdBy owners').populate('cities').exec(async (err, res) => {
+            Company.find({ slug: slug }).populate('createdBy owners').populate('cities').exec(async (err, res) => {
 
                 if (err) {
                     return reject(err)
                 }
+                // const likeCount = await Like.count({ referenceId: companyId })
 
-                const likeCount = await Like.count({ referenceId: companyId })
+                res['likeCount'] = 0;
 
-                res['likeCount'] = likeCount;
-
-                return resolve(res);
+                return resolve(res[0]);
             });
 
 

@@ -50,6 +50,7 @@ const graphQlPostSchema = `
         website: String
 
         descriptionHTML: String
+        activities: [Activities]
     }
 
     input PostInput {
@@ -99,6 +100,25 @@ const graphQlPostSchema = `
         website: String
 
         descriptionHTML: String
+        activities: [ActivitiesInput]
+    }
+
+    type Activities {
+        action: String
+        activityDate: String
+        by: User
+        commentId: ID
+        postId: ID
+        message: String
+    }
+
+    input ActivitiesInput {
+        action: String
+        activityDate: String
+        by: UserInput
+        commentID: ID
+        postId: ID
+        message: String
     }
 
     type Location {
@@ -164,15 +184,12 @@ const graphQlPostSchema = `
         fetchFiles(blockType: String, userId: String): [AttachesBlock]
         getCountOfAllPost(userId: String, companyId: String, reference: ReferenceObject): [getCountAllPost]
         getEmailPhoneCountForContact(type: String): [emailPhoneCount]
-        myRSVP(userId: String): [Post]
     }
     extend type Mutation {
         addPost(post: PostInput): Post
         updatePost(post: PostInput, updatedBy: UserInput): Post
+        updatePostContent(post: PostInput, updatedBy: UserInput): String
         deletePost(postId: String, deletedBy: UserInput): Boolean
-
-        rsvpEvent(userId: String, eventId: String): RsvpEventResponse
-        cancelRSVP(userId: String, eventId: String): Post
     }
 `
 

@@ -30,6 +30,10 @@ const emailSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         },
+        tracking: {
+            type: Array,
+            default: []
+        }
     },
     {
         timestamps: true,

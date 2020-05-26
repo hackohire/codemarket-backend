@@ -11,6 +11,7 @@ const graphQlCompanySchema = `
         status: Status
         createdAt: String
         updatedAt: String
+        slug: String
         cities: [City]
         ideas: [descriptionBlocks]
         questions: [descriptionBlocks]
@@ -40,6 +41,7 @@ const graphQlCompanySchema = `
         cover: String
         websiteLink: String
         facebookLink: String
+        slug: String
         instagramLink: String
         twitterLink: String
         yelpLink: String
@@ -72,7 +74,7 @@ const graphQlCompanySchema = `
     extend type Query {
         getCompaniesByType(companyType: String, pageOptions: PageOptionsInput): GetCompaniesByTypeResponse
         getCompaniesByUserIdAndType(userId: String, companyType: String): [Company]
-        getCompanyById(companyId: String): Company
+        getCompanyById(slug: String): Company
         getListOfUsersInACompany(companyId: String): [User]
         getEventsByCompanyId(companyId: String): [Post]
     }

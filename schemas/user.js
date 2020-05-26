@@ -14,6 +14,7 @@ type User {
     stackoverflow_url: String
     portfolio_links: [String]
     location: String
+    slug: String
     avatar: String
     cover: String
     roles: [String]
@@ -29,6 +30,7 @@ type User {
     name: String
     email: String
     sub: String
+    slug: String
     email_verified: Boolean
     programming_languages: [String]
     github_url: String
@@ -82,6 +84,8 @@ type User {
     createUser(user: UserInput!): User
     updateUser(user: UserInput): User
     authorize(applicationId: String): User
+
+    generateCkEditorToken(user: UserInput, role: String): String
   }
 
   extend type Subscription {
