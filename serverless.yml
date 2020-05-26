@@ -231,10 +231,6 @@ resources:
     #   Type: AWS::SNS::Topic
     #   Properties:
     #     TopicName: campaign
-    normal:
-      Type: "AWS::SQS::Queue"
-      Properties:
-        QueueName: "normal"
     
     validateEmail:
       Type: "AWS::SQS::Queue"
