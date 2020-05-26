@@ -26,7 +26,6 @@ const {
     DynamoDBSubscriptionManager,
     Server,
 } = require('aws-lambda-graphql');
-const AWS = require('aws-sdk');
 
 AWS.config.update({
     secretAccessKey: process.env.AWS_SECRETKEY,
