@@ -4,6 +4,10 @@ const Emails = require('../models/email')();
 const Contact = require('../models/contact')();
 const EmailValidator = require('email-deep-validator');
 const emailValidator = new EmailValidator();
+const AWS = require('aws-sdk');
+const sqs = new AWS.SQS({
+    region: "us-east-1",
+});
 
 let conn;
 
@@ -124,60 +128,76 @@ async function getCsvFileData(_, {data}, { headers, db, decodedToken }) {
             console.log('Using existing mongoose connection.');
         }
 
-        async function validEmail(emails) {
-            return new Promise((resolve, reject) => {
-                var emailObj = [];
-                async function run1(data, index) {
-                    if (index < data.length) {
-                            emailValidator.verify(data[index]).then(async (res) => {
-                                if (res.wellFormed && res.validDomain) {
-                                    console.log("true email ==> ", data[index]);
-                                    emailObj.push({email: data[index], status: true});
-                                } else {
-                                    console.log("false email ==> ", data[index]);
-                                    emailObj.push({email: data[index], status: false});
-                                }
-                                index += 1;
-                                await run1(data, index);
-                            })
-                            .catch(async (err) => {
-                                emailObj.push({email: data[index], status: true});
-                                index += 1;
-                                await run1(data, index);
-                            });
-                    } else {
-                        resolve(emailObj);
-                    }
+        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/validateEmail";
+
+        data.forEach((d) => {
+            const params = {
+                MessageBody: JSON.stringify(d),
+                QueueUrl: queueUrl,
+            };
+
+            sqs.sendMessage(params, (error, data) => {
+                if (error) {
+                    console.log("Error while sending ==> ", error);
+                } else {
+                    console.log("Success while sending ==> ", data);
                 }
-                run1(emails, 0)
-            })
-        }
+            });
+        })
+        // async function validEmail(emails) {
+        //     return new Promise((resolve, reject) => {
+        //         var emailObj = [];
+        //         async function run1(data, index) {
+        //             if (index < data.length) {
+        //                     emailValidator.verify(data[index]).then(async (res) => {
+        //                         if (res.wellFormed && res.validDomain) {
+        //                             console.log("true email ==> ", data[index]);
+        //                             emailObj.push({email: data[index], status: true});
+        //                         } else {
+        //                             console.log("false email ==> ", data[index]);
+        //                             emailObj.push({email: data[index], status: false});
+        //                         }
+        //                         index += 1;
+        //                         await run1(data, index);
+        //                     })
+        //                     .catch(async (err) => {
+        //                         emailObj.push({email: data[index], status: true});
+        //                         index += 1;
+        //                         await run1(data, index);
+        //                     });
+        //             } else {
+        //                 resolve(emailObj);
+        //             }
+        //         }
+        //         run1(emails, 0)
+        //     })
+        // }
     
-        async function run(data, index) {
-            if (index < data.length) {
-                console.log("CURRENT" ,index);
-                validEmail(data[index].email).then(async (e) => {
-                    data[index].email = e;
+        // async function run(data, index) {
+        //     if (index < data.length) {
+        //         console.log("CURRENT" ,index);
+        //         validEmail(data[index].email).then(async (e) => {
+        //             data[index].email = e;
                     
                     
-                    const result = new Contact(data[index]);
-                    console.log(result);
+        //             const result = new Contact(data[index]);
+        //             console.log(result);
                     
-                    result.save().then(async () => {
-                        index += 1;
-                        await run(data, index);
-                    })
-                    // console.log("Resutl ==> ", data[index]);
-                }).catch(err => {
-                    console.log("ee", index, err);
-                });
-                // data.email = result;
-            } else {
-                console.log("Over and out !!!");
-                resolve(true);
-            }
-        }
-        run(data, 0)
+        //             result.save().then(async () => {
+        //                 index += 1;
+        //                 await run(data, index);
+        //             })
+        //             // console.log("Resutl ==> ", data[index]);
+        //         }).catch(err => {
+        //             console.log("ee", index, err);
+        //         });
+        //         // data.email = result;
+        //     } else {
+        //         console.log("Over and out !!!");
+        //         resolve(true);
+        //     }
+        // }
+        // run(data, 0)
     })
 }
 

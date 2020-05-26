@@ -588,9 +588,10 @@ const receiveMessageFromQueue = (event, context) => {
 
 const validateEmail = (event, context) => {
     return new Promise(async (resolve, reject) => {
-        console.log("Data Is ==> ", process.env.BATCH);
+        console.log("Data Is ==> ", event.Records[0].body);
         const emailData = JSON.parse(event.Records[0].body);
 
+        console.log("This is email Data => ", emailData);
         async function validEmail(emails) {
             return new Promise((resolve, reject) => {
                 var emailObj = [];
