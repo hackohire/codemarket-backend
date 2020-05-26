@@ -144,15 +144,6 @@ functions:
           method: POST
           cors: true
 
-  receiveMessageFromQueue:
-    handler: handler.receiveMessageFromQueue
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - normal
-              - Arn
-
   validateEmail:
     handler: handler.validateEmail
     events:
