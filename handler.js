@@ -1,6 +1,7 @@
 // const { ApolloServer } = require('apollo-server-lambda');
 const typeDefs = require('./schemas');
 const resolvers = require('./resolvers');
+const nodemailer = require('nodemailer');
 const connectToMongoDB = require('./helpers/db');
 // const auth = require('./helpers/auth');
 const Cart = require('./models/cart')();
@@ -11,8 +12,13 @@ const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
 var moment = require('moment');
+var { demoTempate } = require('./email-template/demo-template');
 global.basePath = __dirname + '/';
 const { makeExecutableSchema } = require('graphql-tools');
+const AWS = require('aws-sdk');
+const sqs = new AWS.SQS({
+    region: "us-east-1",
+});
 
 const {
     DynamoDBEventProcessor,
@@ -20,7 +26,6 @@ const {
     DynamoDBSubscriptionManager,
     Server,
 } = require('aws-lambda-graphql');
-const AWS = require('aws-sdk');
 
 AWS.config.update({
     secretAccessKey: process.env.AWS_SECRETKEY,
@@ -544,6 +549,159 @@ const fetchArticleByLink = (event, context) => {
 
 
 
+const receiveMessageFromQueue = (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        console.log("This is event ", event);
+        console.log("this is context " , context);
+        try {
+            const transporter = await nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: process.env.SMTP_PORT,
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASSWORD
+                },
+                debug: true,
+                secure: true
+            });
+            console.log("This is transporter ==> ", transporter);
+            const emailSent = await transporter.sendMail(JSON.parse(event.Records[0].body));
+
+            if (emailSent) {
+                console.log("Email is sent ==> ", emailSent);
+                return resolve(true);
+            } else {
+                console.log("Email is Fail ==> ", emailSent);
+                return reject(false);
+            }
+
+        } catch (err) {
+            console.log(err);
+            return reject(false);
+        }
+    });
+}
+
+// const testCron = (event, context) => {
+//     return new Promise(async (resolve, reject) => {
+//         console.log("Batch Is ==> ", process.env.BATCH);
+//         console.log("*********** NEW CRON ************");
+//         console.log("Current Time ==> ", new Date(moment().utc().format()));
+//         resolve(true);
+//     });
+// }
+
+const testCron2 = (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        console.log("*********** NEW est CRON ************");
+        let conn = await connectToMongoDB();
+
+        console.log("process.env.MONGODB_URL  ==> ", process.env.MONGODB_URL);
+        let result = [];
+        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/normal";
+        
+        if (process.env.MONGODB_URL) {
+            result = await conn.collection('contacts').aggregate([
+                {
+                    $match: {
+                        batch: 'new_therapist'        
+                    }
+                },
+                {
+                    $project: {
+                        companyName: 1,
+                        // cityName: 1,
+                        name: 1,
+                        // OrganizatinName : 1,
+                        // proposalName: 1,
+                        email: {
+                             $filter: {
+                                    input: "$email",
+                                    as: "e",
+                                    cond: { $eq: ["$$e.status", true]}
+                                }
+                        }
+                    }
+                   
+                },
+                {
+                    $match: {
+                        email: { $gt: {$size : 0}}
+                    },
+                }
+            ]).toArray();
+            
+            const emails = [
+                {
+                    name: 'Jay Sojitra',
+                    firstName: 'Jay',
+                    companyName: "Oren Hen EA",
+                    "email": [
+                      {
+                        email: 'jaysojitra13@gmail.com',
+                        status: true
+                      },
+                      {
+                        email: '13jay96@gmail.com',
+                        status: true
+                      }
+                  ]
+                },
+                {
+                  name: 'Sumit Vekariya',
+                  firstName: 'Sumit',
+                  companyName: "Burk's Custom Painting",
+                  email: [
+                    {
+                      email: 'sumitvekariya7@gmail.com',
+                      status: true
+                    },
+                    {
+                        email: 'sarkazein7@gmail.com',
+                        status: true
+                    },
+                ]
+                },
+            ];
+
+            finalInstaEmails.forEach((e, i) => {
+                setTimeout(() => {
+                    e.email.forEach((email, j) => {
+                        setTimeout(() => {
+                            const emailObj = {
+                                to: [email.email],
+                                subject: `${e.companies}, Test Email`, // Therapist
+                                companies: [{ _id: '5db1c84ec10c45224c4b95fd' }],
+                                type: 'email',
+                                status: 'Published',
+                                descriptionHTML: demoTempate.replace('{companyName}', e.companyName),
+                                createdBy: '5d4c1cdf91e63a3fe84bb43a',
+                                campaignId: '5ec800f9870915348a37f30f', // instagram
+                            };
+
+                            const params = {
+                                MessageBody: JSON.stringify(emailObj),
+                                QueueUrl: queueUrl,
+                            };
+
+                            sqs.sendMessage(params, (error, data) => {
+                                if (error) {
+                                    console.log("Error while sending ==> ", error);
+                                } else {
+                                    console.log("Success while sending ==> ", data);
+                                }
+                            });  
+
+                        }, i * 1000);
+                    })
+                }, I * 1000);
+            });
+        }
+        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/normal";
+
+        await resolve(true);
+    });
+}
 module.exports = {
     // graphqlHandler,
     handler: server.createHttpHandler({
@@ -562,5 +720,9 @@ module.exports = {
     getCouponByName,
     fetchLinkMeta,
     fetchArticleByLink,
+    receiveMessageFromQueue,
+    // testCron,
+    // testCron1,
+    testCron2,
     emailCampaignEvent
 };

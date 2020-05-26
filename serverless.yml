@@ -1,9 +1,10 @@
-service: codemarketapi
+service: manufactureapi
 
 provider:
   name: aws
   runtime: nodejs10.x
   region: us-east-1
+  versionFunctions: false
   stage: ${opt:stage, 'dev'}
   # websocketsApiName: codemarket-videochat-socket
   # websocketsApiRouteSelectionExpression: $request.body.action
@@ -32,6 +33,7 @@ provider:
     CKEDITOR_ENVIRONMENT_ID: ${file(env.yml):${self:provider.stage}.CKEDITOR_ENVIRONMENT_ID}
     CKEDITOR_SECRET_KEY: ${file(env.yml):${self:provider.stage}.CKEDITOR_SECRET_KEY}
 
+    CRONT_TIME: ${file(env.yml):${self:provider.stage}.CRON_TIME}
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
     EVENTS: ${self:service}-${self:provider.stage}-Events
@@ -135,6 +137,11 @@ functions:
           method: GET
           cors: true
 
+  testCron2:
+    handler: handler.testCron2
+    events:
+      - schedule: cron(15 10 23 5 ? 2020)
+
   createStripeUser:
     handler: handler.createStripeUser
     events:
@@ -142,6 +149,15 @@ functions:
           path: createStripeUser
           method: POST
           cors: true
+
+  receiveMessageFromQueue:
+    handler: handler.receiveMessageFromQueue
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - normal
+              - Arn
 
   attachCardAndCreateSubscription:
     handler: handler.attachCardAndCreateSubscription
@@ -212,7 +228,10 @@ resources:
     #   Type: AWS::SNS::Topic
     #   Properties:
     #     TopicName: campaign
-
+    normal:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: "normal"
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
       Type: "AWS::ApiGateway::GatewayResponse"
@@ -300,7 +319,7 @@ plugins:
   - serverless-plugin-offline-dynamodb-stream
   - serverless-offline
   - serverless-domain-manager
-
+  - serverless-prune-plugin
 custom:
   dynamodb:
     stages:
@@ -327,7 +346,7 @@ custom:
     httpPort: 3200
 
   customDomain:
-    domainName: ${self:service}-${self:provider.stage}.codemarket.io
+    domainName: ${self:service}.codemarket.io
     basePath: ''
     certificateName: 'codemarket.io'
     createRoute53Record:	false

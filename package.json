@@ -16,7 +16,8 @@
     "serverless": "^1.67.3",
     "serverless-dynamodb-local": "^0.2.38",
     "serverless-offline": "^6.1.4",
-    "serverless-plugin-offline-dynamodb-stream": "^1.0.19"
+    "serverless-plugin-offline-dynamodb-stream": "^1.0.19",
+    "serverless-prune-plugin": "^1.4.3"
   },
   "dependencies": {
     "amazon-cognito-identity-js": "^4.2.1",
