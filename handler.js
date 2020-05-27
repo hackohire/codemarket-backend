@@ -599,6 +599,7 @@ const validateEmail = (event, context) => {
             return new Promise((resolve1, reject) => {
                 var emailObj = [];
                 async function run1(data, index) {
+                    console.log("inside run1 function ==> ", index, data.length);
                     if (index < data.length) {
                             emailValidator.verify(data[index]).then(async (res) => {
                                 console.log("************************** ", res);
