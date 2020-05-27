@@ -153,14 +153,14 @@ functions:
               - validateEmail
               - Arn
   
-sendEmailFromQueue:
-  handler: handler.sendEmailFromQueue
-  events:
-    - sqs:
-        arn:
-          Fn::GetAtt:
-            - sendEmail
-            - Arn
+  sendEmailFromQueue:
+    handler: handler.sendEmailFromQueue
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - sendEmail
+              - Arn
 
   attachCardAndCreateSubscription:
     handler: handler.attachCardAndCreateSubscription
