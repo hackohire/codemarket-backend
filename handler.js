@@ -551,7 +551,7 @@ const fetchArticleByLink = (event, context) => {
 
 
 
-const receiveMessageFromQueue = (event, context) => {
+const sendEmailFromQueue = (event, context) => {
     return new Promise(async (resolve, reject) => {
         console.log("This is event ", event);
         console.log("this is context " , context);
@@ -806,9 +806,8 @@ module.exports = {
     getCouponByName,
     fetchLinkMeta,
     fetchArticleByLink,
-    receiveMessageFromQueue,
+    sendEmailFromQueue,
     validateEmail,
-    // testCron1,
     testCron2,
     emailCampaignEvent
 };

@@ -130,9 +130,9 @@ async function getCsvFileData(_, {data}, { headers, db, decodedToken }) {
 
         const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/validateEmail";
 
-        // data.forEach((d) => {
+        data.forEach((d) => {
             const params = {
-                MessageBody: JSON.stringify({"hi": "hello"}),
+                MessageBody: JSON.stringify(d),
                 QueueUrl: queueUrl,
             };
 
@@ -143,66 +143,105 @@ async function getCsvFileData(_, {data}, { headers, db, decodedToken }) {
                     console.log("Success while sending ==> ", data);
                 }
             });
-        // })
-        // async function validEmail(emails) {
-        //     return new Promise((resolve, reject) => {
-        //         var emailObj = [];
-        //         async function run1(data, index) {
-        //             if (index < data.length) {
-        //                     emailValidator.verify(data[index]).then(async (res) => {
-        //                         if (res.wellFormed && res.validDomain) {
-        //                             console.log("true email ==> ", data[index]);
-        //                             emailObj.push({email: data[index], status: true});
-        //                         } else {
-        //                             console.log("false email ==> ", data[index]);
-        //                             emailObj.push({email: data[index], status: false});
-        //                         }
-        //                         index += 1;
-        //                         await run1(data, index);
-        //                     })
-        //                     .catch(async (err) => {
-        //                         emailObj.push({email: data[index], status: true});
-        //                         index += 1;
-        //                         await run1(data, index);
-        //                     });
-        //             } else {
-        //                 resolve(emailObj);
-        //             }
-        //         }
-        //         run1(emails, 0)
-        //     })
-        // }
-    
-        // async function run(data, index) {
-        //     if (index < data.length) {
-        //         console.log("CURRENT" ,index);
-        //         validEmail(data[index].email).then(async (e) => {
-        //             data[index].email = e;
-                    
-                    
-        //             const result = new Contact(data[index]);
-        //             console.log(result);
-                    
-        //             result.save().then(async () => {
-        //                 index += 1;
-        //                 await run(data, index);
-        //             })
-        //             // console.log("Resutl ==> ", data[index]);
-        //         }).catch(err => {
-        //             console.log("ee", index, err);
-        //         });
-        //         // data.email = result;
-        //     } else {
-        //         console.log("Over and out !!!");
-        //         resolve(true);
-        //     }
-        // }
-        // run(data, 0)
+        })
+
+        
     })
+}
+
+async function getEmailData(_, { batches, emailTemplate, subject }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+
+        if (!db) {
+            console.log('Creating new mongoose connection.');
+            conn = await connectToMongoDB();
+        } else {
+            console.log('Using existing mongoose connection.');
+        }
+
+        const filePathToOtherUsers = basePath + 'email-template/empty';
+        const result = await Contact.aggregate([
+            {
+                $match: {
+                    batch: batches.name        
+                }
+            },
+            {
+                $project: {
+                    companyName: 1,
+                    cityName: 1,
+                    name: 1,
+                    OrganizatinName : 1,
+                    proposalName: 1,
+                    instaProfileId: 1,
+                    followers: 1,
+                    following: 1,
+                    email: {
+                         $filter: {
+                                input: "$email",
+                                as: "e",
+                                cond: { $eq: ["$$e.status", true]}
+                            }
+                    }
+                }
+               
+            },
+            {
+                $match: {
+                    email: { $gt: {$size : 0}}
+                },
+            }
+        ]).exec();
+
+        console.log("B ==> ", result);
+
+        // result.forEach(async (data) => {
+
+        // });
+        const pattern =  /{([^}]+)}/g;
+        const vartoReplace = emailTemplate.match(pattern);
+        
+        result.forEach(async (eData) => {
+            let tempEmailTemplate = emailTemplate.slice();
+            let tempSubjectName = subject.slice();
+
+            if (vartoReplace && vartoReplace.length) {
+                vartoReplace.forEach((v) => {
+                    switch(v){
+                        case "{companyName}":
+                            tempEmailTemplate = tempEmailTemplate.replace(v, eData.companyName);
+                            tempSubjectName = tempSubjectName.replace(v, eData.companyName);
+                            break;
+                        case "{name}":
+                            tempEmailTemplate = tempEmailTemplate.replace(v, eData.name);
+                            tempSubjectName = tempSubjectName.replace(v, eData.name);
+                            break;
+                        default:
+                            break;
+                    }
+                })
+
+            }
+            const mailOption = {
+                // headers: {
+                //     'X-SES-CONFIGURATION-SET': 'campaign',
+                //     'X-SES-MESSAGE-TAGS': 'campaignId=5e8db413194f75696c162682'
+                // },
+                from: "info@codemarket.io",
+                to: eData.email[0].email,
+                replyTo: "info@codemarket.io",
+                subject: tempSubjectName,
+                html: tempEmailTemplate,
+            }
+            console.log("C ==> ", mailOption);
+        })
+        resolve(true);
+    });
 }
 
 module.exports = {
     getCampaignsWithTracking,
     getCampaignEmails,
-    getCsvFileData
+    getCsvFileData,
+    getEmailData
 }

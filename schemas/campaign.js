@@ -74,6 +74,22 @@ const graphQlCampaignSchema = `
         data: JSON
     }
 
+    type getEmailData {
+        batches: batchData
+        emailTemplate: String
+        subject: String
+    }
+
+    type batchData {
+        _id: ID
+        name: String
+    }
+
+    input batchInput {
+        _id: ID
+        name: String
+    }
+
     extend type Query {
         getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String): [Campaign]
         getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
@@ -81,6 +97,7 @@ const graphQlCampaignSchema = `
 
     extend type Mutation {
         getCsvFileData(data: [JSON]): [csvData]
+        getEmailData(batches: batchInput, emailTemplate: String, subject: String): getEmailData
     }
 `;
 
