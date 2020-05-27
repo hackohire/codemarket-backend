@@ -144,7 +144,7 @@ async function getCsvFileData(_, {data}, { headers, db, decodedToken }) {
                 }
             });
         })
-
+        resolve(true);
         
     })
 }
@@ -195,46 +195,97 @@ async function getEmailData(_, { batches, emailTemplate, subject }, { headers, d
 
         console.log("B ==> ", result);
 
-        // result.forEach(async (data) => {
-
-        // });
         const pattern =  /{([^}]+)}/g;
         const vartoReplace = emailTemplate.match(pattern);
         
-        result.forEach(async (eData) => {
-            let tempEmailTemplate = emailTemplate.slice();
-            let tempSubjectName = subject.slice();
+        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/sendEmail";
 
-            if (vartoReplace && vartoReplace.length) {
-                vartoReplace.forEach((v) => {
-                    switch(v){
-                        case "{companyName}":
-                            tempEmailTemplate = tempEmailTemplate.replace(v, eData.companyName);
-                            tempSubjectName = tempSubjectName.replace(v, eData.companyName);
-                            break;
-                        case "{name}":
-                            tempEmailTemplate = tempEmailTemplate.replace(v, eData.name);
-                            tempSubjectName = tempSubjectName.replace(v, eData.name);
-                            break;
-                        default:
-                            break;
+        if (result.length) {
+            result.forEach(async (eData) => {
+                let tempEmailTemplate = emailTemplate.slice();
+                let tempSubjectName = subject.slice();
+    
+                if (vartoReplace && vartoReplace.length) {
+                    vartoReplace.forEach((v) => {
+                        switch(v){
+                            case "{companyName}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.companyName);
+                                tempSubjectName = tempSubjectName.replace(v, eData.companyName);
+                                break;
+                            case "{name}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.name);
+                                tempSubjectName = tempSubjectName.replace(v, eData.name);
+                                break;
+                            case "{cityName}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.cityName);
+                                tempSubjectName = tempSubjectName.replace(v, eData.cityName);
+                                break;
+                            case "{cityName}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.cityName);
+                                tempSubjectName = tempSubjectName.replace(v, eData.cityName);
+                                break;
+                            case "{organizationName}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.OrganizatinName);
+                                tempSubjectName = tempSubjectName.replace(v, eData.OrganizatinName);
+                                break;
+                            case "{proposalName}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.proposalName);
+                                tempSubjectName = tempSubjectName.replace(v, eData.proposalName);
+                                break;
+                            case "{instaProfileId}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.instaProfileId);
+                                tempSubjectName = tempSubjectName.replace(v, eData.instaProfileId);
+                                break;
+                            case "{followers}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.followers);
+                                tempSubjectName = tempSubjectName.replace(v, eData.followers);
+                                break;
+                            case "{following}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.following);
+                                tempSubjectName = tempSubjectName.replace(v, eData.following);
+                                break;
+                            case "{followers}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.followers);
+                                tempSubjectName = tempSubjectName.replace(v, eData.followers);
+                                break;
+                            case "{url}":
+                                tempEmailTemplate = tempEmailTemplate.replace(v, eData.url);
+                                tempSubjectName = tempSubjectName.replace(v, eData.url);
+                                break;
+                            default:
+                                break;
+                        }
+                    })
+    
+                }
+                const mailOption = {
+                    // headers: {
+                    //     'X-SES-CONFIGURATION-SET': 'campaign',
+                    //     'X-SES-MESSAGE-TAGS': 'campaignId=5e8db413194f75696c162682'
+                    // },
+                    from: process.env.FROM_EMAIL,
+                    to: eData.email[0].email,
+                    replyTo: "info@codemarket.io",
+                    subject: tempSubjectName,
+                    html: tempEmailTemplate,
+                }
+    
+                const params = {
+                    MessageBody: JSON.stringify(mailOption),
+                    QueueUrl: queueUrl,
+                };
+    
+                sqs.sendMessage(params, (error, data) => {
+                    if (error) {
+                        console.log("Error while sending ==> ", error);
+                    } else {
+                        console.log("Success while sending ==> ", data);
                     }
-                })
-
-            }
-            const mailOption = {
-                // headers: {
-                //     'X-SES-CONFIGURATION-SET': 'campaign',
-                //     'X-SES-MESSAGE-TAGS': 'campaignId=5e8db413194f75696c162682'
-                // },
-                from: "info@codemarket.io",
-                to: eData.email[0].email,
-                replyTo: "info@codemarket.io",
-                subject: tempSubjectName,
-                html: tempEmailTemplate,
-            }
-            console.log("C ==> ", mailOption);
-        })
+                });
+    
+                console.log("C ==> ", mailOption);
+            })
+        }
         resolve(true);
     });
 }
