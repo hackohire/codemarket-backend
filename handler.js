@@ -600,10 +600,10 @@ const validateEmail = (event, context) => {
 
         emailValidator.verify("mysumifoods@gmail.com").then((res) => {
             console.log("AFTER:: Inside check email ==> ", res);
-          resolve(true);
+          return resolve(true);
         }).catch((err) => {
           console.log('2 ==> ' , err);
-          resolve(false);
+          return resolve(false);
         })
 
         // async function checkEmail () {
