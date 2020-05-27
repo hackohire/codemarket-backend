@@ -598,7 +598,7 @@ const validateEmail = (event, context) => {
 
         console.log("BEFORE:: Inside check email ==> ", emailValidator.verify, typeof emailValidator.verify);
 
-        emailValidator.verify("mysumifoods@gmail.com").then((res) => {
+        await emailValidator.verify("mysumifoods@gmail.com").then((res) => {
             console.log("AFTER:: Inside check email ==> ", res);
           return resolve(true);
         }).catch((err) => {
