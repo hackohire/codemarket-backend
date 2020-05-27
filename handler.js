@@ -666,7 +666,7 @@ const validateEmail = (event, context) => {
                 console.log("This is result ==>", result);
                 
                 result.save().then(async () => {
-                    resolve(true);
+                   return resolve(true);
                 })
             }).catch(err => {
                 console.log("ee", index, err);
