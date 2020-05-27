@@ -16,8 +16,6 @@ var moment = require('moment');
 global.basePath = __dirname + '/';
 const { makeExecutableSchema } = require('graphql-tools');
 const AWS = require('aws-sdk');
-const EmailValidator = require('email-deep-validator');
-const emailValidator = new EmailValidator();
 const Contact = require('./models/contact')();
 
 const sqs = new AWS.SQS({
@@ -588,6 +586,9 @@ const receiveMessageFromQueue = (event, context) => {
 
 const validateEmail = (event, context) => {
     return new Promise(async (resolve, reject) => {
+        const EmailValidator = require('email-deep-validator');
+        const emailValidator = new EmailValidator();
+
         console.log("Data Is ==> ", event.Records[0].body);
         const emailData = JSON.parse(event.Records[0].body);
 
@@ -599,8 +600,8 @@ const validateEmail = (event, context) => {
             return new Promise((resolve1, reject) => {
                 var emailObj = [];
                 async function run1(data, index) {
-                    console.log("inside run1 function ==> ", index, data.length);
                     if (index < data.length) {
+                        console.log("inside run1 function ==> ", index, data.length, emailValidator);
                             emailValidator.verify(data[index]).then(async (res) => {
                                 console.log("************************** ", res);
                                 if (res.wellFormed && res.validDomain) {
