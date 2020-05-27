@@ -598,7 +598,9 @@ const validateEmail = (event, context) => {
 
         async function checkEmail () {
             try {
+                console.log("BEFORE:: Inside check email ==> ", emailValidator.verify, typeof emailValidator.verify);
               const result = await emailValidator.verify('jaysojitra13@gmail.com');
+              console.log("After:: Inside check email ==> ", emailValidator.verify, typeof emailValidator.verify);
               console.log('1', result);
             } catch (err) {
               console.log('false', err);
