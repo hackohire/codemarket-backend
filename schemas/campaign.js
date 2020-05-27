@@ -96,7 +96,7 @@ const graphQlCampaignSchema = `
     }
 
     extend type Mutation {
-        getCsvFileData(data: [JSON]): [csvData]
+        getCsvFileData(data: [JSON]): csvData
         getEmailData(batches: batchInput, emailTemplate: String, subject: String): getEmailData
     }
 `;
