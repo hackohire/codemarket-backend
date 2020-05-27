@@ -596,15 +596,15 @@ const validateEmail = (event, context) => {
 
         console.log("This is email Data => ", emailData);
 
-        console.log("BEFORE:: Inside check email ==> ", emailValidator.verify, typeof emailValidator.verify);
+        // console.log("BEFORE:: Inside check email ==> ", emailValidator.verify, typeof emailValidator.verify);
 
-        await emailValidator.verify("mysumifoods@gmail.com").then((res) => {
-            console.log("AFTER:: Inside check email ==> ", res);
-          return resolve(true);
-        }).catch((err) => {
-          console.log('2 ==> ' , err);
-          return resolve(false);
-        })
+        // await emailValidator.verify("mysumifoods@gmail.com").then((res) => {
+        //     console.log("AFTER:: Inside check email ==> ", res);
+        //   return resolve(true);
+        // }).catch((err) => {
+        //   console.log('2 ==> ' , err);
+        //   return resolve(false);
+        // })
 
         // async function checkEmail () {
         //     try {
@@ -619,61 +619,61 @@ const validateEmail = (event, context) => {
           
         // await checkEmail()
         // resolve(true);
-        // async function validEmail(emails) {
-        //     console.log("Inside validEmail function ==> ", emails);
-        //     return new Promise((resolve1, reject) => {
-        //         var emailObj = [];
-        //         async function run1(data, index) {
-        //             if (index < data.length) {
-        //                 console.log("inside run1 function ==> ", index, data.length, emailValidator);
-        //                     emailValidator.verify(data[index]).then(async (res) => {
-        //                         console.log("************************** ", res);
-        //                         if (res.wellFormed && res.validDomain) {
-        //                             console.log("true email ==> ", data[index]);
-        //                             emailObj.push({email: data[index], status: true});
-        //                         } else {
-        //                             console.log("false email ==> ", data[index]);
-        //                             emailObj.push({email: data[index], status: false});
-        //                         }
-        //                         index += 1;
-        //                         await run1(data, index);
-        //                     })
-        //                     .catch(async (err) => {
-        //                         console.log("Error while validating an email==> ", err);
-        //                         emailObj.push({email: data[index], status: false});
-        //                         index += 1;
-        //                         await run1(data, index);
-        //                     });
-        //             } else {
-        //                 console.log("Resolve1 ==> ", emailObj);
-        //                 resolve1(emailObj);
-        //             }
-        //         }
-        //         console.log("Run1 is called");
-        //         run1(emails, 0)
-        //     })
-        // }
+        async function validEmail(emails) {
+            console.log("Inside validEmail function ==> ", emails);
+            return new Promise((resolve1, reject) => {
+                var emailObj = [];
+                async function run1(data, index) {
+                    if (index < data.length) {
+                        console.log("inside run1 function ==> ", index, data.length, emailValidator);
+                            emailValidator.verify(data[index]).then(async (res) => {
+                                console.log("************************** ", res);
+                                if (res.wellFormed && res.validDomain) {
+                                    console.log("true email ==> ", data[index]);
+                                    emailObj.push({email: data[index], status: true});
+                                } else {
+                                    console.log("false email ==> ", data[index]);
+                                    emailObj.push({email: data[index], status: false});
+                                }
+                                index += 1;
+                                await run1(data, index);
+                            })
+                            .catch(async (err) => {
+                                console.log("Error while validating an email==> ", err);
+                                emailObj.push({email: data[index], status: false});
+                                index += 1;
+                                await run1(data, index);
+                            });
+                    } else {
+                        console.log("Resolve1 ==> ", emailObj);
+                        resolve1(emailObj);
+                    }
+                }
+                console.log("Run1 is called");
+                run1(emails, 0)
+            })
+        }
 
-        // async function run(data, index) {
-        //     console.log("Inside run function ==> ", data.email);
-        //     validEmail(data.email).then(async (e) => {
-        //         console.log("After validation emails ==> ", e);
+        async function run(data, index) {
+            console.log("Inside run function ==> ", data.email);
+            validEmail(data.email).then(async (e) => {
+                console.log("After validation emails ==> ", e);
 
-        //         data.email = e;
-        //         console.log("This is data before save ==>", data);
+                data.email = e;
+                console.log("This is data before save ==>", data);
 
-        //         const result = new Contact(data);
-        //         console.log("This is result ==>", result);
+                const result = new Contact(data);
+                console.log("This is result ==>", result);
                 
-        //         result.save().then(async () => {
-        //             resolve(true);
-        //         })
-        //     }).catch(err => {
-        //         console.log("ee", index, err);
-        //     });
-        // }
-        // console.log("Run is called");
-        // run(emailData, 0)
+                result.save().then(async () => {
+                    resolve(true);
+                })
+            }).catch(err => {
+                console.log("ee", index, err);
+            });
+        }
+        console.log("Run is called");
+        run(emailData, 0)
 
     });
 }
