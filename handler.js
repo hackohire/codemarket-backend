@@ -596,13 +596,17 @@ const validateEmail = (event, context) => {
 
         console.log("This is email Data => ", emailData);
 
-        emailValidator.verify("mysumifoods@gmail.com").then((res) => {
-          console.log('1 ==> ' , res);
-          resolve(true);
-        }).catch((err) => {
-            console.log('2 ==> ' , err);
-            resolve(false);
-        })
+        async function checkEmail () {
+            try {
+              const result = await emailValidator.verify('jaysojitra13@gmail.com');
+              console.log('1', result);
+            } catch (err) {
+              console.log('false', err);
+            }
+          }
+          
+        await checkEmail()
+        resolve(true);
         // async function validEmail(emails) {
         //     console.log("Inside validEmail function ==> ", emails);
         //     return new Promise((resolve1, reject) => {

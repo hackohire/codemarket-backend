@@ -130,9 +130,9 @@ async function getCsvFileData(_, {data}, { headers, db, decodedToken }) {
 
         const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/validateEmail";
 
-        data.forEach((d) => {
+        // data.forEach((d) => {
             const params = {
-                MessageBody: JSON.stringify(d),
+                MessageBody: JSON.stringify({"hi": "hello"}),
                 QueueUrl: queueUrl,
             };
 
@@ -143,7 +143,7 @@ async function getCsvFileData(_, {data}, { headers, db, decodedToken }) {
                     console.log("Success while sending ==> ", data);
                 }
             });
-        })
+        // })
         // async function validEmail(emails) {
         //     return new Promise((resolve, reject) => {
         //         var emailObj = [];
