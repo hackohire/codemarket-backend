@@ -159,7 +159,6 @@ async function getEmailData(_, { batches, emailTemplate, subject }, { headers, d
             console.log('Using existing mongoose connection.');
         }
 
-        const filePathToOtherUsers = basePath + 'email-template/empty';
         const result = await Contact.aggregate([
             {
                 $match: {
@@ -199,6 +198,10 @@ async function getEmailData(_, { batches, emailTemplate, subject }, { headers, d
         const vartoReplace = emailTemplate.match(pattern);
         
         const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/sendEmail";
+
+        if (!emailTemplate) {
+            return reject(false);
+        }
 
         if (result.length) {
             result.forEach(async (eData) => {
