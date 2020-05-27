@@ -593,7 +593,8 @@ const validateEmail = (event, context) => {
 
         console.log("This is email Data => ", emailData);
         async function validEmail(emails) {
-            return new Promise((resolve, reject) => {
+            console.log("Inside validEmail function ==> ", emails);
+            return new Promise((resolve1, reject) => {
                 var emailObj = [];
                 async function run1(data, index) {
                     if (index < data.length) {
@@ -614,7 +615,8 @@ const validateEmail = (event, context) => {
                                 await run1(data, index);
                             });
                     } else {
-                        resolve(emailObj);
+                        console.log("Resolve1 ==> ", emailObj);
+                        resolve1(emailObj);
                     }
                 }
                 run1(emails, 0)
@@ -622,7 +624,10 @@ const validateEmail = (event, context) => {
         }
 
         async function run(data, index) {
+            console.log("Inside run function ==> ", data.email);
             validEmail(data.email).then(async (e) => {
+                console.log("After validation emails ==> ", e);
+
                 data.email = e;
                 console.log("This is data before save ==>", data);
 
@@ -636,6 +641,7 @@ const validateEmail = (event, context) => {
                 console.log("ee", index, err);
             });
         }
+        console.log("Run is called");
         run(emailData, 0)
 
     });
