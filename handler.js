@@ -591,6 +591,8 @@ const validateEmail = (event, context) => {
         console.log("Data Is ==> ", event.Records[0].body);
         const emailData = JSON.parse(event.Records[0].body);
 
+        let conn = await connectToMongoDB();
+
         console.log("This is email Data => ", emailData);
         async function validEmail(emails) {
             console.log("Inside validEmail function ==> ", emails);
@@ -599,6 +601,7 @@ const validateEmail = (event, context) => {
                 async function run1(data, index) {
                     if (index < data.length) {
                             emailValidator.verify(data[index]).then(async (res) => {
+                                console.log("************************** ", res);
                                 if (res.wellFormed && res.validDomain) {
                                     console.log("true email ==> ", data[index]);
                                     emailObj.push({email: data[index], status: true});
@@ -610,6 +613,7 @@ const validateEmail = (event, context) => {
                                 await run1(data, index);
                             })
                             .catch(async (err) => {
+                                console.log("Error while validating an email==> ", err);
                                 emailObj.push({email: data[index], status: false});
                                 index += 1;
                                 await run1(data, index);
@@ -619,6 +623,7 @@ const validateEmail = (event, context) => {
                         resolve1(emailObj);
                     }
                 }
+                console.log("Run1 is called");
                 run1(emails, 0)
             })
         }
