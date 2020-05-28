@@ -465,7 +465,7 @@ const emailCampaignEvent = async (event, context) => {
         
             const parsedMessage = JSON.parse(message);
         
-            console.log('parsedMessage', parsedMessage)
+            console.log('parsedMessage', parsedMessage, parsedMessage.mail.tags.campaignId[0], parsedMessage.mail.destination[0])
         
             const savedEvent = await conn.collection('emails').updateOne(
                 { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), to: parsedMessage.mail.destination[0]},
