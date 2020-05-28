@@ -553,6 +553,8 @@ const fetchArticleByLink = (event, context) => {
 
 const sendEmailFromQueue = (event, context) => {
     return new Promise(async (resolve, reject) => {
+        let conn = await connectToMongoDB();
+        
         console.log("This is event ", event);
         console.log("this is context " , context);
         try {
