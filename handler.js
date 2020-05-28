@@ -17,7 +17,7 @@ global.basePath = __dirname + '/';
 const { makeExecutableSchema } = require('graphql-tools');
 const AWS = require('aws-sdk');
 const Contact = require('./models/contact')();
-
+const Email = require('./models/email')();
 const sqs = new AWS.SQS({
     region: "us-east-1",
 });
@@ -571,6 +571,8 @@ const sendEmailFromQueue = (event, context) => {
 
             if (emailSent) {
                 console.log("Email is sent ==> ", emailSent);
+                const int = new Email(JSON.parse(event.Records[0].body));
+                await int.save();
                 return resolve(true);
             } else {
                 console.log("Email is Fail ==> ", emailSent);

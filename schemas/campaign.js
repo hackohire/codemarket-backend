@@ -68,6 +68,8 @@ const graphQlCampaignSchema = `
     
     type csvData {
         data: JSON
+        createdBy: String
+        fileName: String
     }
 
     input csvInputData {
@@ -78,16 +80,19 @@ const graphQlCampaignSchema = `
         batches: batchData
         emailTemplate: String
         subject: String
+        createdBy: String
     }
 
     type batchData {
         _id: ID
         name: String
+        campaignId: String
     }
 
     input batchInput {
         _id: ID
         name: String
+        campaignId: String
     }
 
     extend type Query {
@@ -96,8 +101,8 @@ const graphQlCampaignSchema = `
     }
 
     extend type Mutation {
-        getCsvFileData(data: [JSON]): csvData
-        getEmailData(batches: batchInput, emailTemplate: String, subject: String): getEmailData
+        getCsvFileData(data: [JSON], createdBy: String, fileName: String): csvData
+        getEmailData(batches: batchInput, emailTemplate: String, subject: String, createdBy: String): getEmailData
     }
 `;
 
