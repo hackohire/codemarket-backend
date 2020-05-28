@@ -121,7 +121,7 @@ async function getCampaignEmails(_, { pageOptions, campaignId }, { headers, db, 
     });
 }
 
-async function getCsvFileData(_, {data, createdBy, fileName, label}, { headers, db, decodedToken }) {
+async function getCsvFileData(_, {data, createdBy, fileName, label, companies}, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
 
         if (!db) {
@@ -140,7 +140,7 @@ async function getCsvFileData(_, {data, createdBy, fileName, label}, { headers, 
         const campaignObj = {
             name: label + ' Campaign',
             createdBy: createdBy,
-            companies: [{ _id: '5db1c84ec10c45224c4b95fd' }]
+            companies: [{ _id: companies._id }]
         };
         const campaignData = new Campaign(campaignObj);
         const cResult = await campaignData.save();
@@ -192,7 +192,7 @@ async function getCsvFileData(_, {data, createdBy, fileName, label}, { headers, 
     })
 }
 
-async function getEmailData(_, { batches, emailTemplate, subject, createdBy, from }, { headers, db, decodedToken }) {
+async function getEmailData(_, { batches, emailTemplate, subject, createdBy, from, companies }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
 
         if (!db) {
@@ -411,7 +411,8 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                         subject: tempSubjectName,
                         html: tempEmailTemplate,
                         campaignId: batches.campaignId,
-                        companies: [{ _id: '5db1c84ec10c45224c4b95fd' }],
+                        createdBy: createdBy,
+                        companies: [{ _id: companies._id }],
                     };
 
                     const params = {
