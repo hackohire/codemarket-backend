@@ -297,6 +297,8 @@ async function getEmailData(_, { batches, emailTemplate, subject }, { headers, d
                         status: "Published",
                         subject: tempSubjectName,
                         html: tempEmailTemplate,
+                        campaignId: batches.campaignId,
+                        companies: [{ _id: '5db1c84ec10c45224c4b95fd' }],
                     };
 
                     const params = {
