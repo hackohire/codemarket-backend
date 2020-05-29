@@ -1,23 +1,30 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+
 const contactSchema = new Schema(
     {
-        name: String,
+        companies: [{
+            type: Schema.Types.ObjectId,
+            ref: "company",
+        }],
+        status: String,
         email: String,
-        subject: String,
-        description: String
+        name: String,
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }
     },
     {
         timestamps: true,
-        id: true,/** Will automatically create, createdAt & updatedAt fields */
     },
 );
 
 module.exports = () => {
     try {
-        return mongoose.model('contact');
+        return mongoose.model('cartitem');
     } catch (e) {
-        return mongoose.model('contact', contactSchema);
+        return mongoose.model('cartitem', contactSchema);
     }
 };

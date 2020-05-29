@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-lambda');
+
 
 
 
@@ -38,4 +38,4 @@ const makemoneySchema = `
     }
 `
 
-module.exports = gql(makemoneySchema);
+module.exports = makemoneySchema;

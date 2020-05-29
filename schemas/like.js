@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-lambda');
+
 
 const graphQlLikeSchema = `
 
@@ -30,4 +30,4 @@ const graphQlLikeSchema = `
     }
 `
 
-module.exports = gql(graphQlLikeSchema);
+module.exports = graphQlLikeSchema;

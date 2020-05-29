@@ -24,6 +24,13 @@ provider:
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
     STRIPE_SECRET_KEY: ${file(env.yml):${self:provider.stage}.STRIPE_SECRET_KEY}
+    IS_OFFLINE: ${file(env.yml):${self:provider.stage}.IS_OFFLINE}
+    TWILIO_CHAT_SERVICE_SID: ${file(env.yml):${self:provider.stage}.TWILIO_CHAT_SERVICE_SID}
+    TWILIO_ACCOUNT_SID: ${file(env.yml):${self:provider.stage}.TWILIO_ACCOUNT_SID}
+    TWILIO_API_KEY: ${file(env.yml):${self:provider.stage}.TWILIO_API_KEY}
+    TWILIO_API_SECRET: ${file(env.yml):${self:provider.stage}.TWILIO_API_SECRET}
+    CKEDITOR_ENVIRONMENT_ID: ${file(env.yml):${self:provider.stage}.CKEDITOR_ENVIRONMENT_ID}
+    CKEDITOR_SECRET_KEY: ${file(env.yml):${self:provider.stage}.CKEDITOR_SECRET_KEY}
 
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
@@ -118,6 +125,14 @@ functions:
       - http:
           path: getCheckoutSession
           method: POST
+          cors: true
+  
+  saveContact:
+    handler: resolvers/post.saveContact
+    events:
+      - http:
+          path: saveContact
+          method: GET
           cors: true
 
   createStripeUser:
@@ -301,12 +316,12 @@ custom:
           - dynamoDBStreamHandler
 
   serverless-offline:
-    port: 3200
+    httpPort: 3200
 
   customDomain:
     domainName: ${self:service}-api.codemarket.io
     basePath: ''
-    certificateName: '*.codemarket.io'
+    certificateName: 'codemarket.io'
     createRoute53Record:	false
     endpointType: 'edge'
     securityPolicy: tls_1_2

@@ -55,7 +55,7 @@ const postSchema = new Schema(
                 },
                 createdBy: {
                     type: Schema.Types.ObjectId,
-                    ref: "user", 
+                    ref: "user",
                 }
             },
             status: {
@@ -85,6 +85,8 @@ const postSchema = new Schema(
                 'note',
 
                 'question',
+
+                'blog',
 
                 'email'                  /** Post type for Email */
             ],
@@ -167,6 +169,10 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         }],
+        clients: [{
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }],
         assignees: [{
             type: Schema.Types.ObjectId,
             ref: "user",
@@ -180,7 +186,9 @@ const postSchema = new Schema(
         email: [String],
         birthDate: String,
         address: String,
-        website: String
+        website: String,
+
+        descriptionHTML: String
 
 
     },
