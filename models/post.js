@@ -55,7 +55,7 @@ const postSchema = new Schema(
                 },
                 createdBy: {
                     type: Schema.Types.ObjectId,
-                    ref: "user", 
+                    ref: "user",
                 }
             },
             status: {
@@ -85,6 +85,8 @@ const postSchema = new Schema(
                 'note',
 
                 'question',
+
+                'blog',
 
                 'email'                  /** Post type for Email */
             ],
