@@ -13,7 +13,7 @@ const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
-const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData } = require('./campaign');
+const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData } = require('./campaign');
 const {createdToken} = require('./chat');
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
@@ -114,7 +114,8 @@ module.exports = {
 
     addHelpGrowBusiness,
     getCsvFileData,
-    getEmailData
+    getEmailData,
+    saveCsvFileData
   },
   Subscription: {
     onCommentAdded: {

@@ -173,15 +173,15 @@ async function getCsvFileData(_, {data, createdBy, fileName, label, companies}, 
                         QueueUrl: queueUrl,
                     };
                     
-                    sqs.sendMessage(params, (error, res) => {
-                        if (error) {
-                            console.log("Error while sending ==> ", error);
-                        } else {
-                            console.log("Success while sending ==> ", res);
-                        }
-                        index += 1;
-                        run(data, index);
-                    });
+                    // sqs.sendMessage(params, (error, res) => {
+                    //     if (error) {
+                    //         console.log("Error while sending ==> ", error);
+                    //     } else {
+                    //         console.log("Success while sending ==> ", res);
+                    //     }
+                    //     index += 1;
+                    //     run(data, index);
+                    // });
                 } else {
                     console.log("this is done")
                     return resolve(true);
@@ -444,9 +444,80 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
     });
 }
 
+async function saveCsvFileData(_, {data, createdBy, fileName, label, companies}, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+    
+            const fileObj = {
+                name: fileName,
+                createdBy
+            };
+    
+            //Create campaign
+            const campaignObj = {
+                name: label + ' Campaign',
+                createdBy: createdBy,
+                companies: [{ _id: companies._id }]
+            };
+            const campaignData = new Campaign(campaignObj);
+            const cResult = await campaignData.save();
+            
+            // Create Batch
+            const batchObj = {
+                name: label,
+                createdBy: createdBy,
+                campaignId: cResult._id
+            };
+            const batchData = new Batch(batchObj);
+            await batchData.save();
+    
+            // const fileData = new File(fileObj);
+            // const fileResult = await fileData.save();
+    
+            async function run(data, index) {
+                return new Promise((resolve1, reject) => {
+                    if (index < data.length) {
+                        data[index]["createdBy"] = createdBy;
+                        data[index]["batch"] = label;
+                        // if (index === (data.length - 1)) {
+                        //     data[index]["fileId"] = fileResult._id.toString();
+                        // }
+                        data[index]["email"] = [{
+                            email: data[index]["email"],
+                            status: JSON.parse(data[index]["status"]) ? true : false,
+                        }];
+    
+                        data[index]["status"] = "Published";
+                        const cData = new Contact(data[index]);
+                        cData.save().then((res) => {
+                            index += 1;
+                            run(data, index);
+                        }).
+                        catch((err) => {
+                            console.log("Err ", err);
+                        })
+                    } else {
+                        console.log("this is done")
+                        return resolve(true);
+                    }
+                })
+            }
+            run(data, 0)
+        } catch (err) {
+            console.log("TC error ==> ", err);
+        }
+    })
+}
 module.exports = {
     getCampaignsWithTracking,
     getCampaignEmails,
     getCsvFileData,
-    getEmailData
+    getEmailData,
+    saveCsvFileData
 }
