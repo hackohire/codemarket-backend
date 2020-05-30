@@ -457,7 +457,7 @@ const emailCampaignEvent = async (event, context) => {
         try {
             let conn = await connectToMongoDB();
         
-            // console.log('Received event:', JSON.stringify(event, null, 2));
+            console.log('Received event:', JSON.stringify(event, null, 2));
         
             const message = event.Records[0].Sns.Message;
             
