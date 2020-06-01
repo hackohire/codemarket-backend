@@ -51,6 +51,8 @@ const graphQlPostSchema = `
 
         descriptionHTML: String
         activities: [Activities]
+        appointment_date: String
+        cancelReason: String
     }
 
     input PostInput {
@@ -101,6 +103,8 @@ const graphQlPostSchema = `
 
         descriptionHTML: String
         activities: [ActivitiesInput]
+        appointment_date: String
+        cancelReason: String
     }
 
     type Activities {
