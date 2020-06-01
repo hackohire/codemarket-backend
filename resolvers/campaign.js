@@ -415,7 +415,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                         companies: [{ _id: companies._id }],
                     };
 
-                    const hiddenElement = `<p> {{campaignId:${batches.campaignId}}}</p>`
+                    const hiddenElement = `<p> {campaignId:${batches.campaignId}}</p>`
                     mailOption.html += hiddenElement;
                     const params = {
                         MessageBody: JSON.stringify(mailOption),
@@ -423,15 +423,15 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                     };
 
                     console.log(index , mailOption);
-                    // sqs.sendMessage(params, (error, res) => {
-                    //     if (error) {
-                    //         console.log("Error while sending ==> ", error);
-                    //     } else {
-                    //         console.log("Success while sending ==> ", res);
-                    //     }
-                    //     index += 1;
-                    //     sendEmail(data, index);
-                    // });
+                    sqs.sendMessage(params, (error, res) => {
+                        if (error) {
+                            console.log("Error while sending ==> ", error);
+                        } else {
+                            console.log("Success while sending ==> ", res);
+                        }
+                        index += 1;
+                        sendEmail(data, index);
+                    });
 
                 } else {
                     console.log("This is DONE!!!")
