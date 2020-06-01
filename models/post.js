@@ -66,7 +66,7 @@ const postSchema = new Schema(
         type: {
             type: String,
             enum: [
-                'product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'goal', 'event', 'dream-job', 'job', 'bug',
+                'product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'goal', 'event', 'dream-job', 'job', 'bug', 'appointment',
 
                 'competitive-advantage',   /** company post type */
 
@@ -135,7 +135,8 @@ const postSchema = new Schema(
             ref: "user",
         }],
         cover: String,
-
+        appointment_date: String,
+        cancelReason: String,
         /** Dreamjob Specific Fields */
         cities: [{
             type: Schema.Types.ObjectId,
