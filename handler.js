@@ -699,7 +699,7 @@ const readAndSaveEmailDataFromS3 = (event, context) => {
                         console.log("Err in reading ==> ", err, err.stack);
                         reject(false);
                     } else {
-                        console.log("Raw email:\n" + data.Body);
+                        console.log("Raw email:\n" + data.Body, typeof data.Body, data.Body.toString());
                         
                         // Custom email processing goes here
                         
