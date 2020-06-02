@@ -408,8 +408,6 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
     });
 }
 
-
-
 async function deletePost(_, { postId, deletedBy }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -1184,6 +1182,33 @@ async function saveContact(_, { }, { header, db, decodedToken }) {
     })
 }
 
+async function getPostByPostType(_, { postType, pageOptions }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
+            let condition = { type: postType }
+            let total = await Post.countDocuments(condition).exec()
+            const posts = await Post.find(condition)
+                .populate('createdBy')
+                .sort(sort)
+                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
+                .exec();
+            return resolve({ posts, total });
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 module.exports = {
     getAllPosts,
     fetchFiles,
@@ -1198,4 +1223,5 @@ module.exports = {
     updatePostContent,
     getCountOfAllPost,
     saveContact,
+    getPostByPostType,
 }

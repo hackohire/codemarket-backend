@@ -187,7 +187,8 @@ const graphQlPostSchema = `
         fullSearch(searchString: String): [Post]
         fetchFiles(blockType: String, userId: String): [AttachesBlock]
         getCountOfAllPost(userId: String, companyId: String, reference: ReferenceObject): [getCountAllPost]
-        getEmailPhoneCountForContact(type: String): [emailPhoneCount]
+        getEmailPhoneCountForContact(type: String): [emailPhoneCount],
+        getPostByPostType(postType: String, pageOptions: PageOptionsInput): GetPostsByUserIdAndTypeResponse
     }
     extend type Mutation {
         addPost(post: PostInput): Post
