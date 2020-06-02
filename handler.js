@@ -701,6 +701,14 @@ const readAndSaveEmailDataFromS3 = (event, context) => {
                     } else {
                         console.log("Raw email:\n" + data.Body, typeof data.Body, data.Body.toString());
                         
+                        console.log("Keys are ==> ", Object.keys(data.Body));
+                        
+                        const result = JSON.stringify(data.body);
+                        const regex = new RegExp('\{(campaignId:[^}]+)\}');
+                        const regexData = result.match(regex);
+                        console.log('This is regexData ==> ', regexData);
+
+                        console.log("SPLIT1: ", regexData[1].split(':'), regexData[1].split(':')[1]);
                         // Custom email processing goes here
                         
                         resolve(true);
