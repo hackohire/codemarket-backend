@@ -240,6 +240,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
 
         console.log("B ==> ", result);
 
+        const campaignData = await Campaign.find({ batchId: batches._id });
         const pattern =  /{([^}]+)}/g;
         const vartoReplaceInTemplate = emailTemplate.match(pattern);
         const vartoReplaceInFrom = from.match(pattern);
@@ -252,7 +253,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
         }
 
         // Update Campaign
-        const updatedBatch = await Campaign.update({ _id: batches.campaignId},{ $set: { subject: subject, descriptionHTML: emailTemplate} });
+        const updatedBatch = await Campaign.update({ _id: campaignData[0]._id},{ $set: { subject: subject, descriptionHTML: emailTemplate} });
 
 
         if (result.length) {
@@ -402,7 +403,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                     const mailOption = {
                         headers: {
                             'X-SES-CONFIGURATION-SET': 'la2050',
-                            'X-SES-MESSAGE-TAGS': `campaignId=${batches.campaignId}`
+                            'X-SES-MESSAGE-TAGS': `campaignId=${campaignData[0]._id}`
                         },
                         from: `${tempFrom} <${process.env.FROM_EMAIL}>`,
                         to: [data[index].email[0].email],
@@ -411,13 +412,12 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                         status: "Published",
                         subject: tempSubjectName,
                         html: tempEmailTemplate,
-                        campaignId: batches.campaignId,
+                        campaignId: campaignData[0]._id,
                         createdBy: createdBy,
                         companies: [{ _id: companies._id }],
                     };
-
-                    const hiddenElement = `<p> {campaignId:${batches.campaignId}}</p>`
-                    mailOption.html += hiddenElement;
+                    const hiddenElement = `<p style="display: none;"> {campaignId:${campaignData[0]._id}}</p>`
+                    mailOption.html = "<html><body>" + mailOption.html + hiddenElement + "</body></html>";
                     const params = {
                         MessageBody: JSON.stringify(mailOption),
                         QueueUrl: queueUrl,

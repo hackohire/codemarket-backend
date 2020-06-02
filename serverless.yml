@@ -136,6 +136,14 @@ functions:
           method: GET
           cors: true
 
+  readAndSaveEmailDataFromS3:
+    handler: handler.readAndSaveEmailDataFromS3
+    events:
+      - http:
+          path: readAndSaveEmailDataFromS3
+          method: POST
+          cors: true
+
   createStripeUser:
     handler: handler.createStripeUser
     events:

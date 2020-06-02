@@ -21,6 +21,7 @@ const Email = require('./models/email')();
 const sqs = new AWS.SQS({
     region: "us-east-1",
 });
+var s3 = new AWS.S3();
 
 const {
     DynamoDBEventProcessor,
@@ -682,114 +683,33 @@ const validateEmail = (event, context) => {
     });
 }
 
-const testCron2 = (event, context) => {
-    return new Promise(async (resolve, reject) => {
-        console.log("*********** NEW est CRON ************");
-        let conn = await connectToMongoDB();
-
-        console.log("process.env.MONGODB_URL  ==> ", process.env.MONGODB_URL);
-        let result = [];
-        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/normal";
-        
-        if (process.env.MONGODB_URL) {
-            result = await conn.collection('contacts').aggregate([
-                {
-                    $match: {
-                        batch: 'new_therapist'        
-                    }
-                },
-                {
-                    $project: {
-                        companyName: 1,
-                        // cityName: 1,
-                        name: 1,
-                        // OrganizatinName : 1,
-                        // proposalName: 1,
-                        email: {
-                             $filter: {
-                                    input: "$email",
-                                    as: "e",
-                                    cond: { $eq: ["$$e.status", true]}
-                                }
-                        }
-                    }
-                   
-                },
-                {
-                    $match: {
-                        email: { $gt: {$size : 0}}
-                    },
-                }
-            ]).toArray();
+const readAndSaveEmailDataFromS3 = (event, context) => {
+    return new Promise((resolve, reject) => {
+        try {
+            var bucketName = 'email-test-reply';
+            var sesNotification = event.Records[0].ses;
+            console.log("SES Notification:\n", JSON.stringify(sesNotification, null, 2));
             
-            const emails = [
-                {
-                    name: 'Jay Sojitra',
-                    firstName: 'Jay',
-                    companyName: "Oren Hen EA",
-                    "email": [
-                      {
-                        email: 'jaysojitra13@gmail.com',
-                        status: true
-                      },
-                      {
-                        email: '13jay96@gmail.com',
-                        status: true
-                      }
-                  ]
-                },
-                {
-                  name: 'Sumit Vekariya',
-                  firstName: 'Sumit',
-                  companyName: "Burk's Custom Painting",
-                  email: [
-                    {
-                      email: 'sumitvekariya7@gmail.com',
-                      status: true
-                    },
-                    {
-                        email: 'sarkazein7@gmail.com',
-                        status: true
-                    },
-                ]
-                },
-            ];
-
-            finalInstaEmails.forEach((e, i) => {
-                setTimeout(() => {
-                    e.email.forEach((email, j) => {
-                        setTimeout(() => {
-                            const emailObj = {
-                                to: [email.email],
-                                subject: `${e.companies}, Test Email`, // Therapist
-                                companies: [{ _id: '5db1c84ec10c45224c4b95fd' }],
-                                type: 'email',
-                                status: 'Published',
-                                // descriptionHTML: demoTempate.replace('{companyName}', e.companyName),
-                                createdBy: '5d4c1cdf91e63a3fe84bb43a',
-                                campaignId: '5ec800f9870915348a37f30f', // instagram
-                            };
-
-                            const params = {
-                                MessageBody: JSON.stringify(emailObj),
-                                QueueUrl: queueUrl,
-                            };
-
-                            sqs.sendMessage(params, (error, data) => {
-                                if (error) {
-                                    console.log("Error while sending ==> ", error);
-                                } else {
-                                    console.log("Success while sending ==> ", data);
-                                }
-                            });  
-
-                        }, i * 1000);
-                    })
-                }, I * 1000);
-            });
+            // Retrieve the email from your bucket
+            s3.getObject({
+                    Bucket: bucketName,
+                    Key: sesNotification.mail.messageId
+                }, function(err, data) {
+                    if (err) {
+                        console.log("Err in reading ==> ", err, err.stack);
+                        reject(false);
+                    } else {
+                        console.log("Raw email:\n" + data.Body);
+                        
+                        // Custom email processing goes here
+                        
+                        resolve(true);
+                    }
+                });
+        } catch (err) {
+            console.log('Error in catch =+> ', err);
+            reject(false);
         }
-
-        await resolve(true);
     });
 }
 module.exports = {
@@ -812,6 +732,6 @@ module.exports = {
     fetchArticleByLink,
     sendEmailFromQueue,
     validateEmail,
-    testCron2,
-    emailCampaignEvent
+    emailCampaignEvent,
+    readAndSaveEmailDataFromS3
 };
