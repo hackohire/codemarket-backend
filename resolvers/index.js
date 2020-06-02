@@ -6,22 +6,21 @@ const { findFromCollection, addToCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, fetchFiles, getCountOfAllPost, getEmailPhoneCountForContact, saveContact } = require('./post');
-const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact } = require('./post');
+const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId } = require('./company');
 const { scheduleCall, getBookingList } = require('./booking');
 const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
-const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
-const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
+const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription } = require('./subscription');
+const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType } = require('./post-type');
 const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
-const {createdToken} = require('./chat');
+const { createdToken } = require('./chat');
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
-const { pubSub } = require('../helpers/pubsub');
-const {addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
-const {addformData, fetchformData} = require('./FormData');
+const { addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
+const { addformData, fetchformData } = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
-const {createVideoToken} = require('./videoCall');
+const { createVideoToken } = require('./videoCall');
 const { generateCkEditorToken } = require('./auth');
 
 module.exports = {
@@ -40,7 +39,7 @@ module.exports = {
 
     getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged,
 
-    getPostsByUserIdAndType, getPostById, getPostsByType, fetchFiles,
+    getPostsByUserIdAndType, getPostById, getPostsByType,
 
     findFromCollection,
 
@@ -78,7 +77,7 @@ module.exports = {
     // addProduct,
     // updateProduct,
     // deleteProduct,
-    addformJson,addformData,
+    addformJson, addformData,
 
     addComment,
     updateComment,
@@ -196,7 +195,7 @@ module.exports = {
   descriptionBlocks: {
     __resolveType(block, context, info) {
 
-      switch(block.type) {
+      switch (block.type) {
 
         case 'paragraph':
           return 'ParagraphBlock'
@@ -207,7 +206,7 @@ module.exports = {
         case 'code':
           return 'CodeBlock';
 
-        case 'image': 
+        case 'image':
           return 'ImageBlock';
 
         case 'list':
