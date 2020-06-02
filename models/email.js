@@ -21,6 +21,7 @@ const emailSchema = new Schema(
             default: ''
         },
         campaignId: Schema.Types.ObjectId,
+        batchId: Schema.Types.ObjectId,
         dateRange: [String],
         companies: [{
             type: Schema.Types.ObjectId,

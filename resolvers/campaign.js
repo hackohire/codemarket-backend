@@ -14,15 +14,15 @@ const sqs = new AWS.SQS({
 
 let conn;
 
-async function getCampaignsWithTracking(_, { pageOptions, companyId, campaignId }, { headers, db, decodedToken }) {
+async function getCampaignsWithTracking(_, { pageOptions, companyId, batchId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
             conn = await connectToMongoDB();
 
-            const campaigns = await conn.collection('campaigns').aggregate([
+            let campaigns = await conn.collection('campaigns').aggregate([
                 {
-                    $match: { companies: ObjectID(companyId) }
+                    $match: { companies: ObjectID(companyId), batchId: ObjectID(batchId) }
                 },
                 {
                     $lookup: {
@@ -51,8 +51,9 @@ async function getCampaignsWithTracking(_, { pageOptions, companyId, campaignId 
                         descriptionHTML: 1,
                         companies: 1,
                         createdBy: 1,
+                        batchId: 1,
                         subject: 1,
-                        emailData: { $slice: ['$emailData', 0, 10]},
+                        emailData: { $slice: ['$emailData', (pageOptions.pageNumber - 1) * pageOptions.limit, pageOptions.limit]},
                         count: { $size: "$emailData"}
                     }
                 },
@@ -461,23 +462,24 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
                 createdBy
             };
     
+            // Create Batch
+            const batchObj = {
+                name: label,
+                createdBy: createdBy
+            };
+            const batchData = new Batch(batchObj);
+            await batchData.save();
+
             //Create campaign
             const campaignObj = {
                 name: label + ' Campaign',
                 createdBy: createdBy,
-                companies: [{ _id: companies._id }]
+                companies: [{ _id: companies._id }],
+                batchId: batchData._id
             };
             const campaignData = new Campaign(campaignObj);
             const cResult = await campaignData.save();
             
-            // Create Batch
-            const batchObj = {
-                name: label,
-                createdBy: createdBy,
-                campaignId: cResult._id
-            };
-            const batchData = new Batch(batchObj);
-            await batchData.save();
     
             // const fileData = new File(fileObj);
             // const fileResult = await fileData.save();

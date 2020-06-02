@@ -100,7 +100,7 @@ const graphQlCampaignSchema = `
     }
 
     extend type Query {
-        getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String): [Campaign]
+        getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String, batchId: String): [Campaign]
         getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
     }
 

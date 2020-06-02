@@ -11,6 +11,10 @@ const campaignSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         },
+        batchId: {
+            type: Schema.Types.ObjectId,
+            ref: "batch",
+        },
         name: String,
         descriptionHTML: String,
         subject: String,
