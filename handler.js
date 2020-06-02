@@ -699,11 +699,9 @@ const readAndSaveEmailDataFromS3 = (event, context) => {
                         console.log("Err in reading ==> ", err, err.stack);
                         reject(false);
                     } else {
-                        console.log("Raw email:\n" + data.Body, typeof data.Body, data.Body.toString());
-                        
-                        console.log("Keys are ==> ", Object.keys(data.Body));
-                        
-                        const result = JSON.stringify(data.body);
+
+                        const result = JSON.stringify(data.Body);
+                        console.log("Result ==> ", result);
                         const regex = new RegExp('\{(campaignId:[^}]+)\}');
                         const regexData = result.match(regex);
                         console.log('This is regexData ==> ', regexData);
