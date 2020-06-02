@@ -25,6 +25,7 @@ const partialRight = require('lodash/function').partialRight;
 const pick = require('lodash/object').pick;
 var moment = require('moment');
 const contactModel = require('../models/contact')();
+const uniq = require('lodash/array').uniq;
 
 let conn;
 
@@ -50,6 +51,9 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
             await int.save(post).then(async (p) => {
                 console.log(p)
 
+                /** User to be notified realtime */
+                const usersToBeNotified = uniq(([p.createdBy].concat(p.collaborators).concat(p.clients)).map(i => i.toString()));
+
                 p.populate('createdBy')
                     .populate('tags')
                     .populate('cities')
@@ -59,6 +63,9 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('assignees')
                     .populate('clients')
                     .execPopulate().then(async populatedPost => {
+
+                        /** Update the users Realtime */
+                        await pubSub.publish('LISTEN_NOTIFICATION', { postUpdated: { post: p }, usersToBeNotified })
 
                         /** Send email notification to the post creator */
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
@@ -277,6 +284,12 @@ async function updatePostContent(_, { post, updatedBy }, { headers, db, decodedT
                 if (err) {
                     return reject(err)
                 }
+
+                await res.populate('createdBy').execPopulate();
+
+                /** Update the users connected with the post realtime */
+                const usersToBeNotified = uniq(([res.createdBy._id].concat(res.collaborators).concat(res.clients)).map(i => i.toString()));
+                await pubSub.publish('LISTEN_NOTIFICATION', { postUpdated: { post: res }, usersToBeNotified })
                 return resolve(res.descriptionHTML);
             });
 
@@ -304,10 +317,15 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
 
             const postTemp = await Post.findOne({ _id: post._id });
 
+
+
             await Post.findOneAndUpdate({ _id: post._id }, post, { new: true, useFindAndModify: false }, async (err, res) => {
                 if (err) {
                     return reject(err)
                 }
+
+                /** Users to be notified realtime */
+                const usersToBeNotified = uniq(([res.createdBy].concat(res.collaborators).concat(res.clients)).map(i => i.toString()));
 
                 res
                     .populate('createdBy')
@@ -321,6 +339,9 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                     .populate('clients')
 
                     .execPopulate().then(async (d) => {
+
+                        /** Update the users connected with the post realtime */
+                        await pubSub.publish('LISTEN_NOTIFICATION', { postUpdated: { post: res }, usersToBeNotified })
 
                         const allUserAfterPostSave = await helper.getUserAssociatedWithPost(post._id);
 
@@ -375,26 +396,6 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                             })
                             console.log(collaboratorsToSendEmail);
                         }
-
-                        // if (res && post.assignees && post.assignees.length) {
-                        //     const assigneesAfterUpdate = await res.toObject();
-                        //     const assigneesBeforeUpdate = (await postTemp.populate('assignees').execPopulate()).toObject();
-                        //     const assiggneesToSendEmail = differenceBy(assigneesAfterUpdate.assignees, assigneesBeforeUpdate.assignees, 'email');
-
-                        //     const filePath = basePath + 'email-template/common-template';
-                        //     const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
-                        //     assiggneesToSendEmail.forEach(async (u) => {
-                        //         const payLoad = {
-                        //             NAME: u.name,
-                        //             LINK: productLink,
-                        //             CONTENT: `A "${res.type} ${res.name}" has been assigned to you by ${res.createdBy.name}. Please Click here to check the details.`,
-                        //             SUBJECT: `New Assignment ${res.name} assigned to you`
-                        //             // TYPE: type ? type : string.capitalize(post.type)
-                        //         };
-                        //         await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
-                        //     })
-                        //     console.log(assiggneesToSendEmail);
-                        // }
 
                         return resolve(d);
                     });
@@ -453,59 +454,6 @@ async function deletePost(_, { postId, deletedBy }, { headers, db, decodedToken 
             );
 
 
-
-        } catch (e) {
-            console.log(e);
-            return reject(e);
-        }
-    });
-}
-
-async function fetchFiles(_, { blockType, userId }, { headers }) {
-    return new Promise(async (resolve, reject) => {
-        try {
-
-            conn = await connectToMongoDB();
-
-            let files = await Post.aggregate([
-                {
-                    $match:
-                    {
-                        "description.data.createdBy": ObjectID(userId),
-                        "description.type": blockType
-                    }
-                },
-                {
-                    $project:
-                    {
-                        blocks:
-                        {
-                            $filter:
-                            {
-                                input: "$description",
-                                as: "block",
-                                cond: { $and: [{ $eq: ["$$block.type", blockType] }, { $eq: ["$$block.data.createdBy", ObjectID(userId)] }] }
-                            }
-                        }
-                    }
-                },
-                {
-                    $unwind:
-                    {
-                        path: "$blocks",
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $group:
-                    {
-                        _id: "$blocks.data.createdBy",
-                        blocks: { $push: "$blocks" }
-                    }
-                },
-            ])
-
-            resolve(files && files.length ? files[0].blocks : []);
 
         } catch (e) {
             console.log(e);
@@ -906,30 +854,12 @@ async function fullSearch(_, { searchString }, { headers, db, decodedToken }) {
                         as: 'tags'
                     }
                 },
-                { $match: { $or: [{ name: { $regex: regex } }, { "description.data.text": { $regex: regex } }, { type: { $regex: regex } }, { "tags.name": { $regex: regex } }] } },
+                { $match: { $or: [{ name: { $regex: regex } }, { "descriptionHTML": { $regex: regex } }, { type: { $regex: regex } }, { "tags.name": { $regex: regex } }] } },
                 //  {$lookup: {
 
                 //  }}
 
             ]).exec();
-
-            // posts = await Post.find({
-
-            //     $or: [
-            //         {
-            //             name: { $regex: regex }
-            //         },
-            //         {
-            //             type: { $regex: regex }
-            //         },
-            //         {
-            //             'description.data.text': { $regex: regex }
-            //         },
-            //     ],
-
-            // }).populate('createdBy').populate('tags').exec();
-            // posts = await Post.find({ $text: { $search : searchString }}).populate('createdBy').populate('tags')
-            // .exec();
 
             return await resolve(posts);
 
@@ -1186,7 +1116,6 @@ async function saveContact(_, { }, { header, db, decodedToken }) {
 
 module.exports = {
     getAllPosts,
-    fetchFiles,
     fullSearch,
     getEmailPhoneCountForContact,
     addPost,

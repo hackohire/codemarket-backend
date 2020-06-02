@@ -22,6 +22,7 @@ const { addformData, fetchformData } = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
 const { createVideoToken } = require('./videoCall');
 const { generateCkEditorToken } = require('./auth');
+const { pubSub } = require('../helpers/pubsub');
 
 module.exports = {
   JSON: GraphQLJSON,
@@ -172,7 +173,8 @@ module.exports = {
     onUserOnline: {
       resolve: (rootValue) => {
         // root value is the payload from sendMessage mutation
-        return { onCommentAdded: rootValue.comment, };
+        delete rootValue['usersToBeNotified'];
+        return rootValue;
       },
       subscribe: withFilter(
         pubSub.subscribe('LISTEN_NOTIFICATION'),

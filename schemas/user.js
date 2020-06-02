@@ -64,15 +64,19 @@ type User {
     productCount: Int
   }
 
-  type SubscriptionEvents {
-    onCommentAdded: Comment
+  type UserPostSubscriptionResponse {
+    postAdded: UserNotificationData
+    postUpdated: UserNotificationData
+    postDeleted: UserNotificationData
+    commentAdded: UserNotificationData
+    commentUpdated: UserNotificationData
+    commentDeleted: UserNotificationData
   }
 
-  type UserPostSubscriptionResponse {
-    postAdded: Post
-    postUpdated: Post
-    postDeleted: Post
-}
+  type UserNotificationData {
+    post: Post
+    comment: Comment
+  }
 
   extend type Query {
     getUsers(_page: Int _limit: Int): [User!]!
@@ -89,7 +93,7 @@ type User {
   }
 
   extend type Subscription {
-    onUserOnline(user: UserInput): SubscriptionEvents
+    onUserOnline(user: UserInput): UserPostSubscriptionResponse
     onUsersPostChanges(userId: String): UserPostSubscriptionResponse
   }
 `
