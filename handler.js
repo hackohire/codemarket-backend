@@ -744,11 +744,11 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
 
                         //Get index of both the regex and for loop to get the actual reply between them
                         for(i=match1.index ; i<match2.index ; i++) {
-                            repliedHTML += result[index];
+                            repliedHTML += result[i];
                         }
 
                         console.log('This is RepliedHTMLSring ===> ', repliedHTML);
-                        
+
                         const eData = await Email.updateOne({to: toEmail, campaignId: campaignId, batchId: batchId},{$set: { isReplied: true }});
                         console.log("EDATA ===> ", eData);
                         resolve(true);
