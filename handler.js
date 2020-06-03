@@ -696,7 +696,7 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
             s3.getObject({
                     Bucket: bucketName,
                     Key: sesNotification.mail.messageId
-                }, function(err, data) {
+                }, async function(err, data) {
                     if (err) {
                         console.log("Err in reading ==> ", err, err.stack);
                         reject(false);
