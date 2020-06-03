@@ -749,7 +749,7 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
 
                         console.log('This is RepliedHTMLSring ===> ', repliedHTML);
 
-                        const eData = await Email.updateOne({to: toEmail, campaignId: campaignId, batchId: batchId},{$set: { isReplied: true }});
+                        const eData = await Email.updateOne({to: toEmail, campaignId: campaignId, batchId: batchId},{$set: { isReplied: true, repliedHTML: repliedHTML }});
                         console.log("EDATA ===> ", eData);
                         resolve(true);
                     }
