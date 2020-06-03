@@ -700,7 +700,10 @@ const readAndSaveEmailDataFromS3 = (event, context) => {
                         reject(false);
                     } else {
 
-                        let bufferOriginal = Buffer.from(JSON.parse(data.Body).data);
+                        const jsonString = JSON.stringify(data.Body);
+                        console.log("Json strign ==> ", jsonString);
+                        
+                        let bufferOriginal = Buffer.from(JSON.parse(jsonString).data);
 
                         console.log("Original ==> ", bufferOriginal);
 
