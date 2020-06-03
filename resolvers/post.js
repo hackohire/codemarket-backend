@@ -460,41 +460,43 @@ async function deletePost(_, { postId, deletedBy }, { headers, db, decodedToken 
     });
 }
 
-async function getAllPosts(_, { pageOptions, type, reference, companyId, connectedWithUser, createdBy }, { headers, db, decodedToken }) {
+async function getAllPosts(_, { pageOptions, type, reference, companyId, connectedWithUser, createdBy, searchString }, { headers }) {
     return new Promise(async (resolve, reject) => {
         try {
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'updatedAt';
             let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
 
-            if (!db) {
-                console.log('Creating new mongoose connection.');
-                conn = await connectToMongoDB();
-            } else {
-                console.log('Using existing mongoose connection.');
-            }
+            conn = await connectToMongoDB();
 
             let condition = {
                 status: 'Published',
-                type: type ? type : { $ne: null }
+                type: type ? type : { $ne: null },
+                '$and': []
             }
 
-            if (createdBy) {
-                condition['$and'] = [{
+            if (searchString) {
+                /** Fetching all the Posts containing the search string */
+                var regex = new RegExp(searchString, 'i');
+
+                condition['$and'].push({
                     '$or': [
-                        { createdBy: ObjectID(createdBy) }
+                        { 'descriptionHTML': { $regex: regex } },
+                        { 'name': { $regex: regex } },
+                        { 'type': { $regex: regex } },
+                        { 'tags.name': { $regex: regex } }
                     ]
-                }]
+                })
             }
 
             if (connectedWithUser) {
-                condition['$and'] = [{
+                condition['$and'].push({
                     '$or': [
                         { collaborators: ObjectID(connectedWithUser) },
                         { assignees: ObjectID(connectedWithUser) },
                         { createdBy: ObjectID(connectedWithUser) }
                     ]
-                }]
+                })
             }
 
             if (reference) {
@@ -543,46 +545,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 {
                     $match: condition
                 },
-                /** The below commented code is to fetch the comments related to the posts */
-                // {
-                //     $lookup: {
-                //         from: 'comments',
-                //         let: { status: "$status", reference_id: "$_id" },
-                //         pipeline: [
-                //             {
-                //                 $match:
-                //                 {
-                //                     $expr:
-                //                     {
-                //                         $and:
-                //                             [
-                //                                 { $ne: ["$status", "Deleted"] },
-                //                                 { $eq: ["$$reference_id", "$referenceId"] },
-                //                                 { $eq: ["$parentId", null] }
-                //                             ]
-                //                     }
-                //                 }
-                //             },
-                //             // {
-                //             //     $lookup: {
-                //             //         "from": "users",
-                //             //         "let": { "created_by": "$createdBy" },
-                //             //         pipeline: [
-                //             //             { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
-                //             //         ],
-                //             //         as: "createdBy"
-                //             //     }
-                //             // },
-                //             // {
-                //             //     $unwind: {
-                //             //         "path": "$createdBy",
-                //             //         "preserveNullAndEmptyArrays": true
-                //             //     }
-                //             // },
-                //         ],
-                //         as: 'comments'
-                //     }
-                // },
                 {
                     $lookup: {
                         from: 'likes',
@@ -802,19 +764,11 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 // .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
                 .exec();
 
-            /** Fetching all the Published Posts */
-            // posts = await Post.find({ 
-            //     status: 'Published'
-            // }).populate('createdBy').populate('tags')
-            //     .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-            //     .limit(pageOptions.limit)
-            //     .sort(sort)
-            //     .exec();
 
             return await resolve(
                 {
                     posts: posts && posts.length ? posts[0].posts : [],
-                    total: posts && posts.length && posts[0].pageInfo ? posts[0].pageInfo[0].count : 0
+                    total: posts && posts.length && posts[0].pageInfo && posts[0].pageInfo.length ? posts[0].pageInfo[0].count : 0
                 });
 
         } catch (e) {
@@ -853,9 +807,6 @@ async function fullSearch(_, { searchString }, { headers, db, decodedToken }) {
                     }
                 },
                 { $match: { $or: [{ name: { $regex: regex } }, { "descriptionHTML": { $regex: regex } }, { type: { $regex: regex } }, { "tags.name": { $regex: regex } }] } },
-                //  {$lookup: {
-
-                //  }}
 
             ]).exec();
 
