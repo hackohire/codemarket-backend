@@ -25,6 +25,7 @@ const partialRight = require('lodash/function').partialRight;
 const pick = require('lodash/object').pick;
 var moment = require('moment');
 const contactModel = require('../models/contact')();
+const uniq = require('lodash/array').uniq;
 
 let conn;
 
@@ -50,6 +51,9 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
             await int.save(post).then(async (p) => {
                 console.log(p)
 
+                /** User to be notified realtime */
+                const usersToBeNotified = uniq(([p.createdBy].concat(p.collaborators).concat(p.clients)).map(i => i.toString()));
+
                 p.populate('createdBy')
                     .populate('tags')
                     .populate('cities')
@@ -59,6 +63,9 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('assignees')
                     .populate('clients')
                     .execPopulate().then(async populatedPost => {
+
+                        /** Update the users Realtime */
+                        await pubSub.publish('LISTEN_NOTIFICATION', { postUpdated: { post: p }, usersToBeNotified })
 
                         /** Send email notification to the post creator */
                         await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
@@ -277,6 +284,12 @@ async function updatePostContent(_, { post, updatedBy }, { headers, db, decodedT
                 if (err) {
                     return reject(err)
                 }
+
+                await res.populate('createdBy').execPopulate();
+
+                /** Update the users connected with the post realtime */
+                const usersToBeNotified = uniq(([res.createdBy._id].concat(res.collaborators).concat(res.clients)).map(i => i.toString()));
+                await pubSub.publish('LISTEN_NOTIFICATION', { postUpdated: { post: res }, usersToBeNotified })
                 return resolve(res.descriptionHTML);
             });
 
@@ -304,10 +317,15 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
 
             const postTemp = await Post.findOne({ _id: post._id });
 
+
+
             await Post.findOneAndUpdate({ _id: post._id }, post, { new: true, useFindAndModify: false }, async (err, res) => {
                 if (err) {
                     return reject(err)
                 }
+
+                /** Users to be notified realtime */
+                const usersToBeNotified = uniq(([res.createdBy].concat(res.collaborators).concat(res.clients)).map(i => i.toString()));
 
                 res
                     .populate('createdBy')
@@ -321,6 +339,9 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                     .populate('clients')
 
                     .execPopulate().then(async (d) => {
+
+                        /** Update the users connected with the post realtime */
+                        await pubSub.publish('LISTEN_NOTIFICATION', { postUpdated: { post: res }, usersToBeNotified })
 
                         const allUserAfterPostSave = await helper.getUserAssociatedWithPost(post._id);
 
@@ -376,26 +397,6 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                             console.log(collaboratorsToSendEmail);
                         }
 
-                        // if (res && post.assignees && post.assignees.length) {
-                        //     const assigneesAfterUpdate = await res.toObject();
-                        //     const assigneesBeforeUpdate = (await postTemp.populate('assignees').execPopulate()).toObject();
-                        //     const assiggneesToSendEmail = differenceBy(assigneesAfterUpdate.assignees, assigneesBeforeUpdate.assignees, 'email');
-
-                        //     const filePath = basePath + 'email-template/common-template';
-                        //     const productLink = `${process.env.FRONT_END_URL}post/${res.slug}`;
-                        //     assiggneesToSendEmail.forEach(async (u) => {
-                        //         const payLoad = {
-                        //             NAME: u.name,
-                        //             LINK: productLink,
-                        //             CONTENT: `A "${res.type} ${res.name}" has been assigned to you by ${res.createdBy.name}. Please Click here to check the details.`,
-                        //             SUBJECT: `New Assignment ${res.name} assigned to you`
-                        //             // TYPE: type ? type : string.capitalize(post.type)
-                        //         };
-                        //         await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
-                        //     })
-                        //     console.log(assiggneesToSendEmail);
-                        // }
-
                         return resolve(d);
                     });
             });
@@ -407,8 +408,6 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
         }
     });
 }
-
-
 
 async function deletePost(_, { postId, deletedBy }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
@@ -461,94 +460,43 @@ async function deletePost(_, { postId, deletedBy }, { headers, db, decodedToken 
     });
 }
 
-async function fetchFiles(_, { blockType, userId }, { headers }) {
-    return new Promise(async (resolve, reject) => {
-        try {
-
-            conn = await connectToMongoDB();
-
-            let files = await Post.aggregate([
-                {
-                    $match:
-                    {
-                        "description.data.createdBy": ObjectID(userId),
-                        "description.type": blockType
-                    }
-                },
-                {
-                    $project:
-                    {
-                        blocks:
-                        {
-                            $filter:
-                            {
-                                input: "$description",
-                                as: "block",
-                                cond: { $and: [{ $eq: ["$$block.type", blockType] }, { $eq: ["$$block.data.createdBy", ObjectID(userId)] }] }
-                            }
-                        }
-                    }
-                },
-                {
-                    $unwind:
-                    {
-                        path: "$blocks",
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $group:
-                    {
-                        _id: "$blocks.data.createdBy",
-                        blocks: { $push: "$blocks" }
-                    }
-                },
-            ])
-
-            resolve(files && files.length ? files[0].blocks : []);
-
-        } catch (e) {
-            console.log(e);
-            return reject(e);
-        }
-    });
-}
-
-async function getAllPosts(_, { pageOptions, type, reference, companyId, connectedWithUser, createdBy }, { headers, db, decodedToken }) {
+async function getAllPosts(_, { pageOptions, type, reference, companyId, connectedWithUser, createdBy, searchString }, { headers }) {
     return new Promise(async (resolve, reject) => {
         try {
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'updatedAt';
             let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
 
-            if (!db) {
-                console.log('Creating new mongoose connection.');
-                conn = await connectToMongoDB();
-            } else {
-                console.log('Using existing mongoose connection.');
-            }
+            conn = await connectToMongoDB();
 
             let condition = {
                 status: 'Published',
-                type: type ? type : { $ne: null }
+                type: type ? type : { $ne: null },
+                '$and': []
             }
 
-            if (createdBy) {
-                condition['$and'] = [{
+            if (searchString) {
+                /** Fetching all the Posts containing the search string */
+                var regex = new RegExp(searchString, 'i');
+
+                condition['$and'].push({
                     '$or': [
-                        { createdBy: ObjectID(createdBy) }
+                        { 'descriptionHTML': { $regex: regex } },
+                        { 'name': { $regex: regex } },
+                        { 'type': { $regex: regex } },
+                        { 'tags.name': { $regex: regex } }
                     ]
-                }]
+                })
             }
 
             if (connectedWithUser) {
-                condition['$and'] = [{
+                condition['$and'].push({
                     '$or': [
                         { collaborators: ObjectID(connectedWithUser) },
                         { assignees: ObjectID(connectedWithUser) },
                         { createdBy: ObjectID(connectedWithUser) }
                     ]
-                }]
+                })
             }
 
             if (reference) {
@@ -597,46 +545,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 {
                     $match: condition
                 },
-                /** The below commented code is to fetch the comments related to the posts */
-                // {
-                //     $lookup: {
-                //         from: 'comments',
-                //         let: { status: "$status", reference_id: "$_id" },
-                //         pipeline: [
-                //             {
-                //                 $match:
-                //                 {
-                //                     $expr:
-                //                     {
-                //                         $and:
-                //                             [
-                //                                 { $ne: ["$status", "Deleted"] },
-                //                                 { $eq: ["$$reference_id", "$referenceId"] },
-                //                                 { $eq: ["$parentId", null] }
-                //                             ]
-                //                     }
-                //                 }
-                //             },
-                //             // {
-                //             //     $lookup: {
-                //             //         "from": "users",
-                //             //         "let": { "created_by": "$createdBy" },
-                //             //         pipeline: [
-                //             //             { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
-                //             //         ],
-                //             //         as: "createdBy"
-                //             //     }
-                //             // },
-                //             // {
-                //             //     $unwind: {
-                //             //         "path": "$createdBy",
-                //             //         "preserveNullAndEmptyArrays": true
-                //             //     }
-                //             // },
-                //         ],
-                //         as: 'comments'
-                //     }
-                // },
                 {
                     $lookup: {
                         from: 'likes',
@@ -856,19 +764,11 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 // .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
                 .exec();
 
-            /** Fetching all the Published Posts */
-            // posts = await Post.find({ 
-            //     status: 'Published'
-            // }).populate('createdBy').populate('tags')
-            //     .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-            //     .limit(pageOptions.limit)
-            //     .sort(sort)
-            //     .exec();
 
             return await resolve(
                 {
                     posts: posts && posts.length ? posts[0].posts : [],
-                    total: posts && posts.length && posts[0].pageInfo ? posts[0].pageInfo[0].count : 0
+                    total: posts && posts.length && posts[0].pageInfo && posts[0].pageInfo.length ? posts[0].pageInfo[0].count : 0
                 });
 
         } catch (e) {
@@ -906,30 +806,9 @@ async function fullSearch(_, { searchString }, { headers, db, decodedToken }) {
                         as: 'tags'
                     }
                 },
-                { $match: { $or: [{ name: { $regex: regex } }, { "description.data.text": { $regex: regex } }, { type: { $regex: regex } }, { "tags.name": { $regex: regex } }] } },
-                //  {$lookup: {
-
-                //  }}
+                { $match: { $or: [{ name: { $regex: regex } }, { "descriptionHTML": { $regex: regex } }, { type: { $regex: regex } }, { "tags.name": { $regex: regex } }] } },
 
             ]).exec();
-
-            // posts = await Post.find({
-
-            //     $or: [
-            //         {
-            //             name: { $regex: regex }
-            //         },
-            //         {
-            //             type: { $regex: regex }
-            //         },
-            //         {
-            //             'description.data.text': { $regex: regex }
-            //         },
-            //     ],
-
-            // }).populate('createdBy').populate('tags').exec();
-            // posts = await Post.find({ $text: { $search : searchString }}).populate('createdBy').populate('tags')
-            // .exec();
 
             return await resolve(posts);
 
@@ -1184,9 +1063,38 @@ async function saveContact(_, { }, { header, db, decodedToken }) {
     })
 }
 
+async function getPostByPostType(_, { postType, userId, pageOptions }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
+            let condition = { type: postType }
+            if (userId) {
+                condition.createdBy = userId;
+            }
+            let total = await Post.countDocuments(condition).exec()
+            const posts = await Post.find(condition)
+                .populate('createdBy')
+                .sort(sort)
+                .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
+                .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
+                .exec();
+            return resolve({ posts, total });
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 module.exports = {
     getAllPosts,
-    fetchFiles,
     fullSearch,
     getEmailPhoneCountForContact,
     addPost,
@@ -1198,4 +1106,5 @@ module.exports = {
     updatePostContent,
     getCountOfAllPost,
     saveContact,
+    getPostByPostType,
 }
