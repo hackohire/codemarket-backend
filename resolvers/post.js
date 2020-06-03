@@ -1063,7 +1063,7 @@ async function saveContact(_, { }, { header, db, decodedToken }) {
     })
 }
 
-async function getPostByPostType(_, { postType, pageOptions }, { headers, db, decodedToken }) {
+async function getPostByPostType(_, { postType, userId, pageOptions }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
             if (!db) {
@@ -1075,6 +1075,9 @@ async function getPostByPostType(_, { postType, pageOptions }, { headers, db, de
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'createdAt';
             let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? pageOptions.sort.order : 'desc' };
             let condition = { type: postType }
+            if (userId) {
+                condition.createdBy = userId;
+            }
             let total = await Post.countDocuments(condition).exec()
             const posts = await Post.find(condition)
                 .populate('createdBy')
