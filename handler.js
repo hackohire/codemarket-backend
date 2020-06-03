@@ -729,7 +729,25 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
                         const toEmail = toEmailRegexData[1].split(':')[1];
 
                         console.log("SPLIT1: ", campaignId, batchId, toEmail);
-                        // Custom email processing goes here
+                        
+                        // Get two regex which are uniq. Our reply would be in these two regex
+                        let repliedHTML = '';
+                        const regex1 = new RegExp('Content-Type: text/plain; charset="UTF-8"');
+                        const regex2 = new RegExp('On ');
+
+                        //Find string which match with the regex1
+                        const match1 = result.match(regex1);
+                        console.log('This is match1 ===> ', match1);
+                        //Find string which match with the regexq
+                        const match2 = result.match(regex2);
+                        console.log('This is match1 ===> ', match2);
+
+                        //Get index of both the regex and for loop to get the actual reply between them
+                        for(i=match1.index ; i<match2.index ; i++) {
+                            repliedHTML += result[index];
+                        }
+
+                        console.log('This is RepliedHTMLSring ===> ', repliedHTML);
                         
                         const eData = await Email.updateOne({to: toEmail, campaignId: campaignId, batchId: batchId},{$set: { isReplied: true }});
                         console.log("EDATA ===> ", eData);

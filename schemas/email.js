@@ -29,6 +29,8 @@ const graphQlEmailSchema = `
         slug: String
 
         tracking: [TrackingData]
+        isReplied: Boolean
+        repliedHTML: String
     }
 
     input EmailInput {
@@ -56,6 +58,8 @@ const graphQlEmailSchema = `
         comments: [CommentInput]
         city: String
         slug: String
+        isReplied: Boolean
+        repliedHTML: String
     }    
 
     extend type Mutation {
