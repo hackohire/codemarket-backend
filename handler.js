@@ -683,12 +683,14 @@ const validateEmail = (event, context) => {
     });
 }
 
-const readAndSaveEmailDataFromS3 = (event, context) => {
+const readAndSaveEmailDataFromS3 = async (event, context) => {
     return new Promise((resolve, reject) => {
         try {
             var bucketName = 'email-test-reply';
             var sesNotification = event.Records[0].ses;
             console.log("SES Notification:\n", JSON.stringify(sesNotification, null, 2));
+            
+            let conn = await connectToMongoDB();
             
             // Retrieve the email from your bucket
             s3.getObject({
