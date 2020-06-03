@@ -700,6 +700,8 @@ const readAndSaveEmailDataFromS3 = (event, context) => {
                         reject(false);
                     } else {
 
+                        console.log("Keys ==> " ,Object.keys(data.Body));
+                        console.log("Values ==> " ,Object.values(data.Body));
                         const result = JSON.stringify(data.Body);
                         console.log("Result ==> ", result);
                         const regex = new RegExp('\{(campaignId:[^}]+)\}');
