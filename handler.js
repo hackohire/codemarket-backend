@@ -731,7 +731,7 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
                         console.log("SPLIT1: ", campaignId, batchId, toEmail);
                         // Custom email processing goes here
                         
-                        const eData = await Email.find({to: toEmail, campaignId: campaignId, batchId: batchId});
+                        const eData = await Email.updateOne({to: toEmail, campaignId: campaignId, batchId: batchId},{$set: { isReplied: true }});
                         console.log("EDATA ===> ", eData);
                         resolve(true);
                     }
