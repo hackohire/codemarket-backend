@@ -743,7 +743,7 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
                         console.log('This is match1 ===> ', match2);
 
                         //Get index of both the regex and for loop to get the actual reply between them
-                        for(i=match1.index ; i<match2.index ; i++) {
+                        for(i=match1.index+41 ; i<match2.index ; i++) {
                             repliedHTML += result[i];
                         }
 
