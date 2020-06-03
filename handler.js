@@ -732,7 +732,7 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
                         
                         // Get two regex which are uniq. Our reply would be in these two regex
                         let repliedHTML = '';
-                        const regex1 = new RegExp('Content-Type: text/plain; charset="UTF-8"');
+                        const regex1 = new RegExp('Content-Transfer-Encoding: quoted-printable');
                         const regex2 = new RegExp('On ');
 
                         //Find string which match with the regex1
@@ -743,7 +743,7 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
                         console.log('This is match1 ===> ', match2);
 
                         //Get index of both the regex and for loop to get the actual reply between them
-                        for(i=match1.index+41 ; i<match2.index ; i++) {
+                        for(i=match1.index+43 ; i<match2.index ; i++) {
                             repliedHTML += result[i];
                         }
 
