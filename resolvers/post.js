@@ -472,10 +472,12 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             let condition = {
                 status: 'Published',
                 type: type ? type : { $ne: null },
-                '$and': []
             }
 
             if (searchString) {
+                if (!condition['$and']) {
+                    condition['$and'] = [];
+                }
                 /** Fetching all the Posts containing the search string */
                 var regex = new RegExp(searchString, 'i');
 
@@ -490,6 +492,9 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             }
 
             if (connectedWithUser) {
+                if (!condition['$and']) {
+                    condition['$and'] = [];
+                }
                 condition['$and'].push({
                     '$or': [
                         { collaborators: ObjectID(connectedWithUser) },
