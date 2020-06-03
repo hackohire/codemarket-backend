@@ -412,6 +412,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                         status: "Published",
                         subject: tempSubjectName,
                         html: tempEmailTemplate,
+                        batchId: batches._id,
                         campaignId: campaignData[0]._id,
                         createdBy: createdBy,
                         companies: [{ _id: companies._id }],

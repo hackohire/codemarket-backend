@@ -723,12 +723,14 @@ const readAndSaveEmailDataFromS3 = (event, context) => {
                         console.log('This is toEmailRegexData ==> ', toEmailRegexData);
 
                         const campaignId = campaignRegexData[1].split(':')[1];
-                        const batchId = campaignRegexData[1].split(':')[1];
-                        const toEmail = campaignRegexData[1].split(':')[1];
+                        const batchId = batchRegexData[1].split(':')[1];
+                        const toEmail = toEmailRegexData[1].split(':')[1];
 
                         console.log("SPLIT1: ", campaignId, batchId, toEmail);
                         // Custom email processing goes here
                         
+                        const eData = await Email.find({to: toEmail, campaignId: campaignId, batchId: batchId});
+                        console.log("EDATA ===> ", eData);
                         resolve(true);
                     }
                 });

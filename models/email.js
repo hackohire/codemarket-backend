@@ -22,6 +22,8 @@ const emailSchema = new Schema(
         },
         campaignId: Schema.Types.ObjectId,
         batchId: Schema.Types.ObjectId,
+        isReplied: Boolean,
+        repliedHTML: String,
         dateRange: [String],
         companies: [{
             type: Schema.Types.ObjectId,
