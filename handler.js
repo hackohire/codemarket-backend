@@ -702,18 +702,31 @@ const readAndSaveEmailDataFromS3 = (event, context) => {
 
                         const jsonString = JSON.stringify(data.Body);
                         console.log("Json strign ==> ", jsonString);
-                        
+
                         let bufferOriginal = Buffer.from(JSON.parse(jsonString).data);
 
                         console.log("Original ==> ", bufferOriginal);
 
                         const result = bufferOriginal.toString('utf8');
                         console.log("Result ==> ", bufferOriginal.toString('utf8'));
-                        const regex = new RegExp('\{(campaignId:[^}]+)\}');
-                        const regexData = result.match(regex);
-                        console.log('This is regexData ==> ', regexData);
+                        const campaingRegex = new RegExp('\{(campaignId:[^}]+)\}');
+                        const batchRegex = new RegExp('\{(batchId:[^}]+)\}');
+                        const toEmailRegex = new RegExp('\{(toEmail:[^}]+)\}');
 
-                        console.log("SPLIT1: ", regexData[1].split(':'), regexData[1].split(':')[1]);
+                        const campaignRegexData = result.match(campaingRegex);
+                        console.log('This is campaignRegexData ==> ', campaignRegexData);
+
+                        const batchRegexData = result.match(batchRegex);
+                        console.log('This is batchRegexData ==> ', batchRegexData);
+
+                        const toEmailRegexData = result.match(toEmailRegex);
+                        console.log('This is toEmailRegexData ==> ', toEmailRegexData);
+
+                        const campaignId = campaignRegexData[1].split(':')[1];
+                        const batchId = campaignRegexData[1].split(':')[1];
+                        const toEmail = campaignRegexData[1].split(':')[1];
+
+                        console.log("SPLIT1: ", campaignId, batchId, toEmail);
                         // Custom email processing goes here
                         
                         resolve(true);

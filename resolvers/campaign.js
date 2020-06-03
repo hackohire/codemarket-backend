@@ -416,8 +416,10 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                         createdBy: createdBy,
                         companies: [{ _id: companies._id }],
                     };
-                    const hiddenElement = `<p style="display: none;"> {campaignId:${campaignData[0]._id}}</p>`
-                    mailOption.html = "<html><body>" + mailOption.html + hiddenElement + "</body></html>";
+                    const hiddenElement = `<p style="display: none;"> {campaignId:${campaignData[0]._id}}</p>`;
+                    const batchElement = `<p style="display: none;"> {batchId:${batches._id}}</p>`;
+                    const toEmailElement = `<p style="display: none;"> {toEmail:${data[index].email[0].email}}</p>`;
+                    mailOption.html = "<html><body>" + mailOption.html + hiddenElement + batchElement + toEmailElement + "</body></html>";
                     const params = {
                         MessageBody: JSON.stringify(mailOption),
                         QueueUrl: queueUrl,
