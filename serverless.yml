@@ -33,6 +33,7 @@ provider:
     CKEDITOR_ENVIRONMENT_ID: ${file(env.yml):${self:provider.stage}.CKEDITOR_ENVIRONMENT_ID}
     CKEDITOR_SECRET_KEY: ${file(env.yml):${self:provider.stage}.CKEDITOR_SECRET_KEY}
 
+    SEND_EMAIL_QUEUE: sendEmail-${self:service}-${self:provider.stage}
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
     EVENTS: ${self:service}-${self:provider.stage}-Events
