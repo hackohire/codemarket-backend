@@ -5,9 +5,7 @@ const graphQlPostSchema = `
         _id: ID
         name: String
         type: String
-        description: [descriptionBlocks]
         referencePostUrl: String
-        featuredImage: String
         createdBy: User
         users: [User]
         price: Int
@@ -18,31 +16,16 @@ const graphQlPostSchema = `
         tags: [Tag]
         comments: [Comment]
         commentCount: Int
-        likeCount: Int
         slug: String
-
-        dateRange: [String]
-        location: Location
-        eventType: String
-        membershipRequired: Boolean
-        validSubscription: Boolean
-        usersAttending: [User]
         cover: String
 
         cities: [City]
         companies: [Company]
-        salaryCurrency: String
-        salaryRangeFrom: Int
-        salaryRangeTo: Int
-        jobProfile: [Tag]
-        timeline: Int
-
-        purchasedBy: [PurchasedBy]
 
         connectedPosts: [Post]
         collaborators: [User]
-        assignees: [User]
         clients: [User]
+
         phone: [String]
         email: [String]
         birthDate: String
@@ -51,6 +34,7 @@ const graphQlPostSchema = `
 
         descriptionHTML: String
         activities: [Activities]
+
         appointment_date: String
         cancelReason: String
     }
@@ -59,10 +43,7 @@ const graphQlPostSchema = `
         _id: ID
         name: String
         type: String
-        description: [InputdescriptionBlock]
         referencePostUrl: String
-        shortDescription: String
-        featuredImage: String
         createdBy: ID
         users: [UserInput]
         price: Int
@@ -72,21 +53,11 @@ const graphQlPostSchema = `
         updatedAt: String
         slug: String
         comments: [CommentInput]
-
-        dateRange: [String]
-        location: LocationInput
-        eventType: String
-        membershipRequired: Boolean
         cover: String
 
         cities: [ID]
 
         companies: [CompanyInput]
-        salaryCurrency: String
-        salaryRangeFrom: Int
-        salaryRangeTo: Int
-        jobProfile: [ID]
-        timeline: Int
 
         connectedPosts: [ID]
         connectedEmail: ID
@@ -123,45 +94,6 @@ const graphQlPostSchema = `
         commentID: ID
         postId: ID
         message: String
-    }
-
-    type Location {
-        latitude: Float
-        longitude: Float
-        address: String
-        additionalLocationDetails: String
-    }
-
-    input LocationInput {
-        latitude: Float
-        longitude: Float
-        address: String
-        additionalLocationDetails: String
-    }
-
-    type SellProducts {
-        sellProducts: Boolean
-        products: [Tag]
-    }
-
-    input SellProductsInput {
-        sellProducts: Boolean
-        products: [ID]
-    }
-
-    type SellServices {
-        sellServices: Boolean
-        services: [Tag]
-    }
-
-    input SellServicesInput {
-        sellServices: Boolean
-        services: [ID]
-    }
-
-    type RsvpEventResponse {
-        validSubscription: Boolean
-        usersAttending: [User]
     }
 
     type GetPostsByUserIdAndTypeResponse {

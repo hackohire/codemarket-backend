@@ -1,29 +1,13 @@
 const connectToMongoDB = require('../helpers/db');
-const Product = require('../models/product')();
-// const HelpRequest = require('../models/help')();
-// const Interview = require('../models/interview')();
-// const Requirement = require('../models/requirement')();
-// const Testing = require('../models/testing')();
-// const Design = require('../models/design')();
-// const Howtodoc = require('../models/how-to-doc')();
-// const Goal = require('../models/goal')();
 const Post = require('../models/post')();
 const helper = require('../helpers/helper');
-const Like = require('./../models/like')();
-const Unit = require('./../models/purchased_units')();
 var ObjectID = require('mongodb').ObjectID;
-// const User = require('./../models/user')();
-// const Tag = require('./../models/tag')();
-// const Subscription = require('../models/subscription')();
-// var moment = require('moment');
-// var ObjectID = require('mongodb').ObjectID;
 const { pubSub } = require('../helpers/pubsub');
 const differenceBy = require('lodash/array').differenceBy;
 const unionBy = require('lodash/array').unionBy;
 const map = require('lodash/collection').map;
 const partialRight = require('lodash/function').partialRight;
 const pick = require('lodash/object').pick;
-var moment = require('moment');
 const contactModel = require('../models/contact')();
 const uniq = require('lodash/array').uniq;
 
@@ -192,36 +176,6 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                     if (err) {
                         return reject(err)
                     }
-
-                    if (res && res.type === 'product') {
-                        /** List of users who purchased the bugfix */
-                        let usersWhoPurchased = [];
-
-                        /** Find the unitsSold by reference_id stored as productId while purchase and populate userwho purchased */
-                        const unitsSold = await Unit.find({ reference_id: postId })
-                            .select('purchasedBy createdAt')
-                            .populate({ path: 'purchasedBy', select: 'name avatar' })
-                            .exec();
-
-                        /** If there is more than 0 units */
-                        if (unitsSold && unitsSold.length) {
-
-                            /** Map the array into the fileds "name", "_id", "createdAt" & "avatar" */
-                            usersWhoPurchased = unitsSold.map((u) => {
-                                let userWhoPurchased = {};
-                                userWhoPurchased = u.purchasedBy;
-                                userWhoPurchased.createdAt = u.createdAt;
-                                return userWhoPurchased;
-                            });
-                        }
-
-                        /** attach "purchasedBy" with the response */
-                        res['purchasedBy'] = usersWhoPurchased;
-                    }
-
-                    const likeCount = await Like.count({ referenceId: postId })
-
-                    res['likeCount'] = likeCount;
 
                     return resolve(res);
                 });
@@ -552,14 +506,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 },
                 {
                     $lookup: {
-                        from: 'likes',
-                        localField: '_id',
-                        foreignField: 'referenceId',
-                        as: 'likes'
-                    }
-                },
-                {
-                    $lookup: {
                         from: 'users',
                         localField: 'createdBy',
                         foreignField: '_id',
@@ -736,7 +682,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         slug: 1,
                         createdBy: { $arrayElemAt: ['$createdBy', 0] },
                         tags: 1,
-                        likeCount: { $size: '$likes' },
                         // comments: '$comments',
                         // commentCount: { $size: '$comments'},
                         createdAt: 1,

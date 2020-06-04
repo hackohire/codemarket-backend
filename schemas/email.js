@@ -9,7 +9,6 @@ const graphQlEmailSchema = `
         cc: [String]
         bcc: [String]
         subject: String
-        description: [descriptionBlocks]
         descriptionHTML: String
         city: String
         createdBy: User
@@ -40,7 +39,6 @@ const graphQlEmailSchema = `
         bcc: [String]
         subject: String
         type: String
-        description: [InputdescriptionBlock]
         descriptionHTML: String
 
         createdBy: ID

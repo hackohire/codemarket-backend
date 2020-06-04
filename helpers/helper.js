@@ -1,15 +1,11 @@
 const nodemailer = require('nodemailer');
-var auth = require('./auth');
 const Tag = require('../models/tag')();
 const City = require('../models/city')();
 const Post = require('../models/post')();
 var ObjectId = require('mongodb').ObjectID;
-const Unit = require('../models/purchased_units')();
 const Activity = require('../models/activity-track')();
 const { EmailTemplate } = require('email-templates-v2');
 var string = require('lodash/string');
-const AWS = require('aws-sdk');
-const util = require('util');
 var moment = require('moment');
 
 async function checkIfUserIsAdmin(decodedToken) {
@@ -158,112 +154,101 @@ async function sendPostCreationEmail(post, type = '') {
         HTML_CONTENT: post.descriptionHTML ? `${post.descriptionHTML}` : ``
         // TYPE: type ? type : string.capitalize(post.type)
     };
-    await sendEmail({to: [post.createdBy.email]}, filePath, payLoad);
-}
-
-async function insertManyIntoPurchasedUnit(units) {
-    console.log(units);
-    const unitsAdded = new Promise((resolve, reject) => {
-        Unit.insertMany(units, { ordered: false, rawResult: true }).then((d) => {
-            console.log(d)
-            resolve(d.ops.map(id => id._id));
-        });
-    })
-    return unitsAdded;
+    await sendEmail({ to: [post.createdBy.email] }, filePath, payLoad);
 }
 
 async function getUserAssociatedWithPost(postId) {
     const result = await Post.aggregate([
         {
-            $match: { _id: ObjectId(postId)}
-        },
-        {
-           $lookup:
-                {
-                    from: 'comments',
-                    localField: "_id",
-                    foreignField: "referenceId",
-                    as: "commentData"
-                }
-        },
-        {
-           $lookup:
-                {
-                    from: 'companies',
-                    localField: "companies",
-                    foreignField: "_id",
-                    as: "companyData"
-                }
+            $match: { _id: ObjectId(postId) }
         },
         {
             $lookup:
-                 {
-                     from: 'users',
-                     localField: "createdBy",
-                     foreignField: "_id",
-                     as: "author"
-                 }
+            {
+                from: 'comments',
+                localField: "_id",
+                foreignField: "referenceId",
+                as: "commentData"
+            }
+        },
+        {
+            $lookup:
+            {
+                from: 'companies',
+                localField: "companies",
+                foreignField: "_id",
+                as: "companyData"
+            }
+        },
+        {
+            $lookup:
+            {
+                from: 'users',
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "author"
+            }
         },
         {
             $group:
-                {
-                    _id: "$_id",
-                    name: { $first: "$name"},
-                    type: { $first: "$type"},
-                    author: { $first: "$author"},
-                    clients: { $first: "$clients"},
-                    collaborators: { $first: "$collaborators"},
-                    commentators: { $push: { ids: "$commentData.createdBy"}},
-                    comapnyCreators: { $push: { ids: "$companyData.createdBy"}}
-                }
+            {
+                _id: "$_id",
+                name: { $first: "$name" },
+                type: { $first: "$type" },
+                author: { $first: "$author" },
+                clients: { $first: "$clients" },
+                collaborators: { $first: "$collaborators" },
+                commentators: { $push: { ids: "$commentData.createdBy" } },
+                comapnyCreators: { $push: { ids: "$companyData.createdBy" } }
+            }
         },
         {
             $lookup:
-                {
-                    from: "users",
-                    localField: "collaborators",
-                    foreignField: "_id",
-                    as: "collaborators"
-                }
+            {
+                from: "users",
+                localField: "collaborators",
+                foreignField: "_id",
+                as: "collaborators"
+            }
         },
         {
             $lookup:
-                {
-                    from: "users",
-                    localField: "clients",
-                    foreignField: "_id",
-                    as: "clients"
-                }
+            {
+                from: "users",
+                localField: "clients",
+                foreignField: "_id",
+                as: "clients"
+            }
         },
         {
             $lookup:
-                {
-                    from: "users",
-                    localField: "commentators.ids",
-                    foreignField: "_id",
-                    as: "commentators"
-                }
+            {
+                from: "users",
+                localField: "commentators.ids",
+                foreignField: "_id",
+                as: "commentators"
+            }
         },
         {
             $lookup:
-                {
-                    from: "users",
-                    localField: "comapnyCreators.ids",
-                    foreignField: "_id",
-                    as: "companyOwners"
-                }
+            {
+                from: "users",
+                localField: "comapnyCreators.ids",
+                foreignField: "_id",
+                as: "companyOwners"
+            }
         },
         {
             $project:
-                {
-                    name: 1,
-                    type: 1,
-                    author: 1,
-                    collaborators: 1,
-                    commentators: 1,
-                    companyOwners: 1,
-                    clients: 1
-                }
+            {
+                name: 1,
+                type: 1,
+                author: 1,
+                collaborators: 1,
+                commentators: 1,
+                companyOwners: 1,
+                clients: 1
+            }
         }
     ]).exec();
 
@@ -291,7 +276,6 @@ module.exports = {
     insertManyIntoTags,
     insertManyIntoCities,
     sendEmail,
-    insertManyIntoPurchasedUnit,
     sendPostCreationEmail,
     getUserAssociatedWithPost,
     saveActivity

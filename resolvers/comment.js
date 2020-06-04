@@ -1,7 +1,6 @@
 const connectToMongoDB = require('../helpers/db');
 const helper = require('../helpers/helper');
 const Comment = require('./../models/comment')();
-const Product = require('./../models/product')();
 const Post = require('./../models/post')();
 const { pubSub } = require('../helpers/pubsub');
 const uniq = require('lodash/array').uniq;
@@ -11,8 +10,6 @@ const isEqual = require('lodash/lang').isEqual;
 const map = require('lodash/collection').map;
 const partialRight = require('lodash/function').partialRight;
 const pick = require('lodash/object').pick;
-const forEach = require('lodash/collection').forEach;
-const Like = require('./../models/like')();
 var ObjectID = require('mongodb').ObjectID;
 var moment = require('moment');
 let conn;
@@ -59,8 +56,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
             var data;
             var postLink;
 
-            let usersCommented = await Comment.find({ referenceId: comment.referenceId, status: { $ne: 'Deleted' }, createdBy: { $ne: comment.createdBy } }).select('createdBy').exec();
-            let usersLiked = [];
+            // let usersCommented = await Comment.find({ referenceId: comment.referenceId, status: { $ne: 'Deleted' }, createdBy: { $ne: comment.createdBy } }).select('createdBy').exec();
             // await Like.find({ referenceId: comment.referenceId, userId: { $ne: comment.createdBy } }).select('userId').exec();
 
 
@@ -275,7 +271,7 @@ async function deleteComment(_, { commentId, postId, textHTML }, { headers, db, 
 }
 
 
-async function updateComment(_, { commentId, postId, text, textHTML }, { headers, db, decodedToken }) {
+async function updateComment(_, { commentId, postId, textHTML }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -287,7 +283,7 @@ async function updateComment(_, { commentId, postId, text, textHTML }, { headers
             }
 
             console.log("This is post id in update comenet ==> ", postId);
-            let c = await Comment.findByIdAndUpdate(commentId, { text: text, textHTML: textHTML }, { new: true }).populate('createdBy').exec();
+            let c = await Comment.findByIdAndUpdate(commentId, { textHTML: textHTML }, { new: true }).populate('createdBy').exec();
 
             await pubSub.publish('COMMENT_UPDATED', c);
 

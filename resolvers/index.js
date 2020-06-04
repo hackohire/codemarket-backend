@@ -1,20 +1,13 @@
-const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
-const { getListOfUsersWhoPurchased } = require('./product');
+const { getUsers, createUser, updateUser, authorize, getUserById } = require('./user');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
-const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
 const { findFromCollection, addToCollection } = require('./categories');
-const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
-const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
-const { like, checkIfUserLikedAndLikeCount } = require('./like');
 const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType } = require('./post');
-const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
-const { scheduleCall, getBookingList } = require('./booking');
+const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId } = require('./company');
 const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
-const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
-const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
+const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription } = require('./subscription');
+const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType } = require('./post-type');
 const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData } = require('./campaign');
-const { createdToken } = require('./chat');
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
@@ -31,12 +24,11 @@ module.exports = {
   Upload: GraphQLUpload,
   Query: {
     hello: () => 'Hello world!',
-    getUsers, getUsersAndBugFixesCount, getUserById,
+    getUsers, getUserById,
 
     getAllPosts,
     fullSearch,
     fetchformJson, fetchformData, fetchFormStructureById,
-    getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
 
@@ -46,19 +38,9 @@ module.exports = {
 
     findFromCollection,
 
-    getPurchasedUnitsByUserId,
-
-    getCartItemsList,
-
-    checkIfUserLikedAndLikeCount,
-
     getMembershipSubscriptionsByUserId,
 
     getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, getListOfUsersInACompany, getEventsByCompanyId,
-
-    getBookingList,
-
-    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer,
 
     fetchFields, fetchPostTypes,
 
@@ -68,7 +50,6 @@ module.exports = {
     getPostByPostType,
     getCampaignEmails,
     // Chat Resolver
-    createdToken,
     createVideoToken
   },
   Mutation: {
@@ -91,23 +72,12 @@ module.exports = {
     updatePostContent,
     deletePost,
 
-    addTransaction,
-
-    addToCart,
-    removeItemFromCart,
-
-    like,
-
     addMembershipSubscription,
     inviteMembersToSubscription,
     cancelSubscription,
     acceptInvitation,
 
     addCompany, updateCompany, deleteCompany,
-
-    scheduleCall,
-
-    addQuestionOrAnswer, updateQuestionOrAnswer,
 
     sendEmail,
 
@@ -200,52 +170,5 @@ module.exports = {
   //   }
   // },
 
-  descriptionBlocks: {
-    __resolveType(block, context, info) {
-
-      switch (block.type) {
-
-        case 'paragraph':
-          return 'ParagraphBlock'
-
-        case 'header':
-          return 'HeaderBlock'
-
-        case 'code':
-          return 'CodeBlock';
-
-        case 'image':
-          return 'ImageBlock';
-
-        case 'list':
-          return 'ListBlock'
-
-        case 'quote':
-          return 'QuoteBlock'
-
-        case 'table':
-          return 'TableBlock'
-
-        case 'warning':
-          return 'WarningBlock'
-
-        case 'embed':
-          return 'EmbedBlock'
-
-        case 'linkTool':
-          return 'LinkToolBlock'
-
-        case 'delimiter':
-          return 'ParagraphBlock'
-
-        case 'attaches':
-          return 'AttachesBlock'
-
-        default:
-          console.log('default case')
-          return null;
-      }
-    },
-  },
 
 };

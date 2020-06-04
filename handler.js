@@ -3,8 +3,6 @@ const typeDefs = require('./schemas');
 const resolvers = require('./resolvers');
 const nodemailer = require('nodemailer');
 const connectToMongoDB = require('./helpers/db');
-// const auth = require('./helpers/auth');
-const Cart = require('./models/cart')();
 const helper = require('./helpers/helper');
 var ObjectID = require('mongodb').ObjectID;
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
@@ -155,8 +153,6 @@ const checkoutSessionCompleted = async (event, context) => {
                 await conn.collection('stripe_subscription').insertOne(session);
             } else {
                 await conn.collection('stripe_purchases').insertOne(session);
-                const removedCount = await Cart.remove({ user: session.data.object.client_reference_id }).exec();
-                console.log(removedCount);
             }
 
 
@@ -354,7 +350,7 @@ const attachCardAndCreateSubscription = async (event, context) => {
                 CONTENT: `You have successfully subscribed for ${sub.plan.nickname}.`,
                 SUBJECT: 'Thanks for choosing us!',
             };
-            await helper.sendEmail({to: [body.metadata.email]}, filePath, payLoad);
+            await helper.sendEmail({ to: [body.metadata.email] }, filePath, payLoad);
 
             return resolve({
                 statusCode: 200,
@@ -460,26 +456,26 @@ const emailCampaignEvent = async (event, context) => {
     return new Promise(async (resolve, reject) => {
         try {
             let conn = await connectToMongoDB();
-        
+
             console.log('Received event:', JSON.stringify(event, null, 2));
-        
+
             const message = event.Records[0].Sns.Message;
-            
+
             console.log('From SNS:', message);
-        
+
             const parsedMessage = JSON.parse(message);
-        
+
             console.log('parsedMessage', parsedMessage, parsedMessage.mail.tags.campaignId[0], parsedMessage.mail.destination[0])
-        
+
             const savedEvent = await conn.collection('emails').updateOne(
-                { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), to: parsedMessage.mail.destination[0]},
-                { $push: { tracking: parsedMessage }}
+                { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), to: parsedMessage.mail.destination[0] },
+                { $push: { tracking: parsedMessage } }
             )
-        
+
             // const savedEvent = await conn.collection('email-tracking').insertOne(parsedMessage);
-        
+
             console.log('Saved Email Tracking Event', savedEvent)
-        
+
             return resolve(message);
         } catch (err) {
             console.log("this is errror ==> ", err);
@@ -544,7 +540,7 @@ const fetchArticleByLink = (event, context) => {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Credentials': true,
                 },
-                body: JSON.stringify({ contentHtml: articleHtml, title})
+                body: JSON.stringify({ contentHtml: articleHtml, title })
             });
         } catch (e) {
             console.log(e);
@@ -556,7 +552,7 @@ const fetchArticleByLink = (event, context) => {
 
 const saveImage = (event, context) => {
     return new Promise(async (resolve, reject) => {
-        try{
+        try {
 
             /** parse body */
             let body;
@@ -566,17 +562,17 @@ const saveImage = (event, context) => {
                 body = {};
             }
 
-            let buffer = new Buffer(event.body, 'base64'); 
+            let buffer = new Buffer(event.body, 'base64');
             // var params = JSON.parse(event.body);
             console.log(buffer, body);
 
             var s3Params = {
-              Bucket: 'common-local-files',
-              Body: buffer,
-              ContentDisposition: "inline",
-              Key:  'test.png',
-              ContentType: 'png',
-              ACL: 'public-read',
+                Bucket: 'common-local-files',
+                Body: buffer,
+                ContentDisposition: "inline",
+                Key: 'test.png',
+                ContentType: 'png',
+                ACL: 'public-read',
             };
 
             // var uploadURL = await s3.getSignedUrl('putObject', s3Params);
@@ -595,7 +591,7 @@ const saveImage = (event, context) => {
                 //     url: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${key}`,
                 // };
             });
-        }catch(e){
+        } catch (e) {
             console.log("Err ==> ", e);
             reject(e);
         }
@@ -605,9 +601,9 @@ const saveImage = (event, context) => {
 const sendEmailFromQueue = (event, context) => {
     return new Promise(async (resolve, reject) => {
         let conn = await connectToMongoDB();
-        
+
         console.log("This is event ", event);
-        console.log("this is context " , context);
+        console.log("this is context ", context);
         try {
             const transporter = await nodemailer.createTransport({
                 host: process.env.SMTP_HOST,
@@ -671,7 +667,7 @@ const validateEmail = (event, context) => {
         //       console.log('false', err);
         //     }
         //   }
-          
+
         // await checkEmail()
         // resolve(true);
         async function validEmail(emails) {
@@ -681,21 +677,21 @@ const validateEmail = (event, context) => {
                 async function run1(data, index) {
                     if (index < data.length) {
                         console.log("inside run1 function ==> ", index, data.length, emailValidator);
-                            emailValidator.verify(data[index]).then(async (res) => {
-                                console.log("************************** ", res);
-                                if (res.wellFormed && res.validDomain) {
-                                    console.log("true email ==> ", data[index]);
-                                    emailObj.push({email: data[index], status: true});
-                                } else {
-                                    console.log("false email ==> ", data[index]);
-                                    emailObj.push({email: data[index], status: false});
-                                }
-                                index += 1;
-                                await run1(data, index);
-                            })
+                        emailValidator.verify(data[index]).then(async (res) => {
+                            console.log("************************** ", res);
+                            if (res.wellFormed && res.validDomain) {
+                                console.log("true email ==> ", data[index]);
+                                emailObj.push({ email: data[index], status: true });
+                            } else {
+                                console.log("false email ==> ", data[index]);
+                                emailObj.push({ email: data[index], status: false });
+                            }
+                            index += 1;
+                            await run1(data, index);
+                        })
                             .catch(async (err) => {
                                 console.log("Error while validating an email==> ", err);
-                                emailObj.push({email: data[index], status: false});
+                                emailObj.push({ email: data[index], status: false });
                                 index += 1;
                                 await run1(data, index);
                             });
@@ -719,9 +715,9 @@ const validateEmail = (event, context) => {
 
                 const result = new Contact(data);
                 console.log("This is result ==>", result);
-                
+
                 result.save().then(async () => {
-                   return resolve(true);
+                    return resolve(true);
                 })
             }).catch(err => {
                 console.log("ee", index, err);
@@ -739,71 +735,71 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
             var bucketName = 'email-test-reply';
             var sesNotification = event.Records[0].ses;
             console.log("SES Notification:\n", JSON.stringify(sesNotification, null, 2));
-            
+
             let conn = await connectToMongoDB();
 
             // Retrieve the email from your bucket
             s3.getObject({
-                    Bucket: bucketName,
-                    Key: sesNotification.mail.messageId
-                }, async function(err, data) {
-                    if (err) {
-                        console.log("Err in reading ==> ", err, err.stack);
-                        reject(false);
-                    } else {
+                Bucket: bucketName,
+                Key: sesNotification.mail.messageId
+            }, async function (err, data) {
+                if (err) {
+                    console.log("Err in reading ==> ", err, err.stack);
+                    reject(false);
+                } else {
 
-                        const jsonString = JSON.stringify(data.Body);
-                        console.log("Json strign ==> ", jsonString);
+                    const jsonString = JSON.stringify(data.Body);
+                    console.log("Json strign ==> ", jsonString);
 
-                        let bufferOriginal = Buffer.from(JSON.parse(jsonString).data);
+                    let bufferOriginal = Buffer.from(JSON.parse(jsonString).data);
 
-                        console.log("Original ==> ", bufferOriginal);
+                    console.log("Original ==> ", bufferOriginal);
 
-                        const result = bufferOriginal.toString('utf8');
-                        console.log("Result ==> ", bufferOriginal.toString('utf8'));
-                        const campaingRegex = new RegExp('\{(campaignId:[^}]+)\}');
-                        const batchRegex = new RegExp('\{(batchId:[^}]+)\}');
-                        const toEmailRegex = new RegExp('\{(toEmail:[^}]+)\}');
+                    const result = bufferOriginal.toString('utf8');
+                    console.log("Result ==> ", bufferOriginal.toString('utf8'));
+                    const campaingRegex = new RegExp('\{(campaignId:[^}]+)\}');
+                    const batchRegex = new RegExp('\{(batchId:[^}]+)\}');
+                    const toEmailRegex = new RegExp('\{(toEmail:[^}]+)\}');
 
-                        const campaignRegexData = result.match(campaingRegex);
-                        console.log('This is campaignRegexData ==> ', campaignRegexData);
+                    const campaignRegexData = result.match(campaingRegex);
+                    console.log('This is campaignRegexData ==> ', campaignRegexData);
 
-                        const batchRegexData = result.match(batchRegex);
-                        console.log('This is batchRegexData ==> ', batchRegexData);
+                    const batchRegexData = result.match(batchRegex);
+                    console.log('This is batchRegexData ==> ', batchRegexData);
 
-                        const toEmailRegexData = result.match(toEmailRegex);
-                        console.log('This is toEmailRegexData ==> ', toEmailRegexData);
+                    const toEmailRegexData = result.match(toEmailRegex);
+                    console.log('This is toEmailRegexData ==> ', toEmailRegexData);
 
-                        const campaignId = campaignRegexData[1].split(':')[1];
-                        const batchId = batchRegexData[1].split(':')[1];
-                        const toEmail = toEmailRegexData[1].split(':')[1];
+                    const campaignId = campaignRegexData[1].split(':')[1];
+                    const batchId = batchRegexData[1].split(':')[1];
+                    const toEmail = toEmailRegexData[1].split(':')[1];
 
-                        console.log("SPLIT1: ", campaignId, batchId, toEmail);
-                        
-                        // Get two regex which are uniq. Our reply would be in these two regex
-                        let repliedHTML = '';
-                        const regex1 = new RegExp('Content-Type: text/plain; charset="UTF-8"');
-                        const regex2 = new RegExp('On ');
+                    console.log("SPLIT1: ", campaignId, batchId, toEmail);
 
-                        //Find string which match with the regex1
-                        const match1 = result.match(regex1);
-                        console.log('This is match1 ===> ', match1);
-                        //Find string which match with the regexq
-                        const match2 = result.match(regex2);
-                        console.log('This is match1 ===> ', match2);
+                    // Get two regex which are uniq. Our reply would be in these two regex
+                    let repliedHTML = '';
+                    const regex1 = new RegExp('Content-Type: text/plain; charset="UTF-8"');
+                    const regex2 = new RegExp('On ');
 
-                        //Get index of both the regex and for loop to get the actual reply between them
-                        for(i=match1.index+41 ; i<match2.index ; i++) {
-                            repliedHTML += result[i];
-                        }
+                    //Find string which match with the regex1
+                    const match1 = result.match(regex1);
+                    console.log('This is match1 ===> ', match1);
+                    //Find string which match with the regexq
+                    const match2 = result.match(regex2);
+                    console.log('This is match1 ===> ', match2);
 
-                        console.log('This is RepliedHTMLSring ===> ', repliedHTML);
-
-                        const eData = await Email.updateOne({to: toEmail, campaignId: campaignId, batchId: batchId},{$set: { isReplied: true, repliedHTML: repliedHTML }});
-                        console.log("EDATA ===> ", eData);
-                        resolve(true);
+                    //Get index of both the regex and for loop to get the actual reply between them
+                    for (i = match1.index + 41; i < match2.index; i++) {
+                        repliedHTML += result[i];
                     }
-                });
+
+                    console.log('This is RepliedHTMLSring ===> ', repliedHTML);
+
+                    const eData = await Email.updateOne({ to: toEmail, campaignId: campaignId, batchId: batchId }, { $set: { isReplied: true, repliedHTML: repliedHTML } });
+                    console.log("EDATA ===> ", eData);
+                    resolve(true);
+                }
+            });
         } catch (err) {
             console.log('Error in catch =+> ', err);
             reject(false);
@@ -832,6 +828,5 @@ module.exports = {
     saveImage,
     sendEmailFromQueue,
     validateEmail,
-    emailCampaignEvent,
     readAndSaveEmailDataFromS3
 };
