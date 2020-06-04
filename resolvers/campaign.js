@@ -246,7 +246,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
         const vartoReplaceInFrom = from.match(pattern);
         const vartoReplaceInSubject = subject.match(pattern);
         
-        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/sendEmail";
+        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/sendEmailProd";
 
         if (!emailTemplate) {
             return reject(false);

@@ -175,7 +175,7 @@ functions:
       - sqs:
           arn:
             Fn::GetAtt:
-              - sendEmail
+              - sendEmailProd
               - Arn
 
   attachCardAndCreateSubscription:
@@ -253,10 +253,10 @@ resources:
       Properties:
         QueueName: "validateEmail"
     
-    sendEmail:
+    sendEmailProd:
       Type: "AWS::SQS::Queue"
       Properties:
-        QueueName: "sendEmail"
+        QueueName: "sendEmailProd"
 
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
