@@ -166,7 +166,7 @@ functions:
       - sqs:
           arn:
             Fn::GetAtt:
-              - sendEmail-${self:service}-${self:provider.stage}
+              - sendEmailProd
               - Arn
 
   attachCardAndCreateSubscription:
