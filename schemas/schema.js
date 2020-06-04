@@ -8,7 +8,6 @@ scalar Upload
 type Tag {
   name: String
   type: String
-  campaignId: String
   _id: ID
 }
 
