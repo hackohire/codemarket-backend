@@ -160,22 +160,13 @@ functions:
           method: POST
           cors: true
 
-  validateEmail:
-    handler: handler.validateEmail
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - validateEmailProd
-              - Arn
-  
   sendEmailFromQueue:
     handler: handler.sendEmailFromQueue
     events:
       - sqs:
           arn:
             Fn::GetAtt:
-              - sendEmailProd
+              - sendEmail-${self:service}-${self:provider.stage}
               - Arn
 
   attachCardAndCreateSubscription:
@@ -248,15 +239,10 @@ resources:
     #   Properties:
     #     TopicName: campaign
     
-    validateEmailProd:
-      Type: "AWS::SQS::Queue"
-      Properties:
-        QueueName: "validateEmailProd"
-    
     sendEmailProd:
       Type: "AWS::SQS::Queue"
       Properties:
-        QueueName: "sendEmailProd"
+        QueueName: sendEmail-${self:service}-${self:provider.stage}
 
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:

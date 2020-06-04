@@ -158,7 +158,7 @@ async function getCsvFileData(_, {data, createdBy, fileName, label, companies}, 
         // const fileData = new File(fileObj);
         // const fileResult = await fileData.save();
 
-        const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/validateEmailProd";
+        // const queueUrl = "https://sqs.us-east-1.amazonaws.com/784380094623/validateEmailProd";
 
         async function run(data, index) {
             return new Promise((resolve1, reject) => {
@@ -169,10 +169,10 @@ async function getCsvFileData(_, {data, createdBy, fileName, label, companies}, 
                     //     data[index]["fileId"] = fileResult._id.toString();
                     // }
 
-                    const params = {
-                        MessageBody: JSON.stringify(data[index]),
-                        QueueUrl: queueUrl,
-                    };
+                    // const params = {
+                    //     MessageBody: JSON.stringify(data[index]),
+                    //     QueueUrl: queueUrl,
+                    // };
                     
                     // sqs.sendMessage(params, (error, res) => {
                     //     if (error) {
