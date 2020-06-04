@@ -1,5 +1,9 @@
-const schema = `
 
+
+const schema = `
+scalar JSON
+scalar JSONObject
+scalar Upload
 type Product {
   _id: ID
   type: String
@@ -59,6 +63,7 @@ input SupportInput {
 type Tag {
   name: String
   type: String
+  campaignId: String
   _id: ID
 }
 
@@ -371,7 +376,7 @@ input ReferenceObject {
 type Query {
   hello: String
 
-  getAllPosts(pageOptions: PageOptionsInput, type: String, reference: ReferenceObject, companyId: String, connectedWithUser: String, createdBy: String): getAllPostsResponse
+  getAllPosts(pageOptions: PageOptionsInput, type: String, reference: ReferenceObject, companyId: String, connectedWithUser: String, createdBy: String, searchString: String): getAllPostsResponse
 
   getListOfUsersWhoPurchased(productId: String): [PurchasedBy]
 

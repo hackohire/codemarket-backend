@@ -11,10 +11,10 @@ const graphQlEmailSchema = `
         subject: String
         description: [descriptionBlocks]
         descriptionHTML: String
-
+        city: String
         createdBy: User
 
-        company: Company
+        companies: [Company]
 
         dateRange: [String]
 
@@ -29,6 +29,8 @@ const graphQlEmailSchema = `
         slug: String
 
         tracking: [TrackingData]
+        isReplied: Boolean
+        repliedHTML: String
     }
 
     input EmailInput {
@@ -43,7 +45,7 @@ const graphQlEmailSchema = `
 
         createdBy: ID
 
-        company: CompanyInput
+        companies: [CompanyInput]
 
         dateRange: [String]
 
@@ -54,8 +56,10 @@ const graphQlEmailSchema = `
         createdAt: String
         updatedAt: String
         comments: [CommentInput]
-
+        city: String
         slug: String
+        isReplied: Boolean
+        repliedHTML: String
     }    
 
     extend type Mutation {

@@ -60,11 +60,43 @@ async function insertManyIntoCities(cities) {
     return citiesAdded;
 }
 
-async function sendEmail(recepients, filePath, body) {
+async function sendEmailWithStaticContent(event, context) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            /** parse body */
+            let body;
+            try {
+                body = JSON.parse(event.body);
+            } catch (e) {
+                body = {};
+            }
+
+            const emailSent = await sendEmail(body.email, basePath + 'email-template/bni-event-template', body, 'sumi@codemarket.io');
+            return resolve({
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+                body: JSON.stringify({ emailSent, email: body.email })
+            });
+        }
+        catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+
+    // let conn = await connectToMongoDB();
+    // conn.collection('emails').findOneAndUpdate({email: body.email}, {$set: });
+
+}
+
+async function sendEmail(toEmail, filePath, body, city, fromEmail = '') {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!process.env.IS_OFFLINE) {
+            if (!process.env.IS_OFFLINE || true) {
                 const transporter = await nodemailer.createTransport({
                     host: process.env.SMTP_HOST,
                     port: process.env.SMTP_PORT,
@@ -76,32 +108,32 @@ async function sendEmail(recepients, filePath, body) {
                     secure: true
                 });
                 const template = new EmailTemplate(filePath);
-
-                const renderedTemplate = await template.render(body);
-
-                const mailOptions = {
-                    // headers: {
-                    //     'X-SES-CONFIGURATION-SET': 'campaign',
-                    //     'X-SES-MESSAGE-TAGS': 'campaignId=5e8db413194f75696c162682'
-                    // },
-                    from: process.env.FROM_EMAIL,
-                    to: recepients.to,
-                    cc: recepients.cc,
-                    bcc: recepients.bcc,
-                    replyTo: process.env.FROM_EMAIL,
-                    subject: renderedTemplate.subject,
-                    html: renderedTemplate.html,
-                }; 
-
-                const emailSent = await transporter.sendMail(mailOptions);
-
-                if (emailSent) {
-                    console.log("Email is sent ==> ", emailSent);
-                    return resolve(true);
-                } else {
-                    console.log("Email is Fail ==> ", emailSent);
-                    return reject(false);
-                }
+                await template.render(body, async (err, result) => {
+                    console.log('Error HTML Email Template Rendering', err)
+                    const { html, subject } = result;
+                    const mailOptions = {
+                        headers: {
+                            'X-SES-CONFIGURATION-SET': 'la2050',
+                            'X-SES-MESSAGE-TAGS': 'campaignId=5ec800f9870915348a37f30f' // Instagram
+                        },
+                        from: '"Therapy, Therapist" <sumi@codemarket.io>', // Therapy
+                        to: toEmail,
+                        // cc: "mysumifoods@gmail.com",
+                        // bcc: ['mysumifoods@gmail.com'],
+                        replyTo: fromEmail ? fromEmail : process.env.FROM_EMAIL,
+                        subject: subject,
+                        html: html,
+                    };
+                    await transporter.sendMail(mailOptions, (error, response) => {
+                        if (error) {
+                            console.log('Mail Sending Error', error);
+                            resolve(false);
+                        } else {
+                            console.log('Mail Sent Successfully', response);
+                            resolve(true);
+                        }
+                    });
+                });
             } else {
                 console.log("This is in else ==> ");
                 resolve(true);
