@@ -166,7 +166,7 @@ functions:
       - sqs:
           arn:
             Fn::GetAtt:
-              - validateEmail
+              - validateEmailProd
               - Arn
   
   sendEmailFromQueue:
@@ -248,10 +248,10 @@ resources:
     #   Properties:
     #     TopicName: campaign
     
-    validateEmail:
+    validateEmailProd:
       Type: "AWS::SQS::Queue"
       Properties:
-        QueueName: "validateEmail"
+        QueueName: "validateEmailProd"
     
     sendEmailProd:
       Type: "AWS::SQS::Queue"
