@@ -38,7 +38,6 @@ AWS.config.update({
     region: 'us-east-1'
 });
 
-const s3 = new AWS.S3();
 
 /** serverless offline support */
 const dynamoDbClient = new AWS.DynamoDB.DocumentClient({
