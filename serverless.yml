@@ -168,6 +168,8 @@ functions:
             Fn::GetAtt:
               - sendEmailProd
               - Arn
+          batchSize: 1
+          maximumRetryAttempts: 10
 
   attachCardAndCreateSubscription:
     handler: handler.attachCardAndCreateSubscription

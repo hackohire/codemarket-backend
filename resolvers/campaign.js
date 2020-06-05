@@ -497,7 +497,7 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
                         // }
                         data[index]["email"] = [{
                             email: data[index]["email"],
-                            status: JSON.parse(data[index]["status"]) ? true : false,
+                            status: data[index]["status"] || data[index]["status"] === "Ok" ? true : false,
                         }];
     
                         data[index]["status"] = "Published";
