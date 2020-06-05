@@ -804,10 +804,10 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
                     let match2;
                     const subMatch2 = result.match(regex2);
                     const subMatch5 = result.match(regex5);
-                    if (subMatch5) {
-                        match2 = subMatch5;
-                    } else {
+                    if (subMatch2) {
                         match2 = subMatch2;
+                    } else {
+                        match2 = subMatch5;
                     }
                     console.log('This is match1 ===> ', match2);
 
