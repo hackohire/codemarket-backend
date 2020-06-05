@@ -65,12 +65,50 @@ const graphQlCampaignSchema = `
         emails: [Email]
         total: Int
       }
+    
+    type csvData {
+        data: JSON
+        createdBy: String
+        fileName: String
+        label: String
+        companies: batchData
+    }
+
+    input csvInputData {
+        data: JSON
+    }
+
+    type getEmailData {
+        batches: batchData
+        emailTemplate: String
+        subject: String
+        createdBy: String
+        from: String
+        companies: batchData
+    }
+
+    type batchData {
+        _id: ID
+        name: String
+        campaignId: String
+    }
+
+    input batchInput {
+        _id: ID
+        name: String
+        campaignId: String
+    }
 
     extend type Query {
-        getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String): [Campaign]
+        getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String, batchId: String): [Campaign]
         getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
     }
 
+    extend type Mutation {
+        saveCsvFileData(data: [JSON], createdBy: String, fileName: String, label: String, companies: batchInput): csvData
+        getCsvFileData(data: [JSON], createdBy: String, fileName: String, label: String, companies: batchInput): csvData
+        getEmailData(batches: batchInput, emailTemplate: String, subject: String, createdBy: String, from: String, companies: batchInput): getEmailData
+    }
 `;
 
 module.exports = graphQlCampaignSchema;

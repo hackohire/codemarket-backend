@@ -2,11 +2,8 @@ const connectToMongoDB = require('../helpers/db');
 const Company = require('../models/company')();
 const Post = require('../models/post')();
 const helper = require('../helpers/helper');
-const Like = require('./../models/like')();
 var array = require('lodash/array');
-const { pubSub } = require('../helpers/pubsub');
 const auth = require('../helpers/auth');
-var ObjectID = require('mongodb').ObjectID;
 let conn;
 
 async function addCompany(_, { company }, { headers, db, event }) {
@@ -139,8 +136,6 @@ async function getCompanyById(_, { slug }, { headers, db, decodedToken }) {
                     return reject(err)
                 }
                 // const likeCount = await Like.count({ referenceId: companyId })
-
-                res['likeCount'] = 0;
 
                 return resolve(res[0]);
             });

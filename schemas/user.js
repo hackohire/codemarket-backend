@@ -20,7 +20,6 @@ type User {
     roles: [String]
     createdAt: String
     currentJobDetails: CurrentJobDetails
-    likeCount: Int
     stripeId: ID
     subscription: [SubscriptionSchema]
   }
@@ -58,12 +57,6 @@ type User {
     companyLocation: String
   }
 
-  type UserAndBugFixCount {
-    _id: ID,
-    name: String,
-    productCount: Int
-  }
-
   type UserPostSubscriptionResponse {
     postAdded: UserNotificationData
     postUpdated: UserNotificationData
@@ -80,7 +73,6 @@ type User {
 
   extend type Query {
     getUsers(_page: Int _limit: Int): [User!]!
-    getUsersAndBugFixesCount: [UserAndBugFixCount]
     getUserById(userId: String): User
   }
 

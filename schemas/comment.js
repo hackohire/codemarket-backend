@@ -4,7 +4,6 @@ const commentSchema = `
     parents: [Comment]
     children: [Comment]
     _id: ID
-    text: [descriptionBlocks]
     type: String
     parentId: ID
     createdBy: User
@@ -33,7 +32,6 @@ const commentSchema = `
     userReferenceId: ID
     type: String
     _id: ID
-    text: [InputdescriptionBlock]
     createdBy: ID
     createdAt: String
   
@@ -58,7 +56,7 @@ const commentSchema = `
   
   extend type Mutation {
     addComment(comment: CommentInput): Comment
-    updateComment(commentId: String, postId: String, text: [InputdescriptionBlock], textHTML: String): Comment
+    updateComment(commentId: String, postId: String, textHTML: String): Comment
   }
   
   type Subscription {

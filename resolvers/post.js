@@ -1,29 +1,13 @@
 const connectToMongoDB = require('../helpers/db');
-const Product = require('../models/product')();
-// const HelpRequest = require('../models/help')();
-// const Interview = require('../models/interview')();
-// const Requirement = require('../models/requirement')();
-// const Testing = require('../models/testing')();
-// const Design = require('../models/design')();
-// const Howtodoc = require('../models/how-to-doc')();
-// const Goal = require('../models/goal')();
 const Post = require('../models/post')();
 const helper = require('../helpers/helper');
-const Like = require('./../models/like')();
-const Unit = require('./../models/purchased_units')();
 var ObjectID = require('mongodb').ObjectID;
-// const User = require('./../models/user')();
-// const Tag = require('./../models/tag')();
-// const Subscription = require('../models/subscription')();
-// var moment = require('moment');
-// var ObjectID = require('mongodb').ObjectID;
 const { pubSub } = require('../helpers/pubsub');
 const differenceBy = require('lodash/array').differenceBy;
 const unionBy = require('lodash/array').unionBy;
 const map = require('lodash/collection').map;
 const partialRight = require('lodash/function').partialRight;
 const pick = require('lodash/object').pick;
-var moment = require('moment');
 const contactModel = require('../models/contact')();
 const uniq = require('lodash/array').uniq;
 
@@ -58,9 +42,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('tags')
                     .populate('cities')
                     .populate('companies')
-                    .populate('jobProfile')
                     .populate('collaborators')
-                    .populate('assignees')
                     .populate('clients')
                     .execPopulate().then(async populatedPost => {
 
@@ -145,9 +127,7 @@ async function getPostsByUserIdAndType(_, { userId, status, postType, pageOption
                 .populate('tags')
                 .populate('companies')
                 .populate('cities')
-                .populate('users')
                 .populate('collaborators')
-                .populate('assignees')
 
                 .sort(sort)
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
@@ -175,16 +155,12 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
             }
 
             Post.findById(postId)
-                .populate({ path: 'usersAttending', select: 'name avatar' })
                 .populate('companies')
                 .populate('cities')
                 .populate('createdBy')
                 .populate('tags')
-                .populate('jobProfile')
                 .populate('collaborators')
-                .populate('assignees')
                 .populate('clients')
-                .populate('users')
                 .populate('connectedPosts')
 
                 .exec(async (err, res) => {
@@ -192,36 +168,6 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
                     if (err) {
                         return reject(err)
                     }
-
-                    if (res && res.type === 'product') {
-                        /** List of users who purchased the bugfix */
-                        let usersWhoPurchased = [];
-
-                        /** Find the unitsSold by reference_id stored as productId while purchase and populate userwho purchased */
-                        const unitsSold = await Unit.find({ reference_id: postId })
-                            .select('purchasedBy createdAt')
-                            .populate({ path: 'purchasedBy', select: 'name avatar' })
-                            .exec();
-
-                        /** If there is more than 0 units */
-                        if (unitsSold && unitsSold.length) {
-
-                            /** Map the array into the fileds "name", "_id", "createdAt" & "avatar" */
-                            usersWhoPurchased = unitsSold.map((u) => {
-                                let userWhoPurchased = {};
-                                userWhoPurchased = u.purchasedBy;
-                                userWhoPurchased.createdAt = u.createdAt;
-                                return userWhoPurchased;
-                            });
-                        }
-
-                        /** attach "purchasedBy" with the response */
-                        res['purchasedBy'] = usersWhoPurchased;
-                    }
-
-                    const likeCount = await Like.count({ referenceId: postId })
-
-                    res['likeCount'] = likeCount;
 
                     return resolve(res);
                 });
@@ -250,9 +196,7 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 .populate('tags')
                 .populate('companies')
                 .populate('cities')
-                .populate('jobProfile')
                 .populate('collaborators')
-                .populate('assignees')
                 .populate('clients')
                 // .populate('users')
 
@@ -332,10 +276,7 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                     .populate('companies')
                     .populate('tags')
                     .populate('cities')
-                    .populate('jobProfile')
                     .populate('collaborators')
-                    .populate('assignees')
-                    .populate('users')
                     .populate('clients')
 
                     .execPopulate().then(async (d) => {
@@ -460,41 +401,48 @@ async function deletePost(_, { postId, deletedBy }, { headers, db, decodedToken 
     });
 }
 
-async function getAllPosts(_, { pageOptions, type, reference, companyId, connectedWithUser, createdBy }, { headers, db, decodedToken }) {
+async function getAllPosts(_, { pageOptions, type, reference, companyId, connectedWithUser, createdBy, searchString }, { headers }) {
     return new Promise(async (resolve, reject) => {
         try {
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'updatedAt';
             let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
 
-            if (!db) {
-                console.log('Creating new mongoose connection.');
-                conn = await connectToMongoDB();
-            } else {
-                console.log('Using existing mongoose connection.');
-            }
+            conn = await connectToMongoDB();
 
             let condition = {
                 status: 'Published',
-                type: type ? type : { $ne: null }
+                type: type ? type : { $ne: null },
             }
 
-            if (createdBy) {
-                condition['$and'] = [{
+            if (searchString) {
+                if (!condition['$and']) {
+                    condition['$and'] = [];
+                }
+                /** Fetching all the Posts containing the search string */
+                var regex = new RegExp(searchString, 'i');
+
+                condition['$and'].push({
                     '$or': [
-                        { createdBy: ObjectID(createdBy) }
+                        { 'descriptionHTML': { $regex: regex } },
+                        { 'name': { $regex: regex } },
+                        { 'type': { $regex: regex } },
+                        { 'tags.name': { $regex: regex } }
                     ]
-                }]
+                })
             }
 
             if (connectedWithUser) {
-                condition['$and'] = [{
+                if (!condition['$and']) {
+                    condition['$and'] = [];
+                }
+                condition['$and'].push({
                     '$or': [
                         { collaborators: ObjectID(connectedWithUser) },
                         { assignees: ObjectID(connectedWithUser) },
                         { createdBy: ObjectID(connectedWithUser) }
                     ]
-                }]
+                })
             }
 
             if (reference) {
@@ -542,54 +490,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
             posts = await Post.aggregate([
                 {
                     $match: condition
-                },
-                /** The below commented code is to fetch the comments related to the posts */
-                // {
-                //     $lookup: {
-                //         from: 'comments',
-                //         let: { status: "$status", reference_id: "$_id" },
-                //         pipeline: [
-                //             {
-                //                 $match:
-                //                 {
-                //                     $expr:
-                //                     {
-                //                         $and:
-                //                             [
-                //                                 { $ne: ["$status", "Deleted"] },
-                //                                 { $eq: ["$$reference_id", "$referenceId"] },
-                //                                 { $eq: ["$parentId", null] }
-                //                             ]
-                //                     }
-                //                 }
-                //             },
-                //             // {
-                //             //     $lookup: {
-                //             //         "from": "users",
-                //             //         "let": { "created_by": "$createdBy" },
-                //             //         pipeline: [
-                //             //             { $match: { $expr: { $eq: ["$$created_by", "$_id"] } } }
-                //             //         ],
-                //             //         as: "createdBy"
-                //             //     }
-                //             // },
-                //             // {
-                //             //     $unwind: {
-                //             //         "path": "$createdBy",
-                //             //         "preserveNullAndEmptyArrays": true
-                //             //     }
-                //             // },
-                //         ],
-                //         as: 'comments'
-                //     }
-                // },
-                {
-                    $lookup: {
-                        from: 'likes',
-                        localField: '_id',
-                        foreignField: 'referenceId',
-                        as: 'likes'
-                    }
                 },
                 {
                     $lookup: {
@@ -769,7 +669,6 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                         slug: 1,
                         createdBy: { $arrayElemAt: ['$createdBy', 0] },
                         tags: 1,
-                        likeCount: { $size: '$likes' },
                         // comments: '$comments',
                         // commentCount: { $size: '$comments'},
                         createdAt: 1,
@@ -802,19 +701,11 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                 // .limit(pageOptions.limit ? pageOptions.limit : total ? total : 1)
                 .exec();
 
-            /** Fetching all the Published Posts */
-            // posts = await Post.find({ 
-            //     status: 'Published'
-            // }).populate('createdBy').populate('tags')
-            //     .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
-            //     .limit(pageOptions.limit)
-            //     .sort(sort)
-            //     .exec();
 
             return await resolve(
                 {
                     posts: posts && posts.length ? posts[0].posts : [],
-                    total: posts && posts.length && posts[0].pageInfo ? posts[0].pageInfo[0].count : 0
+                    total: posts && posts.length && posts[0].pageInfo && posts[0].pageInfo.length ? posts[0].pageInfo[0].count : 0
                 });
 
         } catch (e) {
@@ -853,9 +744,6 @@ async function fullSearch(_, { searchString }, { headers, db, decodedToken }) {
                     }
                 },
                 { $match: { $or: [{ name: { $regex: regex } }, { "descriptionHTML": { $regex: regex } }, { type: { $regex: regex } }, { "tags.name": { $regex: regex } }] } },
-                //  {$lookup: {
-
-                //  }}
 
             ]).exec();
 

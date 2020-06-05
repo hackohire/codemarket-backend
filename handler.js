@@ -1,9 +1,8 @@
 // const { ApolloServer } = require('apollo-server-lambda');
 const typeDefs = require('./schemas');
 const resolvers = require('./resolvers');
+const nodemailer = require('nodemailer');
 const connectToMongoDB = require('./helpers/db');
-// const auth = require('./helpers/auth');
-const Cart = require('./models/cart')();
 const helper = require('./helpers/helper');
 var ObjectID = require('mongodb').ObjectID;
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
@@ -11,8 +10,18 @@ const urlMetadata = require('url-metadata');
 const axios = require('axios');
 const parser = require('./helpers/html-parser');
 var moment = require('moment');
+const fs = require('fs');
+
+// var { demoTempate } = require('./email-template/demo-template');
 global.basePath = __dirname + '/';
 const { makeExecutableSchema } = require('graphql-tools');
+const AWS = require('aws-sdk');
+const Contact = require('./models/contact')();
+const Email = require('./models/email')();
+const sqs = new AWS.SQS({
+    region: "us-east-1",
+});
+var s3 = new AWS.S3();
 
 const {
     DynamoDBEventProcessor,
@@ -20,13 +29,13 @@ const {
     DynamoDBSubscriptionManager,
     Server,
 } = require('aws-lambda-graphql');
-const AWS = require('aws-sdk');
 
 AWS.config.update({
     secretAccessKey: process.env.AWS_SECRETKEY,
     accessKeyId: process.env.AWS_ACCESSKEY_ID,
     region: 'us-east-1'
 });
+
 
 /** serverless offline support */
 const dynamoDbClient = new AWS.DynamoDB.DocumentClient({
@@ -144,8 +153,6 @@ const checkoutSessionCompleted = async (event, context) => {
                 await conn.collection('stripe_subscription').insertOne(session);
             } else {
                 await conn.collection('stripe_purchases').insertOne(session);
-                const removedCount = await Cart.remove({ user: session.data.object.client_reference_id }).exec();
-                console.log(removedCount);
             }
 
 
@@ -343,7 +350,7 @@ const attachCardAndCreateSubscription = async (event, context) => {
                 CONTENT: `You have successfully subscribed for ${sub.plan.nickname}.`,
                 SUBJECT: 'Thanks for choosing us!',
             };
-            await helper.sendEmail({to: [body.metadata.email]}, filePath, payLoad);
+            await helper.sendEmail({ to: [body.metadata.email] }, filePath, payLoad);
 
             return resolve({
                 statusCode: 200,
@@ -449,26 +456,26 @@ const emailCampaignEvent = async (event, context) => {
     return new Promise(async (resolve, reject) => {
         try {
             let conn = await connectToMongoDB();
-        
-            // console.log('Received event:', JSON.stringify(event, null, 2));
-        
+
+            console.log('Received event:', JSON.stringify(event, null, 2));
+
             const message = event.Records[0].Sns.Message;
-            
+
             console.log('From SNS:', message);
-        
+
             const parsedMessage = JSON.parse(message);
-        
-            console.log('parsedMessage', parsedMessage)
-        
+
+            console.log('parsedMessage', parsedMessage, parsedMessage.mail.tags.campaignId[0], parsedMessage.mail.destination[0])
+
             const savedEvent = await conn.collection('emails').updateOne(
-                { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), to: parsedMessage.mail.destination[0]},
-                { $push: { tracking: parsedMessage }}
+                { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), to: parsedMessage.mail.destination[0] },
+                { $push: { tracking: parsedMessage } }
             )
-        
+
             // const savedEvent = await conn.collection('email-tracking').insertOne(parsedMessage);
-        
+
             console.log('Saved Email Tracking Event', savedEvent)
-        
+
             return resolve(message);
         } catch (err) {
             console.log("this is errror ==> ", err);
@@ -533,7 +540,7 @@ const fetchArticleByLink = (event, context) => {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Credentials': true,
                 },
-                body: JSON.stringify({ contentHtml: articleHtml, title})
+                body: JSON.stringify({ contentHtml: articleHtml, title })
             });
         } catch (e) {
             console.log(e);
@@ -543,7 +550,285 @@ const fetchArticleByLink = (event, context) => {
 }
 
 
+const saveImage = (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        try {
 
+            /** parse body */
+            let body;
+            try {
+                body = JSON.parse(event);
+            } catch (e) {
+                body = {};
+            }
+
+            let buffer = new Buffer(event.body, 'base64');
+            // var params = JSON.parse(event.body);
+            console.log(buffer, body);
+
+            var s3Params = {
+                Bucket: 'common-local-files',
+                Body: buffer,
+                ContentDisposition: "inline",
+                Key: 'test.png',
+                ContentType: 'png',
+                ACL: 'public-read',
+            };
+
+            // var uploadURL = await s3.getSignedUrl('putObject', s3Params);
+            // console.log("URL == > ", uploadURL);
+            s3.putObject(s3Params, (err) => {
+                if (err) {
+                    console.log("err ==> ", err);
+                    return false;
+                } else {
+
+                    console.log("Sucecses == > ", `https://common-local-files.s3.amazonaws.com/${s3Params.Key}`);
+                }
+
+                // return {
+                //     key,
+                //     url: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${key}`,
+                // };
+            });
+        } catch (e) {
+            console.log("Err ==> ", e);
+            reject(e);
+        }
+    });
+};
+
+const sendEmailFromQueue = (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        let conn = await connectToMongoDB();
+
+        console.log("This is event ", event);
+        console.log("this is context ", context);
+        try {
+            const transporter = await nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: process.env.SMTP_PORT,
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASSWORD
+                },
+                debug: true,
+                secure: true
+            });
+            console.log("This is transporter ==> ", transporter);
+            const emailSent = await transporter.sendMail(JSON.parse(event.Records[0].body));
+
+            if (emailSent) {
+                console.log("Email is sent ==> ", emailSent);
+                const int = new Email(JSON.parse(event.Records[0].body));
+                await int.save();
+                return resolve(true);
+            } else {
+                console.log("Email is Fail ==> ", emailSent);
+                return reject(false);
+            }
+
+        } catch (err) {
+            console.log(err);
+            return reject(false);
+        }
+    });
+}
+
+const validateEmail = (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        const EmailValidator = require('email-deep-validator');
+        const emailValidator = new EmailValidator();
+
+        console.log("Data Is ==> ", event.Records[0].body);
+        const emailData = JSON.parse(event.Records[0].body);
+
+        let conn = await connectToMongoDB();
+
+        console.log("This is email Data => ", emailData);
+
+        // console.log("BEFORE:: Inside check email ==> ", emailValidator.verify, typeof emailValidator.verify);
+
+        // await emailValidator.verify("mysumifoods@gmail.com").then((res) => {
+        //     console.log("AFTER:: Inside check email ==> ", res);
+        //   return resolve(true);
+        // }).catch((err) => {
+        //   console.log('2 ==> ' , err);
+        //   return resolve(false);
+        // })
+
+        // async function checkEmail () {
+        //     try {
+        //         console.log("BEFORE:: Inside check email ==> ", emailValidator.verify, typeof emailValidator.verify);
+        //       const result = await emailValidator.verify('jaysojitra13@gmail.com');
+        //       console.log("After:: Inside check email ==> ", emailValidator.verify, typeof emailValidator.verify);
+        //       console.log('1', result);
+        //     } catch (err) {
+        //       console.log('false', err);
+        //     }
+        //   }
+
+        // await checkEmail()
+        // resolve(true);
+        async function validEmail(emails) {
+            console.log("Inside validEmail function ==> ", emails);
+            return new Promise((resolve1, reject) => {
+                var emailObj = [];
+                async function run1(data, index) {
+                    if (index < data.length) {
+                        console.log("inside run1 function ==> ", index, data.length, emailValidator);
+                        emailValidator.verify(data[index]).then(async (res) => {
+                            console.log("************************** ", res);
+                            if (res.wellFormed && res.validDomain) {
+                                console.log("true email ==> ", data[index]);
+                                emailObj.push({ email: data[index], status: true });
+                            } else {
+                                console.log("false email ==> ", data[index]);
+                                emailObj.push({ email: data[index], status: false });
+                            }
+                            index += 1;
+                            await run1(data, index);
+                        })
+                            .catch(async (err) => {
+                                console.log("Error while validating an email==> ", err);
+                                emailObj.push({ email: data[index], status: false });
+                                index += 1;
+                                await run1(data, index);
+                            });
+                    } else {
+                        console.log("Resolve1 ==> ", emailObj);
+                        resolve1(emailObj);
+                    }
+                }
+                console.log("Run1 is called");
+                run1(emails, 0)
+            })
+        }
+
+        async function run(data, index) {
+            console.log("Inside run function ==> ", data.email);
+            validEmail(data.email).then(async (e) => {
+                console.log("After validation emails ==> ", e);
+
+                data.email = e;
+                console.log("This is data before save ==>", data);
+
+                const result = new Contact(data);
+                console.log("This is result ==>", result);
+
+                result.save().then(async () => {
+                    return resolve(true);
+                })
+            }).catch(err => {
+                console.log("ee", index, err);
+            });
+        }
+        console.log("Run is called");
+        run(emailData, 0)
+
+    });
+}
+
+const readAndSaveEmailDataFromS3 = async (event, context) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            var bucketName = 'email-test-reply';
+            var sesNotification = event.Records[0].ses;
+            console.log("SES Notification:\n", JSON.stringify(sesNotification, null, 2));
+
+            let conn = await connectToMongoDB();
+
+            // Retrieve the email from your bucket
+            s3.getObject({
+                Bucket: bucketName,
+                Key: sesNotification.mail.messageId
+            }, async function (err, data) {
+                if (err) {
+                    console.log("Err in reading ==> ", err, err.stack);
+                    reject(false);
+                } else {
+
+                    const jsonString = JSON.stringify(data.Body);
+                    console.log("Json strign ==> ", jsonString);
+
+                    let bufferOriginal = Buffer.from(JSON.parse(jsonString).data);
+
+                    console.log("Original ==> ", bufferOriginal);
+
+                    const result = bufferOriginal.toString('utf8');
+                    console.log("Result ==> ", bufferOriginal.toString('utf8'));
+                    const campaingRegex = new RegExp('\{(campaignId:[^}]+)\}');
+                    const batchRegex = new RegExp('\{(batchId:[^}]+)\}');
+                    const toEmailRegex = new RegExp('\{(toEmail:[^}]+)\}');
+
+                    const campaignRegexData = result.match(campaingRegex);
+                    console.log('This is campaignRegexData ==> ', campaignRegexData);
+
+                    const batchRegexData = result.match(batchRegex);
+                    console.log('This is batchRegexData ==> ', batchRegexData);
+
+                    const toEmailRegexData = result.match(toEmailRegex);
+                    console.log('This is toEmailRegexData ==> ', toEmailRegexData);
+
+                    const campaignId = campaignRegexData[1].split(':')[1];
+                    const batchId = batchRegexData[1].split(':')[1];
+                    const toEmail = toEmailRegexData[1].split(':')[1];
+
+                    console.log("SPLIT1: ", campaignId, batchId, toEmail);
+
+                    // Get two regex which are uniq. Our reply would be in these two regex
+                    let repliedHTML = '';
+                    const regex1 = new RegExp('Content-Type: text/plain; charset="UTF-8"');
+                    const regex3 = new RegExp('Content-Type: text/plain; charset=UTF-8');
+                    const regex4 = new RegExp('Content-Transfer-Encoding: quoted-printable');
+
+                    const regex2 = new RegExp('On ');
+                    const regex5 = new RegExp('=C2=A0');
+
+                    //Find string which match with the regex1
+                    let match1;
+                    let subMatch4 = result.match(regex4);
+                    let subMatch3 = result.match(regex3);
+                    let subMatch1 = result.match(regex1);
+
+                    if (subMatch1) {
+                        match1 = subMatch1;
+                    } else if (subMatch3){
+                        match1 = subMatch3;
+                    } else {
+                        match1 = subMatch4;
+                    }
+                    console.log('This is match1 ===> ', match1);
+
+                    //Find string which match with the regexq
+                    let match2;
+                    const subMatch2 = result.match(regex2);
+                    const subMatch5 = result.match(regex5);
+                    if (subMatch2) {
+                        match2 = subMatch2;
+                    } else {
+                        match2 = subMatch5;
+                    }
+                    console.log('This is match1 ===> ', match2);
+
+                    //Get index of both the regex and for loop to get the actual reply between them
+                    for (i = match1.index + 43; i < match2.index; i++) {
+                        repliedHTML += result[i];
+                    }
+
+                    console.log('This is RepliedHTMLSring ===> ', repliedHTML);
+
+                    const eData = await Email.updateOne({ to: toEmail, campaignId: campaignId, batchId: batchId }, { $set: { isReplied: true, repliedHTML: repliedHTML } });
+                    console.log("EDATA ===> ", eData);
+                    resolve(true);
+                }
+            });
+        } catch (err) {
+            console.log('Error in catch =+> ', err);
+            reject(false);
+        }
+    });
+}
 module.exports = {
     // graphqlHandler,
     handler: server.createHttpHandler({
@@ -562,5 +847,9 @@ module.exports = {
     getCouponByName,
     fetchLinkMeta,
     fetchArticleByLink,
-    emailCampaignEvent
+    emailCampaignEvent,
+    saveImage,
+    sendEmailFromQueue,
+    validateEmail,
+    readAndSaveEmailDataFromS3
 };

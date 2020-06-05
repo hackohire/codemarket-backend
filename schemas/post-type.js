@@ -6,7 +6,6 @@ const graphQlPostTypeSchema = `
         name: String
         label: String
         type: String
-        description: [descriptionBlocks]
         createdBy: User
         status: Status
         fields: [FieldList]
@@ -18,7 +17,6 @@ const graphQlPostTypeSchema = `
         _id: ID
         type: String
         label: String
-        description: [InputdescriptionBlock]
         createdBy: ID
         status: Status
         fields: [FieldListInput]
