@@ -42,9 +42,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .populate('tags')
                     .populate('cities')
                     .populate('companies')
-                    .populate('jobProfile')
                     .populate('collaborators')
-                    .populate('assignees')
                     .populate('clients')
                     .execPopulate().then(async populatedPost => {
 
@@ -129,9 +127,7 @@ async function getPostsByUserIdAndType(_, { userId, status, postType, pageOption
                 .populate('tags')
                 .populate('companies')
                 .populate('cities')
-                .populate('users')
                 .populate('collaborators')
-                .populate('assignees')
 
                 .sort(sort)
                 .skip((pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit)
@@ -159,16 +155,12 @@ async function getPostById(_, { postId }, { headers, db, decodedToken }) {
             }
 
             Post.findById(postId)
-                .populate({ path: 'usersAttending', select: 'name avatar' })
                 .populate('companies')
                 .populate('cities')
                 .populate('createdBy')
                 .populate('tags')
-                .populate('jobProfile')
                 .populate('collaborators')
-                .populate('assignees')
                 .populate('clients')
-                .populate('users')
                 .populate('connectedPosts')
 
                 .exec(async (err, res) => {
@@ -204,9 +196,7 @@ async function getPostsByType(_, { postType }, { headers, db, decodedToken }) {
                 .populate('tags')
                 .populate('companies')
                 .populate('cities')
-                .populate('jobProfile')
                 .populate('collaborators')
-                .populate('assignees')
                 .populate('clients')
                 // .populate('users')
 
@@ -286,10 +276,7 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                     .populate('companies')
                     .populate('tags')
                     .populate('cities')
-                    .populate('jobProfile')
                     .populate('collaborators')
-                    .populate('assignees')
-                    .populate('users')
                     .populate('clients')
 
                     .execPopulate().then(async (d) => {

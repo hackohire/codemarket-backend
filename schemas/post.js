@@ -37,6 +37,9 @@ const graphQlPostSchema = `
 
         appointment_date: String
         cancelReason: String
+
+        mentor: JSON
+        job: JSON
     }
 
     input PostInput {
@@ -57,13 +60,12 @@ const graphQlPostSchema = `
 
         cities: [ID]
 
-        companies: [CompanyInput]
+        companies: [JSON]
 
         connectedPosts: [ID]
         connectedEmail: ID
         
         collaborators: [UserInput]
-        assignees: [UserInput]
         clients: [UserInput]
 
         phone: [String]
@@ -74,8 +76,12 @@ const graphQlPostSchema = `
 
         descriptionHTML: String
         activities: [ActivitiesInput]
+
         appointment_date: String
         cancelReason: String
+
+        mentor: JSON
+        job: JSON
     }
 
     type Activities {
