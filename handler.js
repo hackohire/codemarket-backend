@@ -779,17 +779,40 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
                     // Get two regex which are uniq. Our reply would be in these two regex
                     let repliedHTML = '';
                     const regex1 = new RegExp('Content-Type: text/plain; charset="UTF-8"');
+                    const regex3 = new RegExp('Content-Type: text/plain; charset=UTF-8');
+                    const regex4 = new RegExp('Content-Transfer-Encoding: quoted-printable');
+
                     const regex2 = new RegExp('On ');
+                    const regex5 = new RegExp('=C2=A0');
 
                     //Find string which match with the regex1
-                    const match1 = result.match(regex1);
+                    let match1;
+                    let subMatch4 = result.match(regex4);
+                    let subMatch3 = result.match(regex3);
+                    let subMatch1 = result.match(regex1);
+
+                    if (subMatch1) {
+                        match1 = subMatch1;
+                    } else if (subMatch3){
+                        match1 = subMatch3;
+                    } else {
+                        match1 = subMatch4;
+                    }
                     console.log('This is match1 ===> ', match1);
+
                     //Find string which match with the regexq
-                    const match2 = result.match(regex2);
+                    let match2;
+                    const subMatch2 = result.match(regex2);
+                    const subMatch5 = result.match(regex5);
+                    if (subMatch2) {
+                        match2 = subMatch2;
+                    } else {
+                        match2 = subMatch5;
+                    }
                     console.log('This is match1 ===> ', match2);
 
                     //Get index of both the regex and for loop to get the actual reply between them
-                    for (i = match1.index + 41; i < match2.index; i++) {
+                    for (i = match1.index + 43; i < match2.index; i++) {
                         repliedHTML += result[i];
                     }
 
