@@ -468,7 +468,7 @@ const emailCampaignEvent = async (event, context) => {
             console.log('parsedMessage', parsedMessage, parsedMessage.mail.tags.campaignId[0], parsedMessage.mail.destination[0])
 
             const savedEvent = await conn.collection('emails').updateOne(
-                { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), to: parsedMessage.mail.destination[0] },
+                { campaignId: ObjectID(parsedMessage.mail.tags.campaignId[0]), uuid: ObjectID(parsedMessage.mail.tags.uuid[0]), to: parsedMessage.mail.destination[0] },
                 { $push: { tracking: parsedMessage } }
             )
 
@@ -771,14 +771,14 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
                     console.log('This is toEmailRegexData ==> ', toEmailRegexData);
 
                     const uuidRegexData = result.match(uuidRegex);
-                    console.log('This is toEmailRegexData ==> ', toEmailRegexData);
+                    console.log('This is uuidRegexData ==> ', uuidRegexData);
 
-                    const campaignId = campaignRegexData[1].split(':')[1];
-                    const batchId = batchRegexData[1].split(':')[1];
-                    const toEmail = toEmailRegexData[1].split(':')[1];
+                    // const campaignId = campaignRegexData[1].split(':')[1];
+                    // const batchId = batchRegexData[1].split(':')[1];
+                    // const toEmail = toEmailRegexData[1].split(':')[1];
                     const uuid = uuidRegexData[1].split(':')[1];
 
-                    console.log("SPLIT1: ", campaignId, batchId, toEmail, uuid);
+                    console.log("SPLIT1: ", uuid);
 
                     // Get two regex which are uniq. Our reply would be in these two regex
                     let repliedHTML = '';

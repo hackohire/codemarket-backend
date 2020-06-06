@@ -17,6 +17,10 @@ const contactSchema = new Schema(
         },
 
         /** Fields related to Contact */
+        isEmailSent: {
+            type: Boolean,
+            default: false
+        },
         phone: [String],
         email: [{
             email: String,

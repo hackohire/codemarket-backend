@@ -206,7 +206,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
         const result = await Contact.aggregate([
             {
                 $match: {
-                    batch: batches.name        
+                    batch: batches.name
                 }
             },
             {
@@ -399,11 +399,14 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                             }
                         })
                     }
+
+                    const uuid = new ObjectID().toHexString();
+
                     // Create Mail Obj
                     const mailOption = {
                         headers: {
                             'X-SES-CONFIGURATION-SET': 'la2050',
-                            'X-SES-MESSAGE-TAGS': `campaignId=${campaignData[0]._id}`
+                            'X-SES-MESSAGE-TAGS': `campaignId=${campaignData[0]._id}, uuid=${uuid}`
                         },
                         from: `${tempFrom} <${process.env.FROM_EMAIL}>`,
                         to: [data[index].email[0].email],
@@ -416,13 +419,13 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                         campaignId: campaignData[0]._id,
                         createdBy: createdBy,
                         companies: [{ _id: companies._id }],
-                        uuid: new ObjectID().toHexString()
+                        uuid: uuid
                     };
                     // const hiddenElement = `<p style="display: none;"> {campaignId:${campaignData[0]._id}}</p>`;
                     // const batchElement = `<p style="display: none;"> {batchId:${batches._id}}</p>`;
                     // const toEmailElement = `<p style="display: none;"> {toEmail:${data[index].email[0].email}}</p>`;
                     // mailOption.html = "<html><body>" + mailOption.html + hiddenElement + batchElement + toEmailElement + "</body></html>";
-                    const hiddenUUID = `<p style="display: none;"> {uuid:${mailOption.uuid}}</p>`;
+                    const hiddenUUID = `<p style="display: none;"> {uuid:${uuid}}</p>`;
                     mailOption.html = "<html><body>" + mailOption.html + hiddenUUID +"</body></html>";
                     const params = {
                         MessageBody: JSON.stringify(mailOption),
@@ -430,12 +433,13 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                     };
 
                     console.log(index , mailOption);
-                    sqs.sendMessage(params, (error, res) => {
+                    sqs.sendMessage(params,async (error, res) => {
                         if (error) {
                             console.log("Error while sending ==> ", error);
                         } else {
                             console.log("Success while sending ==> ", res);
                         }
+                        // const result = await Contact.updateOne({ _id: data[index]._id },{ isEmailSent: true });
                         index += 1;
                         sendEmail(data, index);
                     });
