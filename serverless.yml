@@ -32,6 +32,11 @@ provider:
     CKEDITOR_ENVIRONMENT_ID: ${file(env.yml):${self:provider.stage}.CKEDITOR_ENVIRONMENT_ID}
     CKEDITOR_SECRET_KEY: ${file(env.yml):${self:provider.stage}.CKEDITOR_SECRET_KEY}
 
+    BRAINTREE_ENVIRONMENT: ${file(env.yml):${self:provider.stage}.BRAINTREE_ENVIRONMENT}
+    BRAINTREE_MERCHENTID: ${file(env.yml):${self:provider.stage}.BRAINTREE_MERCHENTID}
+    BRAINTREE_publicKey: ${file(env.yml):${self:provider.stage}.BRAINTREE_publicKey}
+    BRAINTREE_privateKey: ${file(env.yml):${self:provider.stage}.BRAINTREE_privateKey}
+
     SEND_EMAIL_QUEUE: sendEmail-${self:service}-${self:provider.stage}
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions

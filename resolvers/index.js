@@ -1,4 +1,4 @@
-const { getUsers, createUser, updateUser, authorize, getUserById } = require('./user');
+const { getUsers, createUser, updateUser, authorize, getUserById, createBraintreeTransaction } = require('./user');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { findFromCollection, addToCollection } = require('./categories');
 const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType } = require('./post');
@@ -57,6 +57,7 @@ module.exports = {
     updateUser,
     authorize,
     generateCkEditorToken,
+    createBraintreeTransaction,
     addMakeMoney,
     addToCollection,
     // addProduct,
