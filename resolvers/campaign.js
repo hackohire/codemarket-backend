@@ -206,7 +206,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
         const result = await Contact.aggregate([
             {
                 $match: {
-                    batch: batches.name        
+                    batch: batches.name
                 }
             },
             {
@@ -399,11 +399,14 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                             }
                         })
                     }
+
+                    const uuid = new ObjectID().toHexString();
+
                     // Create Mail Obj
                     const mailOption = {
                         headers: {
                             'X-SES-CONFIGURATION-SET': 'la2050',
-                            'X-SES-MESSAGE-TAGS': `campaignId=${campaignData[0]._id}`
+                            'X-SES-MESSAGE-TAGS': `campaignId=${campaignData[0]._id}, uuid=${uuid}`
                         },
                         from: `${tempFrom} <${process.env.FROM_EMAIL}>`,
                         to: [data[index].email[0].email],
@@ -416,23 +419,27 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                         campaignId: campaignData[0]._id,
                         createdBy: createdBy,
                         companies: [{ _id: companies._id }],
+                        uuid: uuid
                     };
-                    const hiddenElement = `<p style="display: none;"> {campaignId:${campaignData[0]._id}}</p>`;
-                    const batchElement = `<p style="display: none;"> {batchId:${batches._id}}</p>`;
-                    const toEmailElement = `<p style="display: none;"> {toEmail:${data[index].email[0].email}}</p>`;
-                    mailOption.html = "<html><body>" + mailOption.html + hiddenElement + batchElement + toEmailElement + "</body></html>";
+                    // const hiddenElement = `<p style="display: none;"> {campaignId:${campaignData[0]._id}}</p>`;
+                    // const batchElement = `<p style="display: none;"> {batchId:${batches._id}}</p>`;
+                    // const toEmailElement = `<p style="display: none;"> {toEmail:${data[index].email[0].email}}</p>`;
+                    // mailOption.html = "<html><body>" + mailOption.html + hiddenElement + batchElement + toEmailElement + "</body></html>";
+                    const hiddenUUID = `<p style="display: none;"> {uuid:${uuid}}</p>`;
+                    mailOption.html = "<html><body>" + mailOption.html + hiddenUUID +"</body></html>";
                     const params = {
                         MessageBody: JSON.stringify(mailOption),
                         QueueUrl: queueUrl,
                     };
 
                     console.log(index , mailOption);
-                    sqs.sendMessage(params, (error, res) => {
+                    sqs.sendMessage(params,async (error, res) => {
                         if (error) {
                             console.log("Error while sending ==> ", error);
                         } else {
                             console.log("Success while sending ==> ", res);
                         }
+                        // const result = await Contact.updateOne({ _id: data[index]._id },{ isEmailSent: true });
                         index += 1;
                         sendEmail(data, index);
                     });
@@ -468,8 +475,11 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
             // Create Batch
             const batchObj = {
                 name: label,
-                createdBy: createdBy
+                createdBy: createdBy,
+                companyId: companies._id
             };
+            console.log("Batch Obj ==> ", batchObj);
+            
             const batchData = new Batch(batchObj);
             await batchData.save();
 
@@ -521,10 +531,32 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
         }
     })
 }
+
+async function getMailingList(_, { companyId }, {headers, db, decodedToken}) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            const result = await Batch.find({companyId: companyId}).populate('createdBy').exec();
+            console.log("batches =>" , result);
+            resolve(result);
+        } catch (err) {
+            console.log("GetMailing List error ==> ", err);
+            reject(false);
+        }
+    });
+}
+
 module.exports = {
     getCampaignsWithTracking,
     getCampaignEmails,
     getCsvFileData,
     getEmailData,
-    saveCsvFileData
+    saveCsvFileData,
+    getMailingList
 }

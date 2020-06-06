@@ -7,7 +7,7 @@ const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription } = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType } = require('./post-type');
-const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData } = require('./campaign');
+const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData, getMailingList } = require('./campaign');
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
@@ -50,7 +50,8 @@ module.exports = {
     getPostByPostType,
     getCampaignEmails,
     // Chat Resolver
-    createVideoToken
+    createVideoToken,
+    getMailingList
   },
   Mutation: {
     createUser,
