@@ -4,7 +4,7 @@ var ObjectID = require('mongodb').ObjectID;
 const Subscription = require('../models/subscription')();
 const helper = require('../helpers/helper');
 const auth = require('../helpers/auth');
-
+var braintree = require("braintree");
 let conn;
 
 async function getUsers(_, { _page = 1, _limit = 10 }, { headers, db, decodedToken }) {
@@ -207,6 +207,53 @@ async function getUserById(_, { userId }, { headers, db, decodedToken }) {
     });
 }
 
+const createBraintreeTransaction = async (_, { data }) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            conn = await connectToMongoDB();
+            var gateway = braintree.connect({
+                environment: braintree.Environment[process.env.BRAINTREE_ENVIRONMENT],
+                merchantId: process.env.BRAINTREE_MERCHENTID,
+                publicKey: process.env.BRAINTREE_publicKey,
+                privateKey: process.env.BRAINTREE_privateKey
+            });
+
+
+            gateway.transaction.sale({
+                amount: data.amount,
+                paymentMethodNonce: data.nonce,
+                options: {
+                    submitForSettlement: true
+                }
+            }, async (err, result) => {
+                console.log(err);
+                console.log(result);
+                if (result && result.success) {
+                    result.transaction['donorName'] = data.name;
+                    result.transaction['donorEmail'] = data.email;
+                    const insertedTransaction = await conn.collection('donations').insertOne(result.transaction);
+                    console.log('insertedTransaction', insertedTransaction);
+                }
+                return resolve(result);
+            });
+            // Getting user Data by passing the userId
+            // await conn.findById(userId).populate('currentJobDetails.jobProfile').populate('currentJobDetails.company').exec(async (err, res) => {
+
+            //     // if error, reject with error
+            //     if (err) {
+            //         return reject(err)
+            //     }
+
+            //     return resolve(res);
+            // });
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
 
 
 
@@ -215,5 +262,6 @@ module.exports = {
     createUser,
     updateUser,
     authorize,
-    getUserById
+    getUserById,
+    createBraintreeTransaction
 };
