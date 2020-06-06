@@ -99,9 +99,16 @@ const graphQlCampaignSchema = `
         campaignId: String
     }
 
+    type mailingList {
+        _id: ID
+        name: String
+        createdBy: User
+    }
+
     extend type Query {
         getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String, batchId: String): [Campaign]
         getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
+        getMailingList(companyId: String) : [mailingList]
     }
 
     extend type Mutation {

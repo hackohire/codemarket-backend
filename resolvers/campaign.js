@@ -475,8 +475,11 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
             // Create Batch
             const batchObj = {
                 name: label,
-                createdBy: createdBy
+                createdBy: createdBy,
+                companyId: companies._id
             };
+            console.log("Batch Obj ==> ", batchObj);
+            
             const batchData = new Batch(batchObj);
             await batchData.save();
 
@@ -528,10 +531,33 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
         }
     })
 }
+
+async function getMailingList(_, { companyId }, {headers, db, decodedToken}) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            console.log("This is companyId ==> ", companyId);
+            const result = await Batch.find({}).populate('createdBy').exec();
+            console.log("batches =>" , result);
+            resolve(result);
+        } catch (err) {
+            console.log("GetMailing List error ==> ", err);
+            reject(false);
+        }
+    });
+}
+
 module.exports = {
     getCampaignsWithTracking,
     getCampaignEmails,
     getCsvFileData,
     getEmailData,
-    saveCsvFileData
+    saveCsvFileData,
+    getMailingList
 }

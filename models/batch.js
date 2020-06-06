@@ -13,6 +13,10 @@ const batchSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "campaign",
         },
+        companyId: {
+            type: Schema.Types.ObjectId,
+            ref: "company",
+        },
         name: String
     },
     {
