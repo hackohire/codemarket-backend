@@ -603,7 +603,6 @@ const sendEmailFromQueue = (event, context) => {
         let conn = await connectToMongoDB();
 
         console.log("This is event ", event);
-        console.log("this is context ", context);
         try {
             const transporter = await nodemailer.createTransport({
                 host: process.env.SMTP_HOST,
@@ -760,6 +759,7 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
                     const campaingRegex = new RegExp('\{(campaignId:[^}]+)\}');
                     const batchRegex = new RegExp('\{(batchId:[^}]+)\}');
                     const toEmailRegex = new RegExp('\{(toEmail:[^}]+)\}');
+                    const uuidRegex = new RegExp('\{(uuid:[^}]+)\}');
 
                     const campaignRegexData = result.match(campaingRegex);
                     console.log('This is campaignRegexData ==> ', campaignRegexData);
@@ -770,11 +770,15 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
                     const toEmailRegexData = result.match(toEmailRegex);
                     console.log('This is toEmailRegexData ==> ', toEmailRegexData);
 
+                    const uuidRegexData = result.match(uuidRegex);
+                    console.log('This is toEmailRegexData ==> ', toEmailRegexData);
+
                     const campaignId = campaignRegexData[1].split(':')[1];
                     const batchId = batchRegexData[1].split(':')[1];
                     const toEmail = toEmailRegexData[1].split(':')[1];
+                    const uuid = uuidRegexData[1].split(':')[1];
 
-                    console.log("SPLIT1: ", campaignId, batchId, toEmail);
+                    console.log("SPLIT1: ", campaignId, batchId, toEmail, uuid);
 
                     // Get two regex which are uniq. Our reply would be in these two regex
                     let repliedHTML = '';
@@ -818,7 +822,10 @@ const readAndSaveEmailDataFromS3 = async (event, context) => {
 
                     console.log('This is RepliedHTMLSring ===> ', repliedHTML);
 
-                    const eData = await Email.updateOne({ to: toEmail, campaignId: campaignId, batchId: batchId }, { $set: { isReplied: true, repliedHTML: repliedHTML } });
+                    // const eData = await Email.updateOne({ to: toEmail, campaignId: campaignId, batchId: batchId }, { $set: { isReplied: true, repliedHTML: repliedHTML } });
+
+                    const eData = await Email.updateOne({ uuid: uuid }, { $set: { isReplied: true, repliedHTML: repliedHTML } });
+
                     console.log("EDATA ===> ", eData);
                     resolve(true);
                 }

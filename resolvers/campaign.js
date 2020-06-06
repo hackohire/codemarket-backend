@@ -416,11 +416,14 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                         campaignId: campaignData[0]._id,
                         createdBy: createdBy,
                         companies: [{ _id: companies._id }],
+                        uuid: new ObjectID().toHexString()
                     };
-                    const hiddenElement = `<p style="display: none;"> {campaignId:${campaignData[0]._id}}</p>`;
-                    const batchElement = `<p style="display: none;"> {batchId:${batches._id}}</p>`;
-                    const toEmailElement = `<p style="display: none;"> {toEmail:${data[index].email[0].email}}</p>`;
-                    mailOption.html = "<html><body>" + mailOption.html + hiddenElement + batchElement + toEmailElement + "</body></html>";
+                    // const hiddenElement = `<p style="display: none;"> {campaignId:${campaignData[0]._id}}</p>`;
+                    // const batchElement = `<p style="display: none;"> {batchId:${batches._id}}</p>`;
+                    // const toEmailElement = `<p style="display: none;"> {toEmail:${data[index].email[0].email}}</p>`;
+                    // mailOption.html = "<html><body>" + mailOption.html + hiddenElement + batchElement + toEmailElement + "</body></html>";
+                    const hiddenUUID = `<p style="display: none;"> {uuid:${mailOption.uuid}}</p>`;
+                    mailOption.html = "<html><body>" + mailOption.html + hiddenUUID +"</body></html>";
                     const params = {
                         MessageBody: JSON.stringify(mailOption),
                         QueueUrl: queueUrl,
