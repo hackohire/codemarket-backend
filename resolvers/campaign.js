@@ -542,8 +542,7 @@ async function getMailingList(_, { companyId }, {headers, db, decodedToken}) {
                 console.log('Using existing mongoose connection.');
             }
 
-            console.log("This is companyId ==> ", companyId);
-            const result = await Batch.find({}).populate('createdBy').exec();
+            const result = await Batch.find({companyId: companyId}).populate('createdBy').exec();
             console.log("batches =>" , result);
             resolve(result);
         } catch (err) {
