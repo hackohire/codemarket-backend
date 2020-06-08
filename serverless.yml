@@ -174,7 +174,6 @@ functions:
               - sendEmailProd
               - Arn
           batchSize: 1
-          maximumRetryAttempts: 2
 
   attachCardAndCreateSubscription:
     handler: handler.attachCardAndCreateSubscription
