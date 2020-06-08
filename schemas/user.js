@@ -82,7 +82,7 @@ type User {
     authorize(applicationId: String): User
 
     generateCkEditorToken(user: UserInput, role: String): String
-    createBraintreeTransaction(data: JSON): JSON
+    createTransaction(data: JSON): JSON
   }
 
   extend type Subscription {

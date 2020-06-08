@@ -1,13 +1,13 @@
-const { getUsers, createUser, updateUser, authorize, getUserById, createBraintreeTransaction } = require('./user');
+const { getUsers, createUser, updateUser, authorize, getUserById, createTransaction } = require('./user');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { findFromCollection, addToCollection } = require('./categories');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType } = require('./post');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType, getAlreadyBookedSlots } = require('./post');
 const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId } = require('./company');
 const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription } = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType } = require('./post-type');
-const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData } = require('./campaign');
+const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData, getMailingList } = require('./campaign');
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
@@ -50,14 +50,16 @@ module.exports = {
     getPostByPostType,
     getCampaignEmails,
     // Chat Resolver
-    createVideoToken
+    createVideoToken,
+    getMailingList,
+    getAlreadyBookedSlots
   },
   Mutation: {
     createUser,
     updateUser,
     authorize,
     generateCkEditorToken,
-    createBraintreeTransaction,
+    createTransaction,
     addMakeMoney,
     addToCollection,
     // addProduct,

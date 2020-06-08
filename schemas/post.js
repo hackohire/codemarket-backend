@@ -37,6 +37,7 @@ const graphQlPostSchema = `
 
         appointment_date: String
         cancelReason: String
+        duration: [String]
 
         mentor: JSON
         job: JSON
@@ -79,6 +80,7 @@ const graphQlPostSchema = `
 
         appointment_date: String
         cancelReason: String
+        duration: [String]
 
         mentor: JSON
         job: JSON
@@ -118,14 +120,19 @@ const graphQlPostSchema = `
         phoneCount: String
     }
 
+    type getDuration {
+        appointment: [Post]
+    }
+
     extend type Query {
         getPostsByType(postType: String): [Post]
         getPostsByUserIdAndType(userId: String, status: String, postType: String, pageOptions: PageOptionsInput): GetPostsByUserIdAndTypeResponse
         getPostById(postId: String): Post
         fullSearch(searchString: String): [Post]
         getCountOfAllPost(userId: String, companyId: String, reference: ReferenceObject): [getCountAllPost]
-        getEmailPhoneCountForContact(type: String): [emailPhoneCount],
+        getEmailPhoneCountForContact(type: String): [emailPhoneCount]
         getPostByPostType(postType: String, userId: String, pageOptions: PageOptionsInput): GetPostsByUserIdAndTypeResponse
+        getAlreadyBookedSlots(date: String): getDuration
     }
     extend type Mutation {
         addPost(post: PostInput): Post
