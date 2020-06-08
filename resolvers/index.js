@@ -1,7 +1,7 @@
 const { getUsers, createUser, updateUser, authorize, getUserById, createBraintreeTransaction } = require('./user');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { findFromCollection, addToCollection } = require('./categories');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType } = require('./post');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType, getAlreadyBookedSlots } = require('./post');
 const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId } = require('./company');
 const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
@@ -51,7 +51,8 @@ module.exports = {
     getCampaignEmails,
     // Chat Resolver
     createVideoToken,
-    getMailingList
+    getMailingList,
+    getAlreadyBookedSlots
   },
   Mutation: {
     createUser,

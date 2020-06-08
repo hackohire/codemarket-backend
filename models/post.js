@@ -85,6 +85,7 @@ const postSchema = new Schema(
         /** Add Fields Related to the new post types here */
         appointment_date: String,
         cancelReason: String,
+        duration: [String],
 
         mentor: {
             topics: [{
