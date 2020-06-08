@@ -1030,6 +1030,26 @@ async function getPostByPostType(_, { postType, userId, pageOptions }, { headers
     });
 }
 
+async function getAlreadyBookedSlots(_, {date}, {header, db, decodedToken}) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+            let condition = { type: 'appointment', appointment_date: date }
+            const appointment = await Post.find(condition);
+            console.log(appointment, date);
+            return resolve({ appointment });
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    })
+}
+
 module.exports = {
     getAllPosts,
     fullSearch,
@@ -1044,4 +1064,5 @@ module.exports = {
     getCountOfAllPost,
     saveContact,
     getPostByPostType,
+    getAlreadyBookedSlots,
 }
