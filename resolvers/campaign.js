@@ -194,7 +194,7 @@ async function getCsvFileData(_, {data, createdBy, fileName, label, companies}, 
     })
 }
 
-async function getEmailData(_, { batches, emailTemplate, subject, createdBy, from, companies }, { headers, db, decodedToken }) {
+async function getEmailData(_, { batches, emailTemplate, subject, createdBy, from, companyId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
 
         if (!db) {
@@ -419,7 +419,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                         batchId: batches._id,
                         campaignId: campaignData[0]._id,
                         createdBy: createdBy,
-                        companies: [{ _id: companies._id }],
+                        companies: [{ _id: companyId }],
                         uuid: uuid
                     };
                     // const hiddenElement = `<p style="display: none;"> {campaignId:${campaignData[0]._id}}</p>`;
@@ -458,7 +458,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
     });
 }
 
-async function saveCsvFileData(_, {data, createdBy, fileName, label, companies}, { headers, db, decodedToken }) {
+async function saveCsvFileData(_, {data, createdBy, fileName, label, companyId}, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
             if (!db) {
@@ -477,9 +477,8 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
             const batchObj = {
                 name: label,
                 createdBy: createdBy,
-                companyId: companies._id
+                companyId: companyId
             };
-            console.log("Batch Obj ==> ", batchObj);
             
             const batchData = new Batch(batchObj);
             await batchData.save();
@@ -488,7 +487,7 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
             const campaignObj = {
                 name: label + ' Campaign',
                 createdBy: createdBy,
-                companies: [{ _id: companies._id }],
+                companies: [{ _id: companyId }],
                 batchId: batchData._id
             };
             const campaignData = new Campaign(campaignObj);
@@ -515,6 +514,7 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
                         data[index]["batchId"] = batchData._id;
                         data[index]["campaignId"] = campaignData._id;
 
+                        console.log("Data  ==> ", data[index]);
                         const cData = new Contact(data[index]);
                         cData.save().then((res) => {
                             index += 1;

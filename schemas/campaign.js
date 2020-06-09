@@ -173,9 +173,9 @@ const graphQlCampaignSchema = `
     }
 
     extend type Mutation {
-        saveCsvFileData(data: [JSON], createdBy: String, fileName: String, label: String, companies: batchInput): csvData
+        saveCsvFileData(data: [JSON], createdBy: String, fileName: String, label: String, companyId: String): csvData
         getCsvFileData(data: [JSON], createdBy: String, fileName: String, label: String, companies: batchInput): csvData
-        getEmailData(batches: batchInput, emailTemplate: String, subject: String, createdBy: String, from: String, companies: batchInput): getEmailData
+        getEmailData(batches: batchInput, emailTemplate: String, subject: String, createdBy: String, from: String, companyId: String): getEmailData
     }
 `;
 
