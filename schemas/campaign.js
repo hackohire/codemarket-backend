@@ -8,6 +8,7 @@ const graphQlCampaignSchema = `
         createdBy: User
         subject: String
         descriptionHTML: String
+        from: String
         count: Int
         emailData: [Email]
     }
@@ -148,11 +149,26 @@ const graphQlCampaignSchema = `
         total: Int
     }
 
+    type CampaignData {
+        _id: ID
+        name: String
+        batchId: String
+        label: String
+        createdAt: String
+        updatedAt: String
+    }
+
+    type getCampaignDataResponse {
+        campaigns: [CampaignData]
+        total: Int
+    }
+
     extend type Query {
         getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String, batchId: String): [Campaign]
         getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
         getMailingList(companyId: String) : [mailingList]
         getMailingListContacts(pageOptions: PageOptionsInput, batchId: String) : getMailingListContactResponse
+        getCampaignData(pageOptions: PageOptionsInput, companyId: String): getCampaignDataResponse
     }
 
     extend type Mutation {

@@ -52,6 +52,7 @@ async function getCampaignsWithTracking(_, { pageOptions, companyId, batchId }, 
                         companies: 1,
                         createdBy: 1,
                         batchId: 1,
+                        from: 1,
                         subject: 1,
                         emailData: { $slice: ['$emailData', (pageOptions.pageNumber - 1) * pageOptions.limit, pageOptions.limit]},
                         count: { $size: "$emailData"}
@@ -246,14 +247,14 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
         const vartoReplaceInFrom = from.match(pattern);
         const vartoReplaceInSubject = subject.match(pattern);
         
-        const queueUrl = `https://sqs.us-east-1.amazonaws.com/784380094623/${process.env.SEND_EMAIL_QUEUE}`;
+        const queueUrl = `https://sqs.us-east-1.amazonaws.com/784380094623/sendEmail-codemarketapi-prod`;
 
         if (!emailTemplate) {
             return reject(false);
         }
 
         // Update Campaign
-        const updatedBatch = await Campaign.update({ _id: campaignData[0]._id},{ $set: { subject: subject, descriptionHTML: emailTemplate} });
+        const updatedBatch = await Campaign.update({ _id: campaignData[0]._id},{ $set: { subject: subject, descriptionHTML: emailTemplate, from: from} });
 
 
         if (result.length) {
@@ -546,7 +547,6 @@ async function getMailingList(_, { companyId }, {headers, db, decodedToken}) {
             }
 
             const result = await Batch.find({companyId: companyId}).populate('createdBy').exec();
-            console.log("batches =>" , result);
             resolve(result);
         } catch (err) {
             console.log("GetMailing List error ==> ", err);
@@ -590,6 +590,45 @@ async function getMailingListContacts(_, {pageOptions, batchId }, {headers, db, 
     });
 }
 
+async function getCampaignData(_, {pageOptions, companyId }, {headers, db, decodedToken}) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            conn = await connectToMongoDB();
+
+            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'updatedAt';
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
+            const result = await Campaign.aggregate([
+                {
+                    $match: { companies: ObjectID(companyId)}
+                },
+                {
+                    $facet: {
+                        campaigns: [
+                            { $sort: sort },
+                            { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                            { $limit: pageOptions.limit },
+                        ],
+                        pageInfo: [
+                            { $group: { _id: null, count: { $sum: 1 } } },
+                        ],
+                    },
+                },
+            ]);
+
+            return await resolve(
+                {
+                    campaigns: result && result.length ? result[0].campaigns : [],
+                    total: result && result.length && result[0].pageInfo && result[0].pageInfo.length ? result[0].pageInfo[0].count : 0
+                });
+
+        } catch (err) {
+            console.log("This is error in catch ==> ", err);
+            resolve(err);
+        }
+    });
+}
+
 module.exports = {
     getCampaignsWithTracking,
     getCampaignEmails,
@@ -597,5 +636,6 @@ module.exports = {
     getEmailData,
     saveCsvFileData,
     getMailingList,
-    getMailingListContacts
+    getMailingListContacts,
+    getCampaignData
 }
