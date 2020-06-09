@@ -105,10 +105,54 @@ const graphQlCampaignSchema = `
         createdBy: User
     }
 
+    type emailContact {
+        _id: ID
+        email: String
+        status: Boolean
+    }
+
+    type Contact {
+        _id: ID
+        createdBy: User
+        batchId: String
+        campaignId: String
+        status: String
+        isEmailSend: Boolean
+        phone: [String]
+        email: [emailContact]
+        proposalName: String
+        OrganizationName: String
+        birthDate: String
+        address: String
+        website: String
+        companyName: String
+        url: String
+        firstName: String
+        lastName: String
+        cityName: String
+        name: String
+        followers: String
+        following: String
+        posts: String
+        instaProfileId: String
+        batch: String
+        descriptionHTML: String
+        companyContactEmail: String
+        conpanyContactPerson: String
+        ownerName: String
+
+    }
+
+    type getMailingListContactResponse {
+        contacts: [Contact]
+        total: Int
+    }
+
     extend type Query {
         getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String, batchId: String): [Campaign]
         getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
         getMailingList(companyId: String) : [mailingList]
+        getMailingListContacts(pageOptions: PageOptionsInput, batchId: String) : getMailingListContactResponse
     }
 
     extend type Mutation {
