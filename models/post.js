@@ -93,6 +93,7 @@ const postSchema = new Schema(
                 ref: "tag",
                 autopopulate: true
             }],
+            duration: [String],
             availabilityDate: String,
         },
 

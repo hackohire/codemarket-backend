@@ -52,6 +52,7 @@ async function getCampaignsWithTracking(_, { pageOptions, companyId, batchId }, 
                         companies: 1,
                         createdBy: 1,
                         batchId: 1,
+                        from: 1,
                         subject: 1,
                         emailData: { $slice: ['$emailData', (pageOptions.pageNumber - 1) * pageOptions.limit, pageOptions.limit]},
                         count: { $size: "$emailData"}
@@ -193,7 +194,7 @@ async function getCsvFileData(_, {data, createdBy, fileName, label, companies}, 
     })
 }
 
-async function getEmailData(_, { batches, emailTemplate, subject, createdBy, from, companies }, { headers, db, decodedToken }) {
+async function getEmailData(_, { batches, emailTemplate, subject, createdBy, from, companyId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
 
         if (!db) {
@@ -225,7 +226,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                          $filter: {
                                 input: "$email",
                                 as: "e",
-                                cond: { $eq: ["$$e.status", true]}
+                                cond: { $eq: ["$$e.status", "Ok"]}
                             }
                     }
                 }
@@ -253,7 +254,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
         }
 
         // Update Campaign
-        const updatedBatch = await Campaign.update({ _id: campaignData[0]._id},{ $set: { subject: subject, descriptionHTML: emailTemplate} });
+        const updatedBatch = await Campaign.update({ _id: campaignData[0]._id},{ $set: { subject: subject, descriptionHTML: emailTemplate, from: from} });
 
 
         if (result.length) {
@@ -418,7 +419,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                         batchId: batches._id,
                         campaignId: campaignData[0]._id,
                         createdBy: createdBy,
-                        companies: [{ _id: companies._id }],
+                        companies: [{ _id: companyId }],
                         uuid: uuid
                     };
                     // const hiddenElement = `<p style="display: none;"> {campaignId:${campaignData[0]._id}}</p>`;
@@ -457,7 +458,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
     });
 }
 
-async function saveCsvFileData(_, {data, createdBy, fileName, label, companies}, { headers, db, decodedToken }) {
+async function saveCsvFileData(_, {data, createdBy, fileName, label, companyId}, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
             if (!db) {
@@ -476,9 +477,8 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
             const batchObj = {
                 name: label,
                 createdBy: createdBy,
-                companyId: companies._id
+                companyId: companyId
             };
-            console.log("Batch Obj ==> ", batchObj);
             
             const batchData = new Batch(batchObj);
             await batchData.save();
@@ -487,7 +487,7 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
             const campaignObj = {
                 name: label + ' Campaign',
                 createdBy: createdBy,
-                companies: [{ _id: companies._id }],
+                companies: [{ _id: companyId }],
                 batchId: batchData._id
             };
             const campaignData = new Campaign(campaignObj);
@@ -507,10 +507,14 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
                         // }
                         data[index]["email"] = [{
                             email: data[index]["email"],
-                            status: data[index]["status"] || data[index]["status"] === "Ok" ? true : false,
+                            status: data[index]["status"],
                         }];
     
                         data[index]["status"] = "Published";
+                        data[index]["batchId"] = batchData._id;
+                        data[index]["campaignId"] = campaignData._id;
+
+                        console.log("Data  ==> ", data[index]);
                         const cData = new Contact(data[index]);
                         cData.save().then((res) => {
                             index += 1;
@@ -521,7 +525,7 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
                         })
                     } else {
                         console.log("this is done")
-                        return resolve(true);
+                        return resolve({ batchId: batchData._id});
                     }
                 })
             }
@@ -543,11 +547,84 @@ async function getMailingList(_, { companyId }, {headers, db, decodedToken}) {
             }
 
             const result = await Batch.find({companyId: companyId}).populate('createdBy').exec();
-            console.log("batches =>" , result);
             resolve(result);
         } catch (err) {
             console.log("GetMailing List error ==> ", err);
             reject(false);
+        }
+    });
+}
+
+async function getMailingListContacts(_, {pageOptions, batchId }, {headers, db, decodedToken}) {
+    return new Promise(async (resolve, reject) => {
+
+        const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field === 'status' ? 'email.status': pageOptions.sort.field : 'updatedAt';
+        let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
+
+        conn = await connectToMongoDB();
+
+        const result = await Contact.aggregate([
+            {
+                $match: {batchId: ObjectID(batchId)}
+            },
+            {
+                $facet: {
+                    contacts: [
+                        { $sort: sort },
+                        { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                        { $limit: pageOptions.limit },
+                    ],
+                    pageInfo: [
+                        { $group: { _id: null, count: { $sum: 1 } } },
+                    ],
+                },
+            },
+        ]).exec();
+
+        return await resolve(
+            {
+                contacts: result && result.length ? result[0].contacts : [],
+                total: result && result.length && result[0].pageInfo && result[0].pageInfo.length ? result[0].pageInfo[0].count : 0
+            });
+
+    });
+}
+
+async function getCampaignData(_, {pageOptions, companyId }, {headers, db, decodedToken}) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            conn = await connectToMongoDB();
+
+            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'updatedAt';
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
+            const result = await Campaign.aggregate([
+                {
+                    $match: { companies: ObjectID(companyId)}
+                },
+                {
+                    $facet: {
+                        campaigns: [
+                            { $sort: sort },
+                            { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                            { $limit: pageOptions.limit },
+                        ],
+                        pageInfo: [
+                            { $group: { _id: null, count: { $sum: 1 } } },
+                        ],
+                    },
+                },
+            ]);
+
+            return await resolve(
+                {
+                    campaigns: result && result.length ? result[0].campaigns : [],
+                    total: result && result.length && result[0].pageInfo && result[0].pageInfo.length ? result[0].pageInfo[0].count : 0
+                });
+
+        } catch (err) {
+            console.log("This is error in catch ==> ", err);
+            resolve(err);
         }
     });
 }
@@ -558,5 +635,7 @@ module.exports = {
     getCsvFileData,
     getEmailData,
     saveCsvFileData,
-    getMailingList
+    getMailingList,
+    getMailingListContacts,
+    getCampaignData
 }
