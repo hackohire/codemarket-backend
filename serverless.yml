@@ -2,10 +2,14 @@ service: codemarketapi
 
 provider:
   name: aws
-  runtime: nodejs8.10
-  region: ap-south-1
-  stage: dev
+  runtime: nodejs10.x
+  region: us-east-1
+  versionFunctions: false
+  stage: ${opt:stage, 'dev'}
+  # websocketsApiName: codemarket-videochat-socket
+  # websocketsApiRouteSelectionExpression: $request.body.action
   environment:
+
     MONGODB_URL: ${file(env.yml):${self:provider.stage}.MONGODB_URL}
     MONGODB_DBNAME: ${file(env.yml):${self:provider.stage}.MONGODB_DBNAME}
     AWS_ACCESSKEY_ID: ${file(env.yml):${self:provider.stage}.AWS_ACCESSKEY_ID}
@@ -20,29 +24,232 @@ provider:
     SMTP_USER: ${file(env.yml):${self:provider.stage}.SMTP_USER}
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
+    STRIPE_SECRET_KEY: ${file(env.yml):${self:provider.stage}.STRIPE_SECRET_KEY}
+    IS_OFFLINE: ${file(env.yml):${self:provider.stage}.IS_OFFLINE}
+    TWILIO_ACCOUNT_SID: ${file(env.yml):${self:provider.stage}.TWILIO_ACCOUNT_SID}
+    TWILIO_API_KEY: ${file(env.yml):${self:provider.stage}.TWILIO_API_KEY}
+    TWILIO_API_SECRET: ${file(env.yml):${self:provider.stage}.TWILIO_API_SECRET}
+    CKEDITOR_ENVIRONMENT_ID: ${file(env.yml):${self:provider.stage}.CKEDITOR_ENVIRONMENT_ID}
+    CKEDITOR_SECRET_KEY: ${file(env.yml):${self:provider.stage}.CKEDITOR_SECRET_KEY}
+
+    BRAINTREE_ENVIRONMENT: ${file(env.yml):${self:provider.stage}.BRAINTREE_ENVIRONMENT}
+    BRAINTREE_MERCHENTID: ${file(env.yml):${self:provider.stage}.BRAINTREE_MERCHENTID}
+    BRAINTREE_publicKey: ${file(env.yml):${self:provider.stage}.BRAINTREE_publicKey}
+    BRAINTREE_privateKey: ${file(env.yml):${self:provider.stage}.BRAINTREE_privateKey}
+
+    SEND_EMAIL_QUEUE: sendEmail-${self:service}-${self:provider.stage}
+    CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
+    SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
+    EVENTS: ${self:service}-${self:provider.stage}-Events
+    SUBSCRIPTION_OPERATIONS: ${self:service}-${self:provider.stage}-SubscriptionOperations
+
+
 functions:
+  
   graphql:
-    handler: handler.graphqlHandler
+    handler: handler.handler
     # role: ServiceRole
     events:
       - http:
           path: graphql
           method: post
-          cors: true
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - x-requested-with
+            allowCredentials: false 
       - http:
           path: graphql
           method: get
-          cors: true
-  hello:
-    handler: handler1.hello
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - x-requested-with
+            allowCredentials: false 
+
+            
+  webSocketHandler:
+    handler: handler.handleWebSocket
+    events:
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+      - websocket:
+          route: $default
+  dynamoDBStreamHandler:
+    handler: handler.handleDynamoDBStream
+    events:
+      - stream:
+          enabled: true
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [EventsDynamoDBTable, StreamArn]
+
+  checkoutSessionCompleted:
+    handler: handler.checkoutSessionCompleted
     events:
       - http:
-          path: hello
+          path: checkoutSessionCompleted
+          method: POST
+          cors: true
+
+  createCheckoutSession:
+    handler: handler.createCheckoutSession
+    events:
+      - http:
+          path: createCheckoutSession
+          method: POST
+          cors: true
+
+  emailCampaignEvent:
+    handler: handler.emailCampaignEvent
+    events:
+      - http:
+          path: emailCampaignEvent
+          method: POST
+          cors: true
+
+      - sns:
+        arn: 'campaign'
+
+  saveImage:
+    handler: handler.saveImage
+    events:
+      - http:
+          path: saveImage
+          method: POST
+          cors: true
+
+  getCheckoutSession:
+    handler: handler.getCheckoutSession
+    events:
+      - http:
+          path: getCheckoutSession
+          method: POST
+          cors: true
+  
+  saveContact:
+    handler: resolvers/post.saveContact
+    events:
+      - http:
+          path: saveContact
           method: GET
           cors: true
 
+  readAndSaveEmailDataFromS3:
+    handler: handler.readAndSaveEmailDataFromS3
+    events:
+      - http:
+          path: readAndSaveEmailDataFromS3
+          method: POST
+          cors: true
+
+  createStripeUser:
+    handler: handler.createStripeUser
+    events:
+      - http:
+          path: createStripeUser
+          method: POST
+          cors: true
+
+  sendEmailFromQueue:
+    handler: handler.sendEmailFromQueue
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - sendEmailProd
+              - Arn
+          batchSize: 1
+
+  attachCardAndCreateSubscription:
+    handler: handler.attachCardAndCreateSubscription
+    events:
+      - http:
+          path: attachCardAndCreateSubscription
+          method: POST
+          cors: true
+
+  getCouponByName:
+    handler: handler.getCouponByName
+    events:
+      - http:
+          path: getCouponByName
+          method: POST
+          cors: true
+
+  sendEmailWithStaticContent:
+    handler: helpers/helper.sendEmailWithStaticContent
+    events:
+      - http:
+          path: sendEmailWithStaticContent
+          method: POST
+          cors: true
+
+  fetchLinkMeta:
+    handler: handler.fetchLinkMeta
+    events:
+      - http:
+          path: fetchLinkMeta
+          method: GET
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - x-requested-with
+            allowCredentials: false  
+
+
+  fetchArticleByLink:
+    handler: handler.fetchArticleByLink
+    events:
+      - http:
+          path: fetchArticleByLink
+          method: GET
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - x-requested-with
+            allowCredentials: false
+
+
 resources:
   Resources:
+
+    # MyTopic:
+    #   Type: AWS::SNS::Topic
+    #   Properties:
+    #     TopicName: campaign
+    
+    sendEmailProd:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: sendEmail-${self:service}-${self:provider.stage}
+
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
       Type: "AWS::ApiGateway::GatewayResponse"
@@ -65,17 +272,102 @@ resources:
           Ref: "ApiGatewayRestApi"
         StatusCode: "401"
 
-plugins:
-  - serverless-offline
-  # - serverless-domain-manager
+    ConnectionsDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        # see DynamoDBConnectionManager
+        TableName: ${self:service}-${self:provider.stage}-Connections
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          # connection id
+          - AttributeName: id
+            KeyType: HASH
 
+    SubscriptionsDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        # see DynamoDBSubscriptionManager
+        TableName: ${self:service}-${self:provider.stage}-Subscriptions
+        AttributeDefinitions:
+          - AttributeName: event
+            AttributeType: S
+          - AttributeName: subscriptionId
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: event
+            KeyType: HASH
+          - AttributeName: subscriptionId
+            KeyType: RANGE
+
+    SubscriptionOperationsDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        # see DynamoDBSubscriptionManager
+        TableName: ${self:service}-${self:provider.stage}-SubscriptionOperations
+        AttributeDefinitions:
+          - AttributeName: subscriptionId
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: subscriptionId
+            KeyType: HASH
+
+    EventsDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        # see DynamoDBEventStore
+        TableName: ${self:service}-${self:provider.stage}-Events
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        # see ISubscriptionEvent
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-plugin-offline-dynamodb-stream
+  - serverless-offline
+  - serverless-domain-manager
+  - serverless-prune-plugin
 custom:
+  dynamodb:
+    stages:
+      - dev
+      - prod
+    start:
+      inMemory: true
+      migrate: true
+      noStart: false
+      sharedDb: true
+    
+  dynamodbStream:
+    host: localhost
+    port: 8000
+    # this fixes the problem with missing region
+    region: us-east-1
+    pollForever: true
+    streams:
+      - table: ${self:service}-${self:provider.stage}-Events
+        functions:
+          - dynamoDBStreamHandler
+
   serverless-offline:
-    port: 3200
-#   customDomain:
-#     domainName: sarkazein7.tech
-#     stage: prod
-#     basePath: ''
-#     certificateName: '*.sarkazein7.tech'
-#     createRoute53Record: true
-#     endpointType: 'regional'
+    httpPort: 3200
+
+  customDomain:
+    domainName: ${self:service}-${self:provider.stage}.codemarket.io
+    basePath: ''
+    certificateName: 'codemarket.io'
+    createRoute53Record:	false
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+    stage: ${self:provider.stage}

@@ -1,20 +1,19 @@
 const mongoose = require('mongoose');
-const bluebird = require('bluebird');
-mongoose.Promise = bluebird;
-mongoose.Promise = global.Promise;
 
 // Only reconnect if needed. State is saved and outlives a handler invocation 
 let isConnected;
 let dbObj;
 
 const connectToDatabase = () => {
+  // mongoose.set('debug', true);
   if (isConnected) {
-    console.log('Re-using existing database connection');
+    console.log('Re-using existing database connection', process.env.MONGODB_URL);
     return Promise.resolve(dbObj);
   }
 
-  console.log('Creating new database connection');
+  console.log('Creating new database connection', process.env.MONGODB_URL);
   return mongoose.connect(process.env.MONGODB_URL, {
+    useFindAndModify: false,
     useNewUrlParser: true, reconnectTries: 30, reconnectInterval: 500, poolSize: 1, socketTimeoutMS: 2000000, keepAlive: true
   })
     .then(db => {

@@ -1,150 +1,178 @@
-const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
-const { addProduct, updateProduct, deleteProduct, getAllProducts, getProductsByUserId, getProductById } = require('./product');
-const { addQuery, getAllHelpRequests, getHelpRequestById, getHelpRequestsByUserId, updateHelpRequest, deleteHelpRequest } = require('./help');
-const { addInterview, getAllInterviews, getInterviewById, getInterviewsByUserId, updateInterview, deleteInterview } = require('./interview');
-const { addTesting, getAllTestings, getTestingById, getTestingsByUserId, updateTesting, deleteTesting } = require('./testing');
-const { addHowtodoc, getAllHowtodocs, getHowtodocById, getHowtodocsByUserId, updateHowtodoc, deleteHowtodoc } = require('./how-to-doc');
-const { addRequirement, getAllRequirements, getRequirementById, getRequirementsByUserId, updateRequirement, deleteRequirement } = require('./requirement');
-const { addDesign, getAllDesigns, getDesignById, getDesignsByUserId, updateDesign, deleteDesign } = require('./design')
-const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment } = require('./comment')
-const { searchCategories } = require('./categories');
-const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
-const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
-const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts } = require('./post');
+const { getUsers, createUser, updateUser, authorize, getUserById, createTransaction } = require('./user');
+const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
+const { findFromCollection, addToCollection } = require('./categories');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType, getAlreadyBookedSlots } = require('./post');
+const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId } = require('./company');
+const { sendEmail } = require('./email');
+const { addMakeMoney } = require('./makeMoney');
+const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription } = require('./subscription');
+const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType } = require('./post-type');
+const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData, getMailingList, getMailingListContacts } = require('./campaign');
+const { addHelpGrowBusiness } = require('./temporary');
+const { withFilter } = require('aws-lambda-graphql');
+const { addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
+const { addformData, fetchformData } = require('./FormData');
+const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
+const { createVideoToken } = require('./videoCall');
+const { generateCkEditorToken } = require('./auth');
+const { GraphQLUpload } = require('graphql-upload');
+const { pubSub } = require('../helpers/pubsub');
 
 module.exports = {
+  JSON: GraphQLJSON,
+  JSONObject: GraphQLJSONObject,
+  Upload: GraphQLUpload,
   Query: {
     hello: () => 'Hello world!',
-    getUsers,
-    getUsersAndBugFixesCount,
-    getUserById,
+    getUsers, getUserById,
 
     getAllPosts,
+    fullSearch,
+    fetchformJson, fetchformData, fetchFormStructureById,
+    // getProductsByUserId,
+    // getProductById,
 
-    getAllProducts,
-    getProductsByUserId,
-    getProductById,
+    getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged,
 
-    getComments,
-    getCommentsByReferenceId,
-    deleteComment,
+    getPostsByUserIdAndType, getPostById, getPostsByType,
 
-    getAllHelpRequests,
-    getHelpRequestsByUserId,
-    getHelpRequestById,
-  
-  
-    getAllInterviews,
-    getInterviewsByUserId,
-    getInterviewById,
+    findFromCollection,
 
-    getAllTestings,
-    getTestingById,
-    getTestingsByUserId,
+    getMembershipSubscriptionsByUserId,
 
-    getAllHowtodocs,
-    getHowtodocById,
-    getHowtodocsByUserId,
-  
-  
-    getAllRequirements,
-    getRequirementsByUserId,
-    getRequirementById,
+    getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, getListOfUsersInACompany, getEventsByCompanyId,
 
-    getAllDesigns,
-    getDesignsByUserId,
-    getDesignById,
+    fetchFields, fetchPostTypes,
 
-    searchCategories,
-
-    getPurchasedUnitsByUserId,
-
-    getCartItemsList,
-
-    checkIfUserLikedAndLikeCount
-
+    getCampaignsWithTracking,
+    getCountOfAllPost,
+    getEmailPhoneCountForContact,
+    getPostByPostType,
+    getCampaignEmails,
+    // Chat Resolver
+    createVideoToken,
+    getMailingList,
+    getAlreadyBookedSlots,
+    getMailingListContacts
   },
   Mutation: {
     createUser,
     updateUser,
     authorize,
-
-    addProduct,
-    updateProduct,
-    deleteProduct,
-
+    generateCkEditorToken,
+    createTransaction,
+    addMakeMoney,
+    addToCollection,
+    // addProduct,
+    // updateProduct,
+    // deleteProduct,
+    addformJson, addformData,
 
     addComment,
     updateComment,
 
-    addQuery,
-    updateHelpRequest,
-    deleteHelpRequest,
+    addPost,
+    updatePost,
+    updatePostContent,
+    deletePost,
 
-    addInterview,
-    updateInterview,
-    deleteInterview,
+    addMembershipSubscription,
+    inviteMembersToSubscription,
+    cancelSubscription,
+    acceptInvitation,
 
-    addRequirement,
-    updateRequirement,
-    deleteRequirement,
+    addCompany, updateCompany, deleteCompany,
 
-    addTesting,
-    updateTesting,
-    deleteTesting,
+    sendEmail,
 
-    addHowtodoc,
-    updateHowtodoc,
-    deleteHowtodoc,
+    addPostType, updatePostType, deletePostType,
 
-    addDesign,
-    updateDesign,
-    deleteDesign,
-
-    addTransaction,
-
-    addToCart,
-    removeItemFromCart,
-
-    like
-
+    addHelpGrowBusiness,
+    getCsvFileData,
+    getEmailData,
+    saveCsvFileData
   },
+  Subscription: {
+    onCommentAdded: {
+      resolve: (rootValue) => {
+        // root value is the payload from sendMessage mutation
+        return rootValue;
+      },
+      subscribe: withFilter(
+        pubSub.subscribe('COMMENT_ADDED'),
+        (rootValue, args) => {
+          // this can be async too :)
+          if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId || args.userId === rootValue.userReferenceId) {
+            return true;
+          }
 
-  descriptionBlocks: {
-    __resolveType(block, context, info) {
+          // return args.type === rootValue.type;
+        },
+      ),
+    },
+    onCommentUpdated: {
+      resolve: (rootValue) => {
+        // root value is the payload from sendMessage mutation
+        // console.log('RooooooooooooooooT Value MAin', rootValue);
+        return rootValue;
+      },
+      subscribe: withFilter(
+        pubSub.subscribe('COMMENT_UPDATED'),
+        (rootValue, args) => {
+          // this can be async too :)
+          // console.log('postIDDDDDDD  Outer', args.postId);
+          // console.log('RooooooooooooooooT Value  Outer', rootValue);
+          if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId || args.userId === rootValue.userReferenceId) {
+            // console.log('=========================================================');
+            // console.log('postIDDDDDDD', args.postId);
+            // console.log('RooooooooooooooooT Value', rootValue);
+            return true;
+          }
 
-      switch(block.type) {
+          // return args.type === rootValue.type;
+        },
+      ),
+    },
+    onCommentDeleted: {
+      resolve: (rootValue) => {
+        // root value is the payload from sendMessage mutation
+        return rootValue;
+      },
+      subscribe: withFilter(
+        pubSub.subscribe('COMMENT_DELETED'),
+        (rootValue, args) => {
+          // this can be async too :)
+          if (args.postId == rootValue.referenceId || args.companyId === rootValue.companyReferenceId || args.userId === rootValue.userReferenceId) {
+            return true;
+          }
 
-        case 'paragraph':
-          return 'ParagraphBlock'
-
-        case 'header':
-          return 'HeaderBlock'
-
-        case 'code':
-          return 'CodeBlock';
-
-        case 'image': 
-          return 'ImageBlock';
-
-        case 'list':
-          return 'ListBlock'
-
-        case 'quote':
-          return 'QuoteBlock'
-
-        case 'table':
-          return 'TableBlock'
-
-        case 'warning':
-          return 'WarningBlock'
-
-        default:
-          console.log('default case')
-          return null;
-      }
+          return false;
+        },
+      ),
+    },
+    onUserOnline: {
+      resolve: (rootValue) => {
+        // root value is the payload from sendMessage mutation
+        delete rootValue['usersToBeNotified'];
+        return rootValue;
+      },
+      subscribe: withFilter(
+        pubSub.subscribe('LISTEN_NOTIFICATION'),
+        (rootValue, args) => {
+          if (rootValue.usersToBeNotified.indexOf(args.user._id) > -1) {
+            return true;
+          }
+          return false;
+        },
+      ),
     },
   },
+
+  // CommentInterface: {
+  //   __resolveType(comment, context, info) {
+  //     return comment;
+  //   }
+  // },
+
 
 };

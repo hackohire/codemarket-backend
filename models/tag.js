@@ -3,7 +3,12 @@ const { Schema } = mongoose;
 
 const tagsSchema = new Schema(
     {
-        name: { type: String }
+        name: { type: String },
+        type: {
+            type: String,
+            enum: ['role', 'product', ''],
+            default: ''
+        },
     }
 );
 

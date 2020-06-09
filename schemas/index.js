@@ -1,21 +1,35 @@
 const graphQlUserSchema = require('./user');
-const graphQlPurchaseSchema = require('./purchase')
-const graphQlCartSchema = require('./cart')
-const graphQlTestingSchema = require('./testing');
-const graphQlDesignSchema = require('./design');
-const graphQlLikeSchema = require('./like');
-const graphQlHowToDocSchema = require('./how-to-doc');
+const graphQlPostSchema = require('./post');
+const graphQlSubscriptionSchema = require('./subscription');
+const graphQlCompanySchema = require('./company');
+const graphQlEmailSchema = require('./email');
+const commentSchema = require('./comment');
+const graphQlPostTypeSchema = require('./post-type');
+const makemoneySchema = require('./MakeMoney');
+const graphQlCampaignSchema = require('./campaign');
+const graphQlVideoCallSchema = require('./videoCall');
+const graphQlHelpBusinessGrowSchema = require('./temporary');
 const schema = require('./schema');
+const formJsonSchema = require('./FormJson');
+const formDataSchema = require('./FormData');
 
 const schemaArray = [
     schema,
     graphQlUserSchema,
-    graphQlPurchaseSchema,
-    graphQlCartSchema,
-    graphQlTestingSchema,
-    graphQlHowToDocSchema,
-    graphQlDesignSchema,
-    graphQlLikeSchema
+    graphQlPostSchema,
+    graphQlCompanySchema,
+    graphQlSubscriptionSchema,
+    graphQlEmailSchema,
+    graphQlPostTypeSchema,
+    commentSchema,
+    makemoneySchema,
+    graphQlCampaignSchema,
+    commentSchema,
+    formJsonSchema,
+    formDataSchema,
+    graphQlHelpBusinessGrowSchema,
+    formJsonSchema,
+    graphQlVideoCallSchema
 ];
 
 module.exports = schemaArray;

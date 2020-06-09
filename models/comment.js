@@ -8,9 +8,15 @@ const commentSchema = new Schema(
             type: Schema.Types.ObjectId,
             default: null
         },
+
+        /** reference Id */
         referenceId: {
-            type: Schema.Types.ObjectId // Id of a product / help-request / requirement / interview
+            type: Schema.Types.ObjectId,
+            // ref: 'post'
         },
+        /** User reference ID for the comments added under the posts created in user's profile */
+        userReferenceId: Schema.Types.ObjectId,
+        companyReferenceId: Schema.Types.ObjectId,
         children: [{
             type: Schema.Types.ObjectId,
             ref: 'comment',
@@ -28,14 +34,26 @@ const commentSchema = new Schema(
         },
         type: {
             type: String,
-            enum: ['product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'design'],
+            enum: ['post', 'product', 'company', 'dream-job'],
         },
         status: {
             type: String,
             enum: ['Created', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted', 'Published', 'Unpublished', 'Resolved'],
             default: 'Created'
         },
-        text: []
+        text: [new Schema({
+            type: String,
+            data: Schema.Types.Mixed,
+        })],
+
+        /** Fileds Related to the comments in specific block in the post */
+        blockSpecificComment: {
+            type: Boolean,
+            default: false
+        },
+        blockId: Schema.Types.ObjectId,
+
+        textHTML: String
     },
     {
         timestamps: true,
