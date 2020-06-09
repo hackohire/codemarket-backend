@@ -226,7 +226,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
                          $filter: {
                                 input: "$email",
                                 as: "e",
-                                cond: { $eq: ["$$e.status", true]}
+                                cond: { $eq: ["$$e.status", "Ok"]}
                             }
                     }
                 }
@@ -247,7 +247,7 @@ async function getEmailData(_, { batches, emailTemplate, subject, createdBy, fro
         const vartoReplaceInFrom = from.match(pattern);
         const vartoReplaceInSubject = subject.match(pattern);
         
-        const queueUrl = `https://sqs.us-east-1.amazonaws.com/784380094623/sendEmail-codemarketapi-prod`;
+        const queueUrl = `https://sqs.us-east-1.amazonaws.com/784380094623/${process.env.SEND_EMAIL_QUEUE}`;
 
         if (!emailTemplate) {
             return reject(false);
@@ -508,7 +508,7 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
                         // }
                         data[index]["email"] = [{
                             email: data[index]["email"],
-                            status: data[index]["status"] === "Ok" ? true : false,
+                            status: data[index]["status"],
                         }];
     
                         data[index]["status"] = "Published";
@@ -525,7 +525,7 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
                         })
                     } else {
                         console.log("this is done")
-                        return resolve(true);
+                        return resolve({ batchId: batchData._id});
                     }
                 })
             }

@@ -73,6 +73,7 @@ const graphQlCampaignSchema = `
         fileName: String
         label: String
         companies: batchData
+        batchId: String
     }
 
     input csvInputData {
@@ -109,7 +110,7 @@ const graphQlCampaignSchema = `
     type emailContact {
         _id: ID
         email: String
-        status: Boolean
+        status: String
     }
 
     type Contact {

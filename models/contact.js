@@ -31,7 +31,7 @@ const contactSchema = new Schema(
         phone: [String],
         email: [{
             email: String,
-            status: Boolean
+            status: String
         }],
         proposalName: String,
         OrganizationName: String,
@@ -52,8 +52,10 @@ const contactSchema = new Schema(
         descriptionHTML: String,
         companyContactEmail: String,
         conpanyContactPerson: String,
-        ownerName: String
-
+        ownerName: String,
+        instagramUrl: String,
+        tweetUrl: String,
+        fbUrl: String
 
     },
     {
