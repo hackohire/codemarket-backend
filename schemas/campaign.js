@@ -8,6 +8,7 @@ const graphQlCampaignSchema = `
         createdBy: User
         subject: String
         descriptionHTML: String
+        from: String
         count: Int
         emailData: [Email]
     }
@@ -72,6 +73,7 @@ const graphQlCampaignSchema = `
         fileName: String
         label: String
         companies: batchData
+        batchId: String
     }
 
     input csvInputData {
@@ -108,7 +110,7 @@ const graphQlCampaignSchema = `
     type emailContact {
         _id: ID
         email: String
-        status: Boolean
+        status: String
     }
 
     type Contact {
@@ -148,17 +150,32 @@ const graphQlCampaignSchema = `
         total: Int
     }
 
+    type CampaignData {
+        _id: ID
+        name: String
+        batchId: String
+        label: String
+        createdAt: String
+        updatedAt: String
+    }
+
+    type getCampaignDataResponse {
+        campaigns: [CampaignData]
+        total: Int
+    }
+
     extend type Query {
         getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String, batchId: String): [Campaign]
         getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
         getMailingList(companyId: String) : [mailingList]
         getMailingListContacts(pageOptions: PageOptionsInput, batchId: String) : getMailingListContactResponse
+        getCampaignData(pageOptions: PageOptionsInput, companyId: String): getCampaignDataResponse
     }
 
     extend type Mutation {
-        saveCsvFileData(data: [JSON], createdBy: String, fileName: String, label: String, companies: batchInput): csvData
+        saveCsvFileData(data: [JSON], createdBy: String, fileName: String, label: String, companyId: String): csvData
         getCsvFileData(data: [JSON], createdBy: String, fileName: String, label: String, companies: batchInput): csvData
-        getEmailData(batches: batchInput, emailTemplate: String, subject: String, createdBy: String, from: String, companies: batchInput): getEmailData
+        getEmailData(batches: batchInput, emailTemplate: String, subject: String, createdBy: String, from: String, companyId: String): getEmailData
     }
 `;
 

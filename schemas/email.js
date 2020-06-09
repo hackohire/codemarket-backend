@@ -12,7 +12,7 @@ const graphQlEmailSchema = `
         descriptionHTML: String
         city: String
         createdBy: User
-
+        from: String
         companies: [Company]
 
         dateRange: [String]
@@ -40,7 +40,7 @@ const graphQlEmailSchema = `
         subject: String
         type: String
         descriptionHTML: String
-
+        from: String
         createdBy: ID
 
         companies: [CompanyInput]

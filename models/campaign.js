@@ -16,6 +16,7 @@ const campaignSchema = new Schema(
             ref: "batch",
         },
         name: String,
+        from: String,
         descriptionHTML: String,
         subject: String,
         companies: [{
