@@ -507,10 +507,13 @@ async function saveCsvFileData(_, {data, createdBy, fileName, label, companies},
                         // }
                         data[index]["email"] = [{
                             email: data[index]["email"],
-                            status: data[index]["status"] || data[index]["status"] === "Ok" ? true : false,
+                            status: data[index]["status"] === "Ok" ? true : false,
                         }];
     
                         data[index]["status"] = "Published";
+                        data[index]["batchId"] = batchData._id;
+                        data[index]["campaignId"] = campaignData._id;
+
                         const cData = new Contact(data[index]);
                         cData.save().then((res) => {
                             index += 1;
@@ -552,11 +555,47 @@ async function getMailingList(_, { companyId }, {headers, db, decodedToken}) {
     });
 }
 
+async function getMailingListContacts(_, {pageOptions, batchId }, {headers, db, decodedToken}) {
+    return new Promise(async (resolve, reject) => {
+
+        const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field === 'status' ? 'email.status': pageOptions.sort.field : 'updatedAt';
+        let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
+
+        conn = await connectToMongoDB();
+
+        const result = await Contact.aggregate([
+            {
+                $match: {batchId: ObjectID(batchId)}
+            },
+            {
+                $facet: {
+                    contacts: [
+                        { $sort: sort },
+                        { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                        { $limit: pageOptions.limit },
+                    ],
+                    pageInfo: [
+                        { $group: { _id: null, count: { $sum: 1 } } },
+                    ],
+                },
+            },
+        ]).exec();
+
+        return await resolve(
+            {
+                contacts: result && result.length ? result[0].contacts : [],
+                total: result && result.length && result[0].pageInfo && result[0].pageInfo.length ? result[0].pageInfo[0].count : 0
+            });
+
+    });
+}
+
 module.exports = {
     getCampaignsWithTracking,
     getCampaignEmails,
     getCsvFileData,
     getEmailData,
     saveCsvFileData,
-    getMailingList
+    getMailingList,
+    getMailingListContacts
 }

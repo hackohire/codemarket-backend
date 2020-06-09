@@ -9,7 +9,14 @@ const contactSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         },
-        
+        batchId: {
+            type: Schema.Types.ObjectId,
+            ref: "batch",
+        },
+        campaignId: {
+            type: Schema.Types.ObjectId,
+            ref: "campaign",
+        },
         status: {
             type: String,
             enum: ['Created', 'Drafted', 'Published', 'Unpublished', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
