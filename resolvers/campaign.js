@@ -583,18 +583,10 @@ async function getMailingListContacts(_, {pageOptions, batchId, searchObj }, {he
                 var regexStatus = new RegExp(searchObj.status, 'i');
                 condition['$and'].push({
                     '$or': [
-                        { 'status': { $regex: regexStatus } }
+                        { 'email.status': { $regex: regexStatus } }
                     ]
                 });
             }
-            
-            // if (searchObj.companyName !== '' && searchObj.status !== '') {
-            //     condition['$and'].push({
-            //         '$or': [
-            //             { 'companyName': { $regex: regexCompanyName } }
-            //         ]
-            //     });
-            // }
         }
 
         console.log("This is condition ==> ", JSON.stringify(condition));
