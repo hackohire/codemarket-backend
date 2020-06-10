@@ -555,7 +555,7 @@ async function getMailingList(_, { companyId }, {headers, db, decodedToken}) {
     });
 }
 
-async function getMailingListContacts(_, {pageOptions, batchId }, {headers, db, decodedToken}) {
+async function getMailingListContacts(_, {pageOptions, batchId, searchObj }, {headers, db, decodedToken}) {
     return new Promise(async (resolve, reject) => {
 
         const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field === 'status' ? 'email.status': pageOptions.sort.field : 'updatedAt';
@@ -563,9 +563,45 @@ async function getMailingListContacts(_, {pageOptions, batchId }, {headers, db, 
 
         conn = await connectToMongoDB();
 
+        let condition = {
+            batchId: ObjectID(batchId),
+        };
+
+        if (searchObj.companyName || searchObj.status) {
+            condition['$and'] = [];
+
+            if (searchObj.companyName !== '') {
+                var regexCompanyName = new RegExp(searchObj.companyName, 'i');
+                condition['$and'].push({
+                    '$or': [
+                        { 'companyName': { $regex: regexCompanyName } }
+                    ]
+                });
+            }
+
+            if (searchObj.status !== '') {
+                var regexStatus = new RegExp(searchObj.status, 'i');
+                condition['$and'].push({
+                    '$or': [
+                        { 'status': { $regex: regexStatus } }
+                    ]
+                });
+            }
+            
+            // if (searchObj.companyName !== '' && searchObj.status !== '') {
+            //     condition['$and'].push({
+            //         '$or': [
+            //             { 'companyName': { $regex: regexCompanyName } }
+            //         ]
+            //     });
+            // }
+        }
+
+        console.log("This is condition ==> ", JSON.stringify(condition));
+
         const result = await Contact.aggregate([
             {
-                $match: {batchId: ObjectID(batchId)}
+                $match: condition
             },
             {
                 $facet: {
