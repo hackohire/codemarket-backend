@@ -55,8 +55,13 @@ const contactSchema = new Schema(
         ownerName: String,
         instagramUrl: String,
         tweetUrl: String,
-        fbUrl: String
-
+        fbUrl: String,
+        occupation: String,
+        location: String,
+        country: String,
+        experience: [String],
+        skills: [String],
+        education: [String],
     },
     {
         timestamps: true,
