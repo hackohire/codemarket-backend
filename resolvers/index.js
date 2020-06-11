@@ -35,7 +35,7 @@ module.exports = {
     getAllPosts,
     fullSearch,
     fetchcontact,
-    getAllProducts, getListOfUsersWhoPurchased,
+    getListOfUsersWhoPurchased,
     fetchHomeBuyerProgram,
     fetchformJson, fetchformData, fetchFormStructureById, fetchformDataById, fetchFormDataByFormId,
     getListOfUsersWhoPurchased,
