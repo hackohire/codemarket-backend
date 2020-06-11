@@ -5,15 +5,13 @@ const graphQlCompanySchema = `
         _id: ID
         name: String
         type: String
-        description: [descriptionBlocks]
         owners: [User]
         createdBy: User
         status: Status
         createdAt: String
         updatedAt: String
+        slug: String
         cities: [City]
-        ideas: [descriptionBlocks]
-        questions: [descriptionBlocks]
         location: Location
         cover: String
         comments: [Comment]
@@ -29,9 +27,6 @@ const graphQlCompanySchema = `
         _id: ID
         name: String
         type: String
-        description: [InputdescriptionBlock]
-        ideas: [InputdescriptionBlock]
-        questions: [InputdescriptionBlock]
         createdBy: ID
         owners: [UserInput]
         status: Status
@@ -40,10 +35,23 @@ const graphQlCompanySchema = `
         cover: String
         websiteLink: String
         facebookLink: String
+        slug: String
         instagramLink: String
         twitterLink: String
         yelpLink: String
         linkedinLink: String
+    }
+
+    type Location {
+        longitude: String
+        latitude: String
+        address: String
+    }
+
+    input LocationInput {
+        longitude: String
+        latitude: String
+        address: String
     }
 
     type City {
@@ -72,7 +80,7 @@ const graphQlCompanySchema = `
     extend type Query {
         getCompaniesByType(companyType: String, pageOptions: PageOptionsInput): GetCompaniesByTypeResponse
         getCompaniesByUserIdAndType(userId: String, companyType: String): [Company]
-        getCompanyById(companyId: String): Company
+        getCompanyById(slug: String): Company
         getListOfUsersInACompany(companyId: String): [User]
         getEventsByCompanyId(companyId: String): [Post]
     }

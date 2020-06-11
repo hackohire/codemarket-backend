@@ -5,9 +5,7 @@ const graphQlPostSchema = `
         _id: ID
         name: String
         type: String
-        description: [descriptionBlocks]
         referencePostUrl: String
-        featuredImage: String
         createdBy: User
         users: [User]
         price: Int
@@ -18,31 +16,16 @@ const graphQlPostSchema = `
         tags: [Tag]
         comments: [Comment]
         commentCount: Int
-        likeCount: Int
         slug: String
-
-        dateRange: [String]
-        location: Location
-        eventType: String
-        membershipRequired: Boolean
-        validSubscription: Boolean
-        usersAttending: [User]
         cover: String
 
         cities: [City]
         companies: [Company]
-        salaryCurrency: String
-        salaryRangeFrom: Int
-        salaryRangeTo: Int
-        jobProfile: [Tag]
-        timeline: Int
-
-        purchasedBy: [PurchasedBy]
 
         connectedPosts: [Post]
         collaborators: [User]
-        assignees: [User]
         clients: [User]
+
         phone: [String]
         email: [String]
         birthDate: String
@@ -51,16 +34,20 @@ const graphQlPostSchema = `
 
         descriptionHTML: String
         activities: [Activities]
+
+        appointment_date: String
+        cancelReason: String
+        duration: [String]
+
+        mentor: JSON
+        job: JSON
     }
 
     input PostInput {
         _id: ID
         name: String
         type: String
-        description: [InputdescriptionBlock]
         referencePostUrl: String
-        shortDescription: String
-        featuredImage: String
         createdBy: ID
         users: [UserInput]
         price: Int
@@ -70,27 +57,16 @@ const graphQlPostSchema = `
         updatedAt: String
         slug: String
         comments: [CommentInput]
-
-        dateRange: [String]
-        location: LocationInput
-        eventType: String
-        membershipRequired: Boolean
         cover: String
 
         cities: [ID]
 
-        companies: [CompanyInput]
-        salaryCurrency: String
-        salaryRangeFrom: Int
-        salaryRangeTo: Int
-        jobProfile: [ID]
-        timeline: Int
+        companies: [JSON]
 
         connectedPosts: [ID]
         connectedEmail: ID
         
         collaborators: [UserInput]
-        assignees: [UserInput]
         clients: [UserInput]
 
         phone: [String]
@@ -101,6 +77,13 @@ const graphQlPostSchema = `
 
         descriptionHTML: String
         activities: [ActivitiesInput]
+
+        appointment_date: String
+        cancelReason: String
+        duration: [String]
+
+        mentor: JSON
+        job: JSON
     }
 
     type Activities {
@@ -121,45 +104,6 @@ const graphQlPostSchema = `
         message: String
     }
 
-    type Location {
-        latitude: Float
-        longitude: Float
-        address: String
-        additionalLocationDetails: String
-    }
-
-    input LocationInput {
-        latitude: Float
-        longitude: Float
-        address: String
-        additionalLocationDetails: String
-    }
-
-    type SellProducts {
-        sellProducts: Boolean
-        products: [Tag]
-    }
-
-    input SellProductsInput {
-        sellProducts: Boolean
-        products: [ID]
-    }
-
-    type SellServices {
-        sellServices: Boolean
-        services: [Tag]
-    }
-
-    input SellServicesInput {
-        sellServices: Boolean
-        services: [ID]
-    }
-
-    type RsvpEventResponse {
-        validSubscription: Boolean
-        usersAttending: [User]
-    }
-
     type GetPostsByUserIdAndTypeResponse {
         posts: [Post]
         total: Int
@@ -176,23 +120,25 @@ const graphQlPostSchema = `
         phoneCount: String
     }
 
+    type getDuration {
+        appointment: [Post]
+    }
+
     extend type Query {
         getPostsByType(postType: String): [Post]
         getPostsByUserIdAndType(userId: String, status: String, postType: String, pageOptions: PageOptionsInput): GetPostsByUserIdAndTypeResponse
         getPostById(postId: String): Post
         fullSearch(searchString: String): [Post]
-        fetchFiles(blockType: String, userId: String): [AttachesBlock]
         getCountOfAllPost(userId: String, companyId: String, reference: ReferenceObject): [getCountAllPost]
         getEmailPhoneCountForContact(type: String): [emailPhoneCount]
-        myRSVP(userId: String): [Post]
+        getPostByPostType(postType: String, userId: String, pageOptions: PageOptionsInput): GetPostsByUserIdAndTypeResponse
+        getAlreadyBookedSlots(date: String): getDuration
     }
     extend type Mutation {
         addPost(post: PostInput): Post
         updatePost(post: PostInput, updatedBy: UserInput): Post
+        updatePostContent(post: PostInput, updatedBy: UserInput): String
         deletePost(postId: String, deletedBy: UserInput): Boolean
-
-        rsvpEvent(userId: String, eventId: String): RsvpEventResponse
-        cancelRSVP(userId: String, eventId: String): Post
     }
 `
 

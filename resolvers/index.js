@@ -1,125 +1,101 @@
-const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
-const { getListOfUsersWhoPurchased } = require('./product');
+const { getUsers, createUser, updateUser, authorize, getUserById, createTransaction } = require('./user');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
-const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
 const { findFromCollection, addToCollection } = require('./categories');
-const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
-const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
-const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch, fetchFiles, getCountOfAllPost, getEmailPhoneCountForContact, saveContact } = require('./post');
-const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
-const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
-const { scheduleCall, getBookingList } = require('./booking');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType, getAlreadyBookedSlots } = require('./post');
+const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId } = require('./company');
 const { sendEmail } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
-const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
-const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
-const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
+const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription } = require('./subscription');
+const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType } = require('./post-type');
+const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData, getMailingList, getMailingListContacts, getCampaignData } = require('./campaign');
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
-const { pubSub } = require('../helpers/pubsub');
-const { addcontact,fetchcontact } = require('./contact');
-const { addformData, fetchformData,fetchformDataById, fetchFormDataByFormId } = require('./FormData');
-const {addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
+const { addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
+const { addformData, fetchformData, fetchformDataById, fetchSavedDataByFormStructure } = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
-const {addBankFormDataRef,getBankFormDataRefByCompanyName,} = require('./bankFormData');
-const {fetchHomeBuyerProgram, addHomeBuyerProgram} = require('./homeBuyerProgram');
+const { createVideoToken } = require('./videoCall');
+const { generateCkEditorToken } = require('./auth');
+const { GraphQLUpload } = require('graphql-upload');
+const { pubSub } = require('../helpers/pubsub');
+const { addcontact } = require('./contact');
 
 module.exports = {
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
+  Upload: GraphQLUpload,
   Query: {
     hello: () => 'Hello world!',
-    getUsers, getUsersAndBugFixesCount, getUserById,
+    getUsers, getUserById,
 
     getAllPosts,
     fullSearch,
-    fetchcontact,
-    getListOfUsersWhoPurchased,
-    fetchHomeBuyerProgram,
-    fetchformJson, fetchformData, fetchFormStructureById, fetchformDataById, fetchFormDataByFormId,
-    getListOfUsersWhoPurchased,
+    fetchformJson, fetchformData, fetchFormStructureById,
     // getProductsByUserId,
     // getProductById,
-    getBankFormDataRefByCompanyName,
 
     getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged,
 
-    getPostsByUserIdAndType, getPostById, getPostsByType, fetchFiles,
+    getPostsByUserIdAndType, getPostById, getPostsByType,
 
     findFromCollection,
 
-    getPurchasedUnitsByUserId,
-
-    getCartItemsList,
-
-    checkIfUserLikedAndLikeCount,
-
     getMembershipSubscriptionsByUserId,
 
-    myRSVP,
-
     getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, getListOfUsersInACompany, getEventsByCompanyId,
-
-    getBookingList,
-
-    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer,
 
     fetchFields, fetchPostTypes,
 
     getCampaignsWithTracking,
     getCountOfAllPost,
     getEmailPhoneCountForContact,
-    getCampaignEmails
+    getPostByPostType,
+    getCampaignEmails,
+    // Chat Resolver
+    createVideoToken,
+    getMailingList,
+    getAlreadyBookedSlots,
+    getMailingListContacts,
+    getCampaignData,
+    fetchformDataById,
+    fetchSavedDataByFormStructure
   },
   Mutation: {
     createUser,
     updateUser,
     authorize,
     addcontact,
+    generateCkEditorToken,
+    createTransaction,
     addMakeMoney,
     addToCollection,
-    addHomeBuyerProgram,
     // addProduct,
     // updateProduct,
     // deleteProduct,
-    addformJson,addformData,
-    addBankFormDataRef,
+    addformJson, addformData,
 
     addComment,
     updateComment,
 
     addPost,
     updatePost,
+    updatePostContent,
     deletePost,
-
-    addTransaction,
-
-    addToCart,
-    removeItemFromCart,
-
-    like,
 
     addMembershipSubscription,
     inviteMembersToSubscription,
     cancelSubscription,
     acceptInvitation,
 
-    rsvpEvent,
-
-    cancelRSVP,
-
     addCompany, updateCompany, deleteCompany,
-
-    scheduleCall,
-
-    addQuestionOrAnswer, updateQuestionOrAnswer,
 
     sendEmail,
 
     addPostType, updatePostType, deletePostType,
 
-    addHelpGrowBusiness
+    addHelpGrowBusiness,
+    getCsvFileData,
+    getEmailData,
+    saveCsvFileData
   },
   Subscription: {
     onCommentAdded: {
@@ -182,7 +158,8 @@ module.exports = {
     onUserOnline: {
       resolve: (rootValue) => {
         // root value is the payload from sendMessage mutation
-        return { onCommentAdded: rootValue.comment, };
+        delete rootValue['usersToBeNotified'];
+        return rootValue;
       },
       subscribe: withFilter(
         pubSub.subscribe('LISTEN_NOTIFICATION'),
@@ -202,52 +179,5 @@ module.exports = {
   //   }
   // },
 
-  descriptionBlocks: {
-    __resolveType(block, context, info) {
-
-      switch(block.type) {
-
-        case 'paragraph':
-          return 'ParagraphBlock'
-
-        case 'header':
-          return 'HeaderBlock'
-
-        case 'code':
-          return 'CodeBlock';
-
-        case 'image': 
-          return 'ImageBlock';
-
-        case 'list':
-          return 'ListBlock'
-
-        case 'quote':
-          return 'QuoteBlock'
-
-        case 'table':
-          return 'TableBlock'
-
-        case 'warning':
-          return 'WarningBlock'
-
-        case 'embed':
-          return 'EmbedBlock'
-
-        case 'linkTool':
-          return 'LinkToolBlock'
-
-        case 'delimiter':
-          return 'ParagraphBlock'
-
-        case 'attaches':
-          return 'AttachesBlock'
-
-        default:
-          console.log('default case')
-          return null;
-      }
-    },
-  },
 
 };

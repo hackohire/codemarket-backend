@@ -1,15 +1,11 @@
 const nodemailer = require('nodemailer');
-var auth = require('./auth');
 const Tag = require('../models/tag')();
 const City = require('../models/city')();
 const Post = require('../models/post')();
 var ObjectId = require('mongodb').ObjectID;
-const Unit = require('../models/purchased_units')();
 const Activity = require('../models/activity-track')();
 const { EmailTemplate } = require('email-templates-v2');
 var string = require('lodash/string');
-const AWS = require('aws-sdk');
-const util = require('util');
 var moment = require('moment');
 
 async function checkIfUserIsAdmin(decodedToken) {
@@ -60,7 +56,39 @@ async function insertManyIntoCities(cities) {
     return citiesAdded;
 }
 
-async function sendEmail(recepients, filePath, body) {
+async function sendEmailWithStaticContent(event, context) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            /** parse body */
+            let body;
+            try {
+                body = JSON.parse(event.body);
+            } catch (e) {
+                body = {};
+            }
+
+            const emailSent = await sendEmail(body.email, basePath + 'email-template/bni-event-template', body, 'sumi@codemarket.io');
+            return resolve({
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+                body: JSON.stringify({ emailSent, email: body.email })
+            });
+        }
+        catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+
+    // let conn = await connectToMongoDB();
+    // conn.collection('emails').findOneAndUpdate({email: body.email}, {$set: });
+
+}
+
+async function sendEmail(toEmail, filePath, body, city, fromEmail = '') {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -76,32 +104,32 @@ async function sendEmail(recepients, filePath, body) {
                     secure: true
                 });
                 const template = new EmailTemplate(filePath);
-
-                const renderedTemplate = await template.render(body);
-
-                const mailOptions = {
-                    // headers: {
-                    //     'X-SES-CONFIGURATION-SET': 'campaign',
-                    //     'X-SES-MESSAGE-TAGS': 'campaignId=5e8db413194f75696c162682'
-                    // },
-                    from: process.env.FROM_EMAIL,
-                    to: recepients.to,
-                    cc: recepients.cc,
-                    bcc: recepients.bcc,
-                    replyTo: process.env.FROM_EMAIL,
-                    subject: renderedTemplate.subject,
-                    html: renderedTemplate.html,
-                }; 
-
-                const emailSent = await transporter.sendMail(mailOptions);
-
-                if (emailSent) {
-                    console.log("Email is sent ==> ", emailSent);
-                    return resolve(true);
-                } else {
-                    console.log("Email is Fail ==> ", emailSent);
-                    return reject(false);
-                }
+                await template.render(body, async (err, result) => {
+                    console.log('Error HTML Email Template Rendering', err)
+                    const { html, subject } = result;
+                    const mailOptions = {
+                        headers: {
+                            'X-SES-CONFIGURATION-SET': 'la2050',
+                            'X-SES-MESSAGE-TAGS': 'campaignId=5ec800f9870915348a37f30f' // Instagram
+                        },
+                        from: '"Therapy, Therapist" <sumi@codemarket.io>', // Therapy
+                        to: toEmail,
+                        // cc: "mysumifoods@gmail.com",
+                        // bcc: ['mysumifoods@gmail.com'],
+                        replyTo: fromEmail ? fromEmail : process.env.FROM_EMAIL,
+                        subject: subject,
+                        html: html,
+                    };
+                    await transporter.sendMail(mailOptions, (error, response) => {
+                        if (error) {
+                            console.log('Mail Sending Error', error);
+                            resolve(false);
+                        } else {
+                            console.log('Mail Sent Successfully', response);
+                            resolve(true);
+                        }
+                    });
+                });
             } else {
                 console.log("This is in else ==> ");
                 resolve(true);
@@ -126,112 +154,101 @@ async function sendPostCreationEmail(post, type = '') {
         HTML_CONTENT: post.descriptionHTML ? `${post.descriptionHTML}` : ``
         // TYPE: type ? type : string.capitalize(post.type)
     };
-    await sendEmail({to: [post.createdBy.email]}, filePath, payLoad);
-}
-
-async function insertManyIntoPurchasedUnit(units) {
-    console.log(units);
-    const unitsAdded = new Promise((resolve, reject) => {
-        Unit.insertMany(units, { ordered: false, rawResult: true }).then((d) => {
-            console.log(d)
-            resolve(d.ops.map(id => id._id));
-        });
-    })
-    return unitsAdded;
+    await sendEmail({ to: [post.createdBy.email] }, filePath, payLoad);
 }
 
 async function getUserAssociatedWithPost(postId) {
     const result = await Post.aggregate([
         {
-            $match: { _id: ObjectId(postId)}
-        },
-        {
-           $lookup:
-                {
-                    from: 'comments',
-                    localField: "_id",
-                    foreignField: "referenceId",
-                    as: "commentData"
-                }
-        },
-        {
-           $lookup:
-                {
-                    from: 'companies',
-                    localField: "companies",
-                    foreignField: "_id",
-                    as: "companyData"
-                }
+            $match: { _id: ObjectId(postId) }
         },
         {
             $lookup:
-                 {
-                     from: 'users',
-                     localField: "createdBy",
-                     foreignField: "_id",
-                     as: "author"
-                 }
+            {
+                from: 'comments',
+                localField: "_id",
+                foreignField: "referenceId",
+                as: "commentData"
+            }
+        },
+        {
+            $lookup:
+            {
+                from: 'companies',
+                localField: "companies",
+                foreignField: "_id",
+                as: "companyData"
+            }
+        },
+        {
+            $lookup:
+            {
+                from: 'users',
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "author"
+            }
         },
         {
             $group:
-                {
-                    _id: "$_id",
-                    name: { $first: "$name"},
-                    type: { $first: "$type"},
-                    author: { $first: "$author"},
-                    clients: { $first: "$clients"},
-                    collaborators: { $first: "$collaborators"},
-                    commentators: { $push: { ids: "$commentData.createdBy"}},
-                    comapnyCreators: { $push: { ids: "$companyData.createdBy"}}
-                }
+            {
+                _id: "$_id",
+                name: { $first: "$name" },
+                type: { $first: "$type" },
+                author: { $first: "$author" },
+                clients: { $first: "$clients" },
+                collaborators: { $first: "$collaborators" },
+                commentators: { $push: { ids: "$commentData.createdBy" } },
+                comapnyCreators: { $push: { ids: "$companyData.createdBy" } }
+            }
         },
         {
             $lookup:
-                {
-                    from: "users",
-                    localField: "collaborators",
-                    foreignField: "_id",
-                    as: "collaborators"
-                }
+            {
+                from: "users",
+                localField: "collaborators",
+                foreignField: "_id",
+                as: "collaborators"
+            }
         },
         {
             $lookup:
-                {
-                    from: "users",
-                    localField: "clients",
-                    foreignField: "_id",
-                    as: "clients"
-                }
+            {
+                from: "users",
+                localField: "clients",
+                foreignField: "_id",
+                as: "clients"
+            }
         },
         {
             $lookup:
-                {
-                    from: "users",
-                    localField: "commentators.ids",
-                    foreignField: "_id",
-                    as: "commentators"
-                }
+            {
+                from: "users",
+                localField: "commentators.ids",
+                foreignField: "_id",
+                as: "commentators"
+            }
         },
         {
             $lookup:
-                {
-                    from: "users",
-                    localField: "comapnyCreators.ids",
-                    foreignField: "_id",
-                    as: "companyOwners"
-                }
+            {
+                from: "users",
+                localField: "comapnyCreators.ids",
+                foreignField: "_id",
+                as: "companyOwners"
+            }
         },
         {
             $project:
-                {
-                    name: 1,
-                    type: 1,
-                    author: 1,
-                    collaborators: 1,
-                    commentators: 1,
-                    companyOwners: 1,
-                    clients: 1
-                }
+            {
+                name: 1,
+                type: 1,
+                author: 1,
+                collaborators: 1,
+                commentators: 1,
+                companyOwners: 1,
+                clients: 1
+            }
         }
     ]).exec();
 
@@ -259,7 +276,6 @@ module.exports = {
     insertManyIntoTags,
     insertManyIntoCities,
     sendEmail,
-    insertManyIntoPurchasedUnit,
     sendPostCreationEmail,
     getUserAssociatedWithPost,
     saveActivity

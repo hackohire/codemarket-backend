@@ -13,6 +13,10 @@ const formDataSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "company",
         },
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        },
     },
     {
         timestamps: true, /** Will automatically create, createdAt & updatedAt fields */
