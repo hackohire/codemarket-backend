@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-lambda');
+
 
 const graphQlCompanySchema = `
     type Company {
@@ -6,6 +6,7 @@ const graphQlCompanySchema = `
         name: String
         type: String
         description: [descriptionBlocks]
+        owners: [User]
         createdBy: User
         status: Status
         createdAt: String
@@ -32,6 +33,7 @@ const graphQlCompanySchema = `
         ideas: [InputdescriptionBlock]
         questions: [InputdescriptionBlock]
         createdBy: ID
+        owners: [UserInput]
         status: Status
         cities: [CityInput]
         location: LocationInput
@@ -86,4 +88,4 @@ const graphQlCompanySchema = `
     }
 `
 
-module.exports = gql(graphQlCompanySchema);
+module.exports = graphQlCompanySchema;

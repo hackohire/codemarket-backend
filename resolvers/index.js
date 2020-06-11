@@ -1,22 +1,33 @@
 const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
-const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
+const { getListOfUsersWhoPurchased } = require('./product');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
 const { findFromCollection, addToCollection } = require('./categories');
 const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
 const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
 const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch } = require('./post');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch, fetchFiles, getCountOfAllPost, getEmailPhoneCountForContact, saveContact } = require('./post');
 const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
 const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
 const { scheduleCall, getBookingList } = require('./booking');
 const { sendEmail } = require('./email');
+const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
+const { getCampaignsWithTracking, getCampaignEmails } = require('./campaign');
+const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { pubSub } = require('../helpers/pubsub');
 const { addcontact,fetchcontact } = require('./contact');
+const { addformData, fetchformData,fetchformDataById, fetchFormDataByFormId } = require('./FormData');
+const {addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
+const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
+const {addBankFormDataRef,getBankFormDataRefByCompanyName,} = require('./bankFormData');
+const {fetchHomeBuyerProgram, addHomeBuyerProgram} = require('./homeBuyerProgram');
+
 module.exports = {
+  JSON: GraphQLJSON,
+  JSONObject: GraphQLJSONObject,
   Query: {
     hello: () => 'Hello world!',
     getUsers, getUsersAndBugFixesCount, getUserById,
@@ -25,12 +36,16 @@ module.exports = {
     fullSearch,
     fetchcontact,
     getAllProducts, getListOfUsersWhoPurchased,
+    fetchHomeBuyerProgram,
+    fetchformJson, fetchformData, fetchFormStructureById, fetchformDataById, fetchFormDataByFormId,
+    getListOfUsersWhoPurchased,
     // getProductsByUserId,
     // getProductById,
+    getBankFormDataRefByCompanyName,
 
     getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged,
 
-    getPostsByUserIdAndType, getPostById, getPostsByType,
+    getPostsByUserIdAndType, getPostById, getPostsByType, fetchFiles,
 
     findFromCollection,
 
@@ -51,17 +66,25 @@ module.exports = {
     getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer,
 
     fetchFields, fetchPostTypes,
+
+    getCampaignsWithTracking,
+    getCountOfAllPost,
+    getEmailPhoneCountForContact,
+    getCampaignEmails
   },
   Mutation: {
     createUser,
     updateUser,
     authorize,
     addcontact,
+    addMakeMoney,
     addToCollection,
+    addHomeBuyerProgram,
     // addProduct,
     // updateProduct,
     // deleteProduct,
-
+    addformJson,addformData,
+    addBankFormDataRef,
 
     addComment,
     updateComment,
@@ -94,7 +117,9 @@ module.exports = {
 
     sendEmail,
 
-    addPostType, updatePostType, deletePostType
+    addPostType, updatePostType, deletePostType,
+
+    addHelpGrowBusiness
   },
   Subscription: {
     onCommentAdded: {
@@ -117,13 +142,19 @@ module.exports = {
     onCommentUpdated: {
       resolve: (rootValue) => {
         // root value is the payload from sendMessage mutation
+        // console.log('RooooooooooooooooT Value MAin', rootValue);
         return rootValue;
       },
       subscribe: withFilter(
         pubSub.subscribe('COMMENT_UPDATED'),
         (rootValue, args) => {
           // this can be async too :)
+          // console.log('postIDDDDDDD  Outer', args.postId);
+          // console.log('RooooooooooooooooT Value  Outer', rootValue);
           if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId || args.userId === rootValue.userReferenceId) {
+            // console.log('=========================================================');
+            // console.log('postIDDDDDDD', args.postId);
+            // console.log('RooooooooooooooooT Value', rootValue);
             return true;
           }
 
@@ -205,6 +236,12 @@ module.exports = {
 
         case 'linkTool':
           return 'LinkToolBlock'
+
+        case 'delimiter':
+          return 'ParagraphBlock'
+
+        case 'attaches':
+          return 'AttachesBlock'
 
         default:
           console.log('default case')

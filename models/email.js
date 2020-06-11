@@ -20,6 +20,7 @@ const emailSchema = new Schema(
             enum: ['email'],
             default: ''
         },
+        campaignId: Schema.Types.ObjectId,
         dateRange: [String],
         company: {
             type: Schema.Types.ObjectId,
@@ -29,6 +30,10 @@ const emailSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         },
+        tracking: {
+            type: Array,
+            default: []
+        }
     },
     {
         timestamps: true,

@@ -1,5 +1,5 @@
 
-const { gql } = require('apollo-server-lambda');
+
 
 const graphQlCartSchema = `
     
@@ -26,5 +26,5 @@ const graphQlCartSchema = `
     }
 `
 
-module.exports = gql(graphQlCartSchema);
+module.exports = graphQlCartSchema;
 

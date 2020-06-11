@@ -1,14 +1,16 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const contactSchema = new Schema(
+const makeMoneySchema = new Schema(
     {
         firstName: String,
         lastName: String,
         email: String,
         phone: String,
-        address: String,
-        showDate: Date
+        haveBusiness: String,
+        describeBusiness: String,
+        WebsiteLink: String,
+        businessAddress: String
     },
     {
         timestamps: true, /** Will automatically create, createdAt & updatedAt fields */
@@ -17,8 +19,8 @@ const contactSchema = new Schema(
 
 module.exports = () => {
     try {
-        return mongoose.model('contact');
+        return mongoose.model('makeMoney');
     } catch (e) {
-        return mongoose.model('contact', contactSchema);
+        return mongoose.model('makeMoney', makeMoneySchema);
     }
 };

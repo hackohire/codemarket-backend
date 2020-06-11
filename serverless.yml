@@ -8,6 +8,7 @@ provider:
   # websocketsApiName: codemarket-videochat-socket
   # websocketsApiRouteSelectionExpression: $request.body.action
   environment:
+
     MONGODB_URL: ${file(env.yml):${self:provider.stage}.MONGODB_URL}
     MONGODB_DBNAME: ${file(env.yml):${self:provider.stage}.MONGODB_DBNAME}
     AWS_ACCESSKEY_ID: ${file(env.yml):${self:provider.stage}.AWS_ACCESSKEY_ID}
@@ -22,13 +23,14 @@ provider:
     SMTP_USER: ${file(env.yml):${self:provider.stage}.SMTP_USER}
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
-    SOCKET_URL: ${file(env.yml):${self:provider.stage}.SOCKET_URL}
     STRIPE_SECRET_KEY: ${file(env.yml):${self:provider.stage}.STRIPE_SECRET_KEY}
+    IS_OFFLINE: ${file(env.yml):${self:provider.stage}.IS_OFFLINE}
 
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
     EVENTS: ${self:service}-${self:provider.stage}-Events
     SUBSCRIPTION_OPERATIONS: ${self:service}-${self:provider.stage}-SubscriptionOperations
+
 
 functions:
   
@@ -65,6 +67,7 @@ functions:
               - x-requested-with
             allowCredentials: false 
 
+            
   webSocketHandler:
     handler: handler.handleWebSocket
     events:
@@ -83,14 +86,6 @@ functions:
           arn:
             Fn::GetAtt: [EventsDynamoDBTable, StreamArn]
 
-  hello:
-    handler: handler1.hello
-    events:
-      - http:
-          path: hello
-          method: GET
-          cors: true
-
   checkoutSessionCompleted:
     handler: handler.checkoutSessionCompleted
     events:
@@ -107,12 +102,31 @@ functions:
           method: POST
           cors: true
 
+  emailCampaignEvent:
+    handler: handler.emailCampaignEvent
+    events:
+      - http:
+          path: emailCampaignEvent
+          method: POST
+          cors: true
+
+      - sns:
+        arn: 'campaign'
+
   getCheckoutSession:
     handler: handler.getCheckoutSession
     events:
       - http:
           path: getCheckoutSession
           method: POST
+          cors: true
+  
+  saveContact:
+    handler: resolvers/post.saveContact
+    events:
+      - http:
+          path: saveContact
+          method: GET
           cors: true
 
   createStripeUser:
@@ -179,6 +193,12 @@ functions:
 
 resources:
   Resources:
+
+    # MyTopic:
+    #   Type: AWS::SNS::Topic
+    #   Properties:
+    #     TopicName: campaign
+
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
       Type: "AWS::ApiGateway::GatewayResponse"
@@ -295,8 +315,8 @@ custom:
   customDomain:
     domainName: ${self:service}-api.codemarket.io
     basePath: ''
-    certificateName: '*.codemarket.io'
-    createRoute53Record:	false
+    certificateName: 'codemarket.io'
+    createRoute53Record:  false
     endpointType: 'edge'
     securityPolicy: tls_1_2
     stage: ${self:provider.stage}

@@ -98,6 +98,10 @@
          border-right: none
       }
 
+      .personal-div-margin {
+         margin: 0 0 0 0;
+      }
+
       .tc-table tbody tr td:first-child {
          border-left: none
       }
@@ -204,7 +208,7 @@
                                                                <img style="    width: 350px;
                                                      object-fit: contain;
                                                      object-position: center;"
-                                                                  src="https://codemarket-files-upload.s3.amazonaws.com/public/logo.png"
+                                                                  src="https://codemarket-files.s3.amazonaws.com/public/levelh-logo.jpeg"
                                                                   alt='CodeMarket'>
                                                             </td>
                                                          </tr>
@@ -304,119 +308,35 @@
                                                                          background-color: #fafafa;
                                                                          border: 1px solid; 
                                                                          ">
-                                                                                 <div>
-                                                                                    <% if (locals.NAME) { %>
-                                                                                    Dear <%= NAME %> ,
-                                                                                    <% } %>
-                                                                                 </div>
-   
-                                                                                 <!-- If the content is set from the options -->
-                                                                                 <% if (locals.CONTENT) { %>
-                                                                                 <br>
-
-                                                                                 <div> <%= CONTENT %> </div>
-                                                                                 <% } %>
-                                                                                 <!-- If the link is set from the options-->
-                                                                                 <% if (locals.LINK) { %>
-                                                                                 <br>
-
-                                                                                 <div> Here is the link, By clicking it
-                                                                                    you will be redirected to the post.
-                                                                                 </div>
-                                                                                 <div><a href="<%=LINK%>""> <%= LINK %></div>
-                                                                            <% } %>
-
-
                                                                             <% if (locals.HTML_CONTENT) { %>
                                                                               <br>
 
                                                                               <div> <%- HTML_CONTENT %> </div>
                                                                               <% } %>
 
-                                                                              
-                                                                            <!-- If the invitation link is set from the options -->
-                                                                            <% if (locals.INVITATION_LINK) { %>
-                                                                              <br>
-
-                                                                               <div>
-                                                                                  Here is the invitation <a href="
-                                                                                       <%= INVITATION_LINK %>"
-                                                                                       target="_blank">link</a>,
-                                                                                    By clicking on it, You will be able
-                                                                                    to successfully accept the
-                                                                                    invitation
-                                                                                 </div>
+                                                                              <% if (locals.FIRSTNAME) { %>
+                                                                                 <br>
+   
+                                                                                <div class="personal-div-margin"> First Name: <%- FIRSTNAME %> </div>
                                                                                  <% } %>
-                                                                                 <!-- This part is onl for RSVP event email -->
-                                                                                 <% if (locals.EVENT_INVITATION_LINK) { %>
+
+                                                                              <% if (locals.LASTNAME) { %>
+                                                                                 <br>
+   
+                                                                              <div class="personal-div-margin"> Last Name: <%- LASTNAME %> </div>
+                                                                              <% } %>
+
+                                                                              <% if (locals.EMAIL) { %>
                                                                                  <br>
 
-                                                                                 <div> You have
-                                                                                    successfully RSVP for
-                                                                                    <%= EVENT_NAME %>. </div><br><br>
-                                                                                 <h3>Event Details:</h3>
-                                                                                 <div>
-                                                                                    <strong>From:</strong><%= FROM %>
-                                                                                 </div>
-                                                                                 <div><strong>To:</strong><%= TO %>
-                                                                                 </div>
-                                                                                 <div>
-                                                                                    <strong>Location:</strong><%= ADDRESS %>
-                                                                                 </div>
-                                                                                 <div>
-                                                                                    Here is the invitation <a
-                                                                                       href="<%= EVENT_INVITATION_LINK %>"
-                                                                                       target="_blank">link</a>,
-                                                                                    By clicking on it, You will be able
-                                                                                    to successfully
-                                                                                    accept the invitation
-                                                                                 </div>
-                                                                                 <% } %>
-                                                                                 <% if (!locals.HTML_CONTENT) { %>
+                                                                                 <div class="personal-div-margin">Email: <%- EMAIL %> </div>
+                                                                              <% } %>
+
+                                                                              <% if (locals.SELECT) { %>
                                                                                  <br>
 
-                                                                                 <div>Thank You.</div>
-
-                                                                                 <!-- SIGNATURE -->
-                                                                                 <div>- The Codemarket Team</div>
-                                                                                 <% } %>
-
-                                                                                 <hr
-                                                                                    style="border: 0; border-top: 1px solid #eee;">
-                                                                                 <div style="text-align: center;">
-
-                                                                                    <a style="display: inline-block;"
-                                                                                       href="https://www.facebook.com/joincodemarket/"
-                                                                                       title="Facebook"
-                                                                                       target="_blank"><img
-                                                                                          alt="Facebook" width="24"
-                                                                                          style="display:block;width:100%;max-width:24px;border:0"
-                                                                                          src="https://codemarket-files-upload.s3.amazonaws.com/public/facebook.png"
-                                                                                          class="CToWUd"></a>
-                                                                                    &nbsp;
-
-                                                                                    <a style="display: inline-block;"
-                                                                                       href="https://twitter.com/joincodemarket"
-                                                                                       title="Twitter"
-                                                                                       target="_blank"><img
-                                                                                          alt="Twitter" width="24"
-                                                                                          style="display:block;width:100%;max-width:24px;border:0"
-                                                                                          src="https://codemarket-files-upload.s3.amazonaws.com/public/twitter.png"
-                                                                                          class="CToWUd"></a>
-                                                                                    &nbsp;
-
-                                                                                    <a style="display: inline-block;"
-                                                                                       href="https://www.linkedin.com/company/joincodemarket/"
-                                                                                       title="Twitter"
-                                                                                       target="_blank"><img
-                                                                                          alt="Twitter" width="24"
-                                                                                          style="display:block;width:100%;max-width:24px;border:0"
-                                                                                          src="https://codemarket-files-upload.s3.amazonaws.com/public/linkedin.png"
-                                                                                          class="CToWUd"></a>
-
-                                                                                 </div>
-                                                                                 <div style="text-align: center;">Palo
-                                                                                    Alto, CA 94306, US</div>
+                                                                                 <div class="personal-div-margin"> Selected Option: <%- SELECT %> </div>
+                                                                              <% } %>
                                                                               </h2>
                                                                         </td>
                                                                      </tr>
