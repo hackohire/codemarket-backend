@@ -8,6 +8,7 @@ const graphQlCampaignSchema = `
         createdBy: User
         subject: String
         descriptionHTML: String
+        from: String
         count: Int
         emailData: [Email]
     }
@@ -65,12 +66,123 @@ const graphQlCampaignSchema = `
         emails: [Email]
         total: Int
       }
-
-    extend type Query {
-        getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String): [Campaign]
-        getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
+    
+    type csvData {
+        data: JSON
+        createdBy: String
+        fileName: String
+        label: String
+        companies: batchData
+        batchId: String
     }
 
+    input csvInputData {
+        data: JSON
+    }
+
+    type getEmailData {
+        batches: batchData
+        emailTemplate: String
+        subject: String
+        createdBy: String
+        from: String
+        companies: batchData
+    }
+
+    type batchData {
+        _id: ID
+        name: String
+        campaignId: String
+    }
+
+    input batchInput {
+        _id: ID
+        name: String
+        campaignId: String
+    }
+
+    type mailingList {
+        _id: ID
+        name: String
+        createdBy: User
+    }
+
+    type emailContact {
+        _id: ID
+        email: String
+        status: String
+    }
+
+    type Contact {
+        _id: ID
+        createdBy: User
+        batchId: String
+        campaignId: String
+        status: String
+        isEmailSend: Boolean
+        phone: [String]
+        email: [emailContact]
+        proposalName: String
+        OrganizationName: String
+        birthDate: String
+        address: String
+        website: String
+        companyName: String
+        url: String
+        firstName: String
+        lastName: String
+        cityName: String
+        name: String
+        followers: String
+        following: String
+        posts: String
+        instaProfileId: String
+        batch: String
+        descriptionHTML: String
+        companyContactEmail: String
+        conpanyContactPerson: String
+        ownerName: String
+
+    }
+
+    type getMailingListContactResponse {
+        contacts: [Contact]
+        total: Int
+    }
+
+    type CampaignData {
+        _id: ID
+        name: String
+        batchId: String
+        label: String
+        createdAt: String
+        updatedAt: String
+    }
+
+    type getCampaignDataResponse {
+        campaigns: [CampaignData]
+        total: Int
+    }
+
+    input searchInput {
+        companyName: String
+        status: String
+    }
+
+
+    extend type Query {
+        getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String, batchId: String): [Campaign]
+        getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
+        getMailingList(companyId: String) : [mailingList]
+        getMailingListContacts(pageOptions: PageOptionsInput, batchId: String, searchObj: searchInput) : getMailingListContactResponse
+        getCampaignData(pageOptions: PageOptionsInput, companyId: String): getCampaignDataResponse
+    }
+
+    extend type Mutation {
+        saveCsvFileData(data: [JSON], createdBy: String, fileName: String, label: String, companyId: String): csvData
+        getCsvFileData(data: [JSON], createdBy: String, fileName: String, label: String, companies: batchInput): csvData
+        getEmailData(batches: batchInput, emailTemplate: String, subject: String, createdBy: String, from: String, companyId: String): getEmailData
+    }
 `;
 
 module.exports = graphQlCampaignSchema;

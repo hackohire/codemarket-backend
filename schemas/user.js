@@ -20,7 +20,6 @@ type User {
     roles: [String]
     createdAt: String
     currentJobDetails: CurrentJobDetails
-    likeCount: Int
     stripeId: ID
     subscription: [SubscriptionSchema]
   }
@@ -58,25 +57,22 @@ type User {
     companyLocation: String
   }
 
-  type UserAndBugFixCount {
-    _id: ID,
-    name: String,
-    productCount: Int
-  }
-
-  type SubscriptionEvents {
-    onCommentAdded: Comment
-  }
-
   type UserPostSubscriptionResponse {
-    postAdded: Post
-    postUpdated: Post
-    postDeleted: Post
-}
+    postAdded: UserNotificationData
+    postUpdated: UserNotificationData
+    postDeleted: UserNotificationData
+    commentAdded: UserNotificationData
+    commentUpdated: UserNotificationData
+    commentDeleted: UserNotificationData
+  }
+
+  type UserNotificationData {
+    post: Post
+    comment: Comment
+  }
 
   extend type Query {
     getUsers(_page: Int _limit: Int): [User!]!
-    getUsersAndBugFixesCount: [UserAndBugFixCount]
     getUserById(userId: String): User
   }
 
@@ -84,10 +80,13 @@ type User {
     createUser(user: UserInput!): User
     updateUser(user: UserInput): User
     authorize(applicationId: String): User
+
+    generateCkEditorToken(user: UserInput, role: String): String
+    createTransaction(data: JSON): JSON
   }
 
   extend type Subscription {
-    onUserOnline(user: UserInput): SubscriptionEvents
+    onUserOnline(user: UserInput): UserPostSubscriptionResponse
     onUsersPostChanges(userId: String): UserPostSubscriptionResponse
   }
 `

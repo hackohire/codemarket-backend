@@ -2,7 +2,7 @@ const connectToMongoDB = require('../helpers/db');
 const twilio = require('../helpers/twilio');
 let conn;
 
-async function createdToken(_, { identity }, { headers, db, decodedToken }) {
+async function createVideoToken(_, { identity }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
             if (!db) {
@@ -12,7 +12,7 @@ async function createdToken(_, { identity }, { headers, db, decodedToken }) {
                 console.log('Using existing mongoose connection.');
             }
 
-            const twilioToken = await twilio.tokenGenerator(identity, '');
+            const twilioToken = await twilio.tokenGeneratorForVideoCall(identity);
             if (twilio) {
                return resolve(twilioToken);
             }
@@ -24,5 +24,5 @@ async function createdToken(_, { identity }, { headers, db, decodedToken }) {
 }
 
 module.exports = {
-    createdToken
+    createVideoToken
 }

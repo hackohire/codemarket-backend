@@ -21,11 +21,15 @@ const emailSchema = new Schema(
             default: ''
         },
         campaignId: Schema.Types.ObjectId,
+        batchId: Schema.Types.ObjectId,
+        uuid: Schema.Types.ObjectId,
+        isReplied: Boolean,
+        repliedHTML: String,
         dateRange: [String],
-        company: {
+        companies: [{
             type: Schema.Types.ObjectId,
             ref: "company",
-        },
+        }],
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: "user",

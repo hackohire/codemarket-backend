@@ -1,13 +1,9 @@
 const connectToMongoDB = require('./../helpers/db');
 const User = require('./../models/user')();
-const Post = require('./../models/post')();
-var array = require('lodash/array');
-const Like = require('./../models/like')();
 var ObjectID = require('mongodb').ObjectID;
 const Subscription = require('../models/subscription')();
 const helper = require('../helpers/helper');
 const auth = require('../helpers/auth');
-
 let conn;
 
 async function getUsers(_, { _page = 1, _limit = 10 }, { headers, db, decodedToken }) {
@@ -56,7 +52,7 @@ async function createUser(_, { user }, { db, event }) {
             // const userSaved = await userToBeSaved.save();
             // console.log(userSaved);
 
-            await User.update({ email: user.email }, { $setOnInsert: { name: user.name }}, options, async (err, u) => {
+            await User.update({ email: user.email }, { $setOnInsert: { name: user.name } }, options, async (err, u) => {
                 if (err) {
                     return (err);
                 }
@@ -67,7 +63,7 @@ async function createUser(_, { user }, { db, event }) {
                         const filePath = basePath + 'email-template/common-template';
 
                         let authUser = await auth.auth(event.headers);
-    
+
                         /** Creating dynamic varibales such as link, subject and email content */
                         const payLoad = {
                             NAME: user.email,
@@ -75,13 +71,13 @@ async function createUser(_, { user }, { db, event }) {
                             LINK: process.env.FRONT_END_URL,
                             SUBJECT: 'Join Codemarket Comment!'
                         };
-    
+
                         /** Sending the email */
                         await helper.sendEmail({ to: [user.email] }, filePath, payLoad);
                         user['_id'] = u.upserted[0]._id.toString();
-                        
+
                     } else {
-                        const userFound = await User.findOne({email: user.email}).exec();
+                        const userFound = await User.findOne({ email: user.email }).exec();
                         user['_id'] = userFound._id;
                     }
 
@@ -179,47 +175,6 @@ async function authorize(_, { applicationId }, { event, context, headers, db, })
     });
 }
 
-async function getUsersAndBugFixesCount(_, { headers, db, decodedToken }) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            // const decodedToken = await auth.auth(headers);
-            if (!db) {
-                console.log('Creating new mongoose connection.');
-                conn = await connectToMongoDB();
-            } else {
-                console.log('Using existing mongoose connection.');
-            }
-
-
-            // let options = { upsert: true, new: true, setDefaultsOnInsert: true, useFindAndModify: false };
-
-            const userData = await User.aggregate([
-                {
-                    $lookup: {
-                        from: 'products',
-                        localField: '_id',
-                        foreignField: 'createdBy',
-                        as: 'productData'
-                    }
-                },
-                {
-                    $project: {
-                        _id: 1,
-                        name: 1,
-                        productCount: { $size: '$productData' }
-                    }
-                }
-            ]).exec();
-
-            return resolve(userData);
-
-        } catch (e) {
-            console.log(e);
-            return reject(e);
-        }
-    });
-}
-
 // Lambda Function to get the user Data by Id
 async function getUserById(_, { userId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
@@ -241,10 +196,6 @@ async function getUserById(_, { userId }, { headers, db, decodedToken }) {
                     return reject(err)
                 }
 
-                const likeCount = await Like.count({ referenceId: userId })
-
-                res['likeCount'] = likeCount;
-
                 return resolve(res);
             });
 
@@ -255,6 +206,34 @@ async function getUserById(_, { userId }, { headers, db, decodedToken }) {
     });
 }
 
+const createTransaction = async (_, { data }) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            conn = await connectToMongoDB();
+
+            const insertedTransaction = await conn.collection('donations').insertOne(data);
+            console.log('insertedTransaction', insertedTransaction);
+
+            return resolve(data);
+
+            // Getting user Data by passing the userId
+            // await conn.findById(userId).populate('currentJobDetails.jobProfile').populate('currentJobDetails.company').exec(async (err, res) => {
+
+            //     // if error, reject with error
+            //     if (err) {
+            //         return reject(err)
+            //     }
+
+            //     return resolve(res);
+            // });
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
 
 
 
@@ -263,6 +242,6 @@ module.exports = {
     createUser,
     updateUser,
     authorize,
-    getUsersAndBugFixesCount,
-    getUserById
+    getUserById,
+    createTransaction
 };
