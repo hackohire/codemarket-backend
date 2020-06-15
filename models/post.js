@@ -87,7 +87,7 @@ const postSchema = new Schema(
         cancelReason: String,
         duration: [String],
 
-        formStrucutreJSON: Object,
+        formStructureJSON: Object,
         
         mentor: {
             topics: [{
