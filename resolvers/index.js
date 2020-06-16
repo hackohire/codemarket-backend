@@ -8,7 +8,7 @@ const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription } = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType } = require('./post-type');
 const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData, getMailingList, getMailingListContacts, getCampaignData } = require('./campaign');
-const { addHelpGrowBusiness } = require('./temporary');
+const { addSurveyUser } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
 const { addformData, fetchformData, fetchformDataById, fetchSavedDataByFormStructure } = require('./FormData');
@@ -92,7 +92,7 @@ module.exports = {
 
     addPostType, updatePostType, deletePostType,
 
-    addHelpGrowBusiness,
+    addSurveyUser,
     getCsvFileData,
     getEmailData,
     saveCsvFileData

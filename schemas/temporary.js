@@ -1,5 +1,5 @@
-const graphQlHelpBusinessGrowSchema = `
-type HelpGrowYourBusineess {
+const graphQlAddSurveyUserSchema = `
+type AddSurveyUsers {
     _id: ID
     businessName: String
     website: String
@@ -11,7 +11,7 @@ type HelpGrowYourBusineess {
     city: String
   }
   
-  input HelpGrowYourBusineessInput {
+  input AddSurveyUserInput {
     _id: ID
     businessName: String
     website: String
@@ -24,9 +24,9 @@ type HelpGrowYourBusineess {
   }
 
   extend type Mutation {
-    addHelpGrowBusiness(helpGrowBusinessObject: HelpGrowYourBusineessInput): HelpGrowYourBusineess
+    addSurveyUser(addSurveyUserObj: AddSurveyUserInput): AddSurveyUsers
   }
 `
 
-module.exports = graphQlHelpBusinessGrowSchema;
+module.exports = graphQlAddSurveyUserSchema;
 

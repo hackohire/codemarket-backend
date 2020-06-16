@@ -4,7 +4,7 @@ mongoose.plugin(slug, { truncate: 0 });
 
 const { Schema } = mongoose;
 
-const helpBusinessGrow = new Schema(
+const surveyUser = new Schema(
     {
         businessName: String,
         email: String,
@@ -26,8 +26,8 @@ const helpBusinessGrow = new Schema(
 
 module.exports = () => {
     try {
-        return mongoose.model('help-business-grow');
+        return mongoose.model('survey-user');
     } catch (e) {
-        return mongoose.model('help-business-grow', helpBusinessGrow);
+        return mongoose.model('survey-user', surveyUser);
     }
 };

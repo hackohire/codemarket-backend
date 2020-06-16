@@ -8,7 +8,7 @@ const graphQlPostTypeSchema = require('./post-type');
 const makemoneySchema = require('./MakeMoney');
 const graphQlCampaignSchema = require('./campaign');
 const graphQlVideoCallSchema = require('./videoCall');
-const graphQlHelpBusinessGrowSchema = require('./temporary');
+const graphQlAddSurveyUserSchema = require('./temporary');
 const schema = require('./schema');
 const contactSchema = require('./contact');
 const formJsonSchema = require('./FormJson');
@@ -31,7 +31,7 @@ const schemaArray = [
     commentSchema,
     formJsonSchema,
     formDataSchema,
-    graphQlHelpBusinessGrowSchema,
+    graphQlAddSurveyUserSchema,
     graphQlVideoCallSchema
 ];
 
