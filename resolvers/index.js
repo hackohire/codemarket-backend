@@ -1,4 +1,4 @@
-const { getUsers, createUser, updateUser, authorize, getUserById, createTransaction } = require('./user');
+const { getUsers, createUser, updateUser, authorize, getUserById, createTransaction, call } = require('./user');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { findFromCollection, addToCollection } = require('./categories');
 const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType, getAlreadyBookedSlots } = require('./post');
@@ -64,6 +64,8 @@ module.exports = {
     createTransaction,
     addMakeMoney,
     addToCollection,
+
+    call,
     // addProduct,
     // updateProduct,
     // deleteProduct,
