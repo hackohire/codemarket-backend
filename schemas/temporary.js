@@ -9,6 +9,7 @@ type AddSurveyUsers {
     businessAreas: [Tag]
     email: String
     city: String
+    alreadyExist: Boolean
   }
   
   input AddSurveyUserInput {
@@ -21,6 +22,7 @@ type AddSurveyUsers {
     businessAreas: [TagInput]
     email: String
     city: String
+    alreadyExist: Boolean
   }
 
   extend type Mutation {
