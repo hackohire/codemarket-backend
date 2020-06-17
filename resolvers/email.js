@@ -52,7 +52,7 @@ async function sendEmail(_, { email }, { event, db, decodedToken }) {
                 HTML_CONTENT: email.descriptionHTML,
                 SUBJECT: email.subject
             };
-            const emailSent = await helper.sendEmail([email.to], templateFilepath, payload, email.city ? email.city : '');
+            const emailSent = await helper.sendEmail([email.to], templateFilepath, payload);
 
             if (emailSent) {
 
@@ -82,6 +82,28 @@ async function sendEmail(_, { email }, { event, db, decodedToken }) {
     });
 }
 
+async function sendEmailFromFrontend(_, { email }, { event, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            const templateFilepath = basePath + 'email-template/common-template';
+            const payload = {
+                HTML_CONTENT: email.descriptionHTML,
+                SUBJECT: email.subject
+            };
+            const emailSent = await helper.sendEmail([email.to], templateFilepath, payload);
+
+            if (emailSent) {
+                resolve(emailSent);
+            }
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 module.exports = {
-    sendEmail
+    sendEmail,
+    sendEmailFromFrontend
 }

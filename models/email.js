@@ -17,7 +17,7 @@ const emailSchema = new Schema(
         status: String,
         type: {
             type: String,
-            enum: ['email'],
+            enum: [''],
             default: ''
         },
         campaignId: Schema.Types.ObjectId,
