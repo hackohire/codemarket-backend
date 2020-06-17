@@ -61,10 +61,10 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                     .execPopulate().then(async populatedPost => {
 
                         /** Send email notification to the post creator */
-                        await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
-
+                        /**await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : ''); */
+                        console.log(populatedPost)
                         /** Save Activity */
-                        await helper.saveActivity('ADD_POST', populatedPost.createdBy._id, null, populatedPost._id, null);
+                        /** await helper.saveActivity('ADD_POST', populatedPost.createdBy._id, null, populatedPost._id, null); */
 
                         /** Send email notification to the collaborators */
                         if (post.status === 'Published' && populatedPost && populatedPost.collaborators && populatedPost.collaborators.length) {
