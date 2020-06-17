@@ -70,6 +70,7 @@ async function addSurveyUser(_, { addSurveyUserObj }, { headers, db, decodedToke
                   if (err) {
                       console.log("Err==>" ,err); // an error occurred
                       userData.email = null;
+                      userData.alreadyExist = true;
                       resolve(userData);
                   }
                   else {
