@@ -41,6 +41,7 @@ const graphQlPostSchema = `
 
         mentor: JSON
         job: JSON
+        formStructureJSON: JSON
     }
 
     input PostInput {
@@ -84,6 +85,7 @@ const graphQlPostSchema = `
 
         mentor: JSON
         job: JSON
+        formStructureJSON: JSON
     }
 
     type Activities {

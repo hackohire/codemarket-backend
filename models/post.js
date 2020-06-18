@@ -87,6 +87,8 @@ const postSchema = new Schema(
         cancelReason: String,
         duration: [String],
 
+        formStructureJSON: Object,
+        
         mentor: {
             topics: [{
                 type: Schema.Types.ObjectId,
