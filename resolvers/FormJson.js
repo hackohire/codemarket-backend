@@ -1,6 +1,7 @@
 const connectToMongoDB = require('../helpers/db');
 const FormJson = require('./../models/FormJson')(); /** Impoer Tweet mongoose model */
 const dbUrl = require('../models/dbUrl')();
+var ObjectID = require('mongodb').ObjectID;
 
 let conn;
 
@@ -21,11 +22,11 @@ async function fetchFormStructureById(_, { formId }) {
     });
 }
 
-async function addformJson(_, { formJson }, { headers }) {
+async function addformJson(_, { formJson, connectedDBId }, { headers }) {
     return new Promise(async (resolve, reject) => {
         try {
             /** Connect Database with the mongo db */
-            conn = await connectToMongoDB('mongodb+srv://sumit:sumit@cluster0-6zfbz.mongodb.net/dro?retryWrites=true&w=majority');
+            conn = await connectToMongoDB();
 
             if (formJson._id) {
                 const updatedForm = await FormJson.findByIdAndUpdate(formJson._id, formJson, {new: true});
@@ -35,12 +36,13 @@ async function addformJson(_, { formJson }, { headers }) {
                 const obj = {
                     formname: formJson.formname,
                     formStructureJSON: formJson.formStructureJSON,
-                    connectedDB: formJson.connectedDB._id
                 };
+                if (connectedDBId) {
+                    obj.connectedDB = ObjectID(connectedDBId)
+                }
 
                 const int = new FormJson(obj);
 
-                // int.connectedDB = formJson.connectedDB._id;
                 /** Here we save the quote document into the database */
                 await int.save(formJson).then(async (p) => {
 
@@ -59,7 +61,7 @@ async function fetchformJson(_, ) {
     return new Promise(async (resolve, reject) => {
         try {
             /** Connect Database with the mongo db */
-            conn = await connectToMongoDB();
+            conn = await connectToMongoDB(process.env.MONGODB_URL);
 
             /** Find the tweets created by the user */
             const formJsonList = await FormJson.find({}).exec();
@@ -92,22 +94,37 @@ async function addDbUrl(_, { name, mongoUrl }, {}) {
     });
 }
 
-async function addIntoAnotherDB(_, { formJson, collection } , { headers, db, decodedToken }) {
+async function addIntoAnotherDB(_, { formJson, connectedDBId, collection } , { headers, db, decodedToken }) {
     return new Promise (async (resolve, reject) => {
         try {
 
-            const obj = {
-                formname: formJson.formname,
-                formStructureJSON: formJson.formStructureJSON,
-                connectedDB: formJson.connectedDB._id
-            };
+            const dbObj = await dbUrl.findOne({ _id: connectedDBId });
+            
+            let conn = await connectToMongoDB(dbObj.mongoUrl);
 
-            const dbObj = await dbUrl.findOne({ _id: formJson.connectedDB._id });
+            if (formJson._id) {
+                const dataToUpdate = {
+                    formname: formJson.formname,
+                    formStructureJSON: formJson.formStructureJSON,
+                    connectedDB: ObjectID(connectedDBId)
+                };
+                const updatedForm = await conn.collection(collection).updateOne({ formname: formJson.formname}, {$set: dataToUpdate});
+                conn = await connectToMongoDB(process.env.MONGODB_URL);
 
-            const conn = await connectToMongoDB(dbObj.mongoUrl);
-
-            await conn.collection(collection).insertOne(obj);
-            resolve(true);
+                resolve(true);
+            } else { 
+                const obj = {
+                    formname: formJson.formname,
+                    formStructureJSON: formJson.formStructureJSON,
+                    connectedDB: ObjectID(connectedDBId)
+                };
+    
+                await conn.collection(collection).insertOne(obj);
+    
+                conn = await connectToMongoDB(process.env.MONGODB_URL);
+    
+                resolve(true);
+            }
 
         } catch (err) {
             console.log("Err in addIntoAnotherDb Catch  ==> ", err);

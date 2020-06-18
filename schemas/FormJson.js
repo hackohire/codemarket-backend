@@ -32,9 +32,9 @@ input formJsonInput {
 }
 
 extend type Mutation {
-    addformJson(formJson: formJsonInput): formJson
+    addformJson(formJson: formJsonInput, connectedDBId: String): formJson
     addDbUrl(name: String, mongoUrl: String) : connectedDBType
-    addIntoAnotherDB(formJson: formJsonInput, collection: String) : formJson
+    addIntoAnotherDB(formJson: formJsonInput, connectedDBId: String, collection: String) : formJson
 }
 
 extend type Query {
