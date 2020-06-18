@@ -1030,7 +1030,7 @@ async function getPostByPostType(_, { postType, userId, pageOptions }, { headers
     });
 }
 
-async function getAlreadyBookedSlots(_, {date}, {header, db, decodedToken}) {
+async function getAlreadyBookedSlots(_, { date }, { header, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
         try {
             if (!db) {
@@ -1039,7 +1039,7 @@ async function getAlreadyBookedSlots(_, {date}, {header, db, decodedToken}) {
             } else {
                 console.log('Using existing mongoose connection.');
             }
-            let condition = { type: 'appointment', appointment_date: date }
+            let condition = { type: { $in: ['appointment', 'mentor'] }, appointment_date: date }
             const appointment = await Post.find(condition);
             console.log(appointment, date);
             return resolve({ appointment });

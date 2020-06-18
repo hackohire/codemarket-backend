@@ -4,6 +4,7 @@ var ObjectID = require('mongodb').ObjectID;
 const Subscription = require('../models/subscription')();
 const helper = require('../helpers/helper');
 const auth = require('../helpers/auth');
+const { pubSub } = require('../helpers/pubsub');
 let conn;
 
 async function getUsers(_, { _page = 1, _limit = 10 }, { headers, db, decodedToken }) {
@@ -235,6 +236,36 @@ const createTransaction = async (_, { data }) => {
     });
 }
 
+const call = async (_, { post, caller }) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            // conn = await connectToMongoDB();
+
+            const usersToBeNotified = [post.createdBy];
+
+            await pubSub.publish('LISTEN_NOTIFICATION', { onCalling: { post, caller }, usersToBeNotified });
+
+            return resolve(true);
+
+            // Getting user Data by passing the userId
+            // await conn.findById(userId).populate('currentJobDetails.jobProfile').populate('currentJobDetails.company').exec(async (err, res) => {
+
+            //     // if error, reject with error
+            //     if (err) {
+            //         return reject(err)
+            //     }
+
+            //     return resolve(res);
+            // });
+
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 
 
 module.exports = {
@@ -243,5 +274,6 @@ module.exports = {
     updateUser,
     authorize,
     getUserById,
-    createTransaction
+    createTransaction,
+    call
 };

@@ -61,7 +61,8 @@ const graphQlEmailSchema = `
     }    
 
     extend type Mutation {
-        sendEmail(email: EmailInput): Email
+        sendEmail(email: EmailInput): Email,
+        sendEmailFromFrontend(email: EmailInput): JSON
     }
 `
 

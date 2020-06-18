@@ -64,6 +64,12 @@ type User {
     commentAdded: UserNotificationData
     commentUpdated: UserNotificationData
     commentDeleted: UserNotificationData
+    onCalling: OnCallReceiving
+  }
+
+  type OnCallReceiving {
+    caller: User
+    post: Post
   }
 
   type UserNotificationData {
@@ -83,6 +89,7 @@ type User {
 
     generateCkEditorToken(user: UserInput, role: String): String
     createTransaction(data: JSON): JSON
+    call(post: PostInput, caller: UserInput): Boolean
   }
 
   extend type Subscription {

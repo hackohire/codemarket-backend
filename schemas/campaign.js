@@ -164,11 +164,17 @@ const graphQlCampaignSchema = `
         total: Int
     }
 
+    input searchInput {
+        companyName: String
+        status: String
+    }
+
+
     extend type Query {
         getCampaignsWithTracking(pageOptions: PageOptionsInput, companyId: String, batchId: String): [Campaign]
         getCampaignEmails(pageOptions: PageOptionsInput, campaignId: String): getEmailResponse
         getMailingList(companyId: String) : [mailingList]
-        getMailingListContacts(pageOptions: PageOptionsInput, batchId: String) : getMailingListContactResponse
+        getMailingListContacts(pageOptions: PageOptionsInput, batchId: String, searchObj: searchInput) : getMailingListContactResponse
         getCampaignData(pageOptions: PageOptionsInput, companyId: String): getCampaignDataResponse
     }
 

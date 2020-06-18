@@ -8,6 +8,10 @@ const formDataSchema = new Schema(
         connectedFormStructureId: {
             type: Schema.Types.ObjectId,
             ref: "form-structure",
+        },
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: "user",
         }
     },
     {

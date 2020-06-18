@@ -8,7 +8,7 @@ const graphQlPostSchema = `
         referencePostUrl: String
         createdBy: User
         users: [User]
-        price: Int
+        price: String
         categories: [String]
         status: Status
         createdAt: String
@@ -41,6 +41,7 @@ const graphQlPostSchema = `
 
         mentor: JSON
         job: JSON
+        formStructureJSON: JSON
     }
 
     input PostInput {
@@ -50,7 +51,7 @@ const graphQlPostSchema = `
         referencePostUrl: String
         createdBy: ID
         users: [UserInput]
-        price: Int
+        price: String
         status: Status
         tags: [TagInput]
         createdAt: String
@@ -84,6 +85,7 @@ const graphQlPostSchema = `
 
         mentor: JSON
         job: JSON
+        formStructureJSON: JSON
     }
 
     type Activities {
@@ -139,6 +141,7 @@ const graphQlPostSchema = `
         updatePost(post: PostInput, updatedBy: UserInput): Post
         updatePostContent(post: PostInput, updatedBy: UserInput): String
         deletePost(postId: String, deletedBy: UserInput): Boolean
+        bookSession(post: PostInput, actionBy: String): JSON
     }
 `
 

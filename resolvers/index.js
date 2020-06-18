@@ -1,9 +1,9 @@
-const { getUsers, createUser, updateUser, authorize, getUserById, createTransaction } = require('./user');
+const { getUsers, createUser, updateUser, authorize, getUserById, createTransaction, call } = require('./user');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { findFromCollection, addToCollection } = require('./categories');
 const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType, getAlreadyBookedSlots } = require('./post');
 const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId } = require('./company');
-const { sendEmail } = require('./email');
+const { sendEmail, sendEmailFromFrontend } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription } = require('./subscription');
 const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType } = require('./post-type');
@@ -15,6 +15,7 @@ const { addformData, fetchformData } = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
 const { createVideoToken } = require('./videoCall');
 const { generateCkEditorToken } = require('./auth');
+const { bookSession } = require('./booking');
 const { GraphQLUpload } = require('graphql-upload');
 const { pubSub } = require('../helpers/pubsub');
 
@@ -64,6 +65,8 @@ module.exports = {
     createTransaction,
     addMakeMoney,
     addToCollection,
+
+    call,
     // addProduct,
     // updateProduct,
     // deleteProduct,
@@ -77,6 +80,8 @@ module.exports = {
     updatePostContent,
     deletePost,
 
+    bookSession,
+
     addMembershipSubscription,
     inviteMembersToSubscription,
     cancelSubscription,
@@ -84,7 +89,7 @@ module.exports = {
 
     addCompany, updateCompany, deleteCompany,
 
-    sendEmail,
+    sendEmail, sendEmailFromFrontend,
 
     addPostType, updatePostType, deletePostType,
 
