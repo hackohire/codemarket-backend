@@ -20,7 +20,7 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         }],
-        price: Number,
+        price: String,
         categories: [],
         status: {
             type: String,
@@ -88,7 +88,7 @@ const postSchema = new Schema(
         duration: [String],
 
         formStructureJSON: Object,
-        
+
         mentor: {
             topics: [{
                 type: Schema.Types.ObjectId,
@@ -97,6 +97,15 @@ const postSchema = new Schema(
             }],
             duration: [String],
             availabilityDate: String,
+            status: {
+                type: String,
+                enum: ['CREATED', 'REQUEST_SENT', 'ACEPTED', 'REJECTED']
+            },
+            requestBy: [{
+                type: Schema.Types.ObjectId,
+                ref: "user",
+                autopopulate: true
+            }]
         },
 
         job: {

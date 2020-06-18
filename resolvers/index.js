@@ -15,6 +15,7 @@ const { addformData, fetchformData } = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
 const { createVideoToken } = require('./videoCall');
 const { generateCkEditorToken } = require('./auth');
+const { bookSession } = require('./booking');
 const { GraphQLUpload } = require('graphql-upload');
 const { pubSub } = require('../helpers/pubsub');
 
@@ -78,6 +79,8 @@ module.exports = {
     updatePost,
     updatePostContent,
     deletePost,
+
+    bookSession,
 
     addMembershipSubscription,
     inviteMembersToSubscription,
