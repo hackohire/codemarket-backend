@@ -112,7 +112,7 @@ async function sendEmail(toEmail, filePath, body, city, fromEmail = '') {
                             'X-SES-CONFIGURATION-SET': 'la2050',
                             'X-SES-MESSAGE-TAGS': 'campaignId=5ec800f9870915348a37f30f' // Instagram
                         },
-                        from: '"Therapy, Therapist" <sumi@codemarket.io>', // Therapy
+                        from: '"Codemarket" <sumi@codemarket.io>', // Therapy
                         to: toEmail,
                         // cc: "mysumifoods@gmail.com",
                         // bcc: ['mysumifoods@gmail.com'],
