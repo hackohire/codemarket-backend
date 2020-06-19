@@ -1,5 +1,7 @@
 const connectToMongoDB = require('../helpers/db');
 const FormJson = require('./../models/FormJson')(); /** Impoer Tweet mongoose model */
+const dbUrl = require('../models/dbUrl')();
+var ObjectID = require('mongodb').ObjectID;
 
 let conn;
 
@@ -9,7 +11,7 @@ async function fetchFormStructureById(_, { formId }) {
             /** Connect Database with the mongo db */
             conn = await connectToMongoDB();
 
-            const formStructure = await FormJson.findById(formId);
+            const formStructure = await FormJson.findById(formId).populate('connectedDB').exec();
 
             return resolve(formStructure);
 
@@ -20,7 +22,7 @@ async function fetchFormStructureById(_, { formId }) {
     });
 }
 
-async function addformJson(_, { formJson }, { headers }) {
+async function addformJson(_, { formJson, connectedDBId }, { headers }) {
     return new Promise(async (resolve, reject) => {
         try {
             /** Connect Database with the mongo db */
@@ -31,11 +33,19 @@ async function addformJson(_, { formJson }, { headers }) {
                 resolve(updatedForm);
             } else {
                 /** This will convert quote object into the mongoose quote model */
-                const int = new FormJson(formJson);
+                const obj = {
+                    formname: formJson.formname,
+                    formStructureJSON: formJson.formStructureJSON,
+                };
+                if (connectedDBId) {
+                    obj.connectedDB = ObjectID(connectedDBId)
+                }
+
+                const int = new FormJson(obj);
 
                 /** Here we save the quote document into the database */
                 await int.save(formJson).then(async (p) => {
-                    console.log(p)
+
                     resolve(p);
                 });
             }
@@ -51,11 +61,10 @@ async function fetchformJson(_, ) {
     return new Promise(async (resolve, reject) => {
         try {
             /** Connect Database with the mongo db */
-            conn = await connectToMongoDB();
+            conn = await connectToMongoDB(process.env.MONGODB_URL);
 
             /** Find the tweets created by the user */
             const formJsonList = await FormJson.find({}).exec();
-            console.log(formJsonList)
             return resolve(formJsonList);
         } catch (e) {
             console.log(e);
@@ -64,9 +73,70 @@ async function fetchformJson(_, ) {
     });
 }
 
+async function addDbUrl(_, { name, mongoUrl }, {}) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const conn = await connectToMongoDB();
+            
+            const obj = {
+                name,
+                mongoUrl
+            }
+            const int = new dbUrl(obj);
+
+            const data = await int.save();
+            console.log("123 ==> " ,data)
+            await resolve(data);
+        } catch (err) {
+            console.log("Err in catch ==> ", err);
+            reject(err);
+        }
+    });
+}
+
+async function addIntoAnotherDB(_, { formJson, connectedDBId, collection } , { headers, db, decodedToken }) {
+    return new Promise (async (resolve, reject) => {
+        try {
+
+            const dbObj = await dbUrl.findOne({ _id: connectedDBId });
+            
+            let conn = await connectToMongoDB(dbObj.mongoUrl);
+
+            if (formJson._id) {
+                const dataToUpdate = {
+                    formname: formJson.formname,
+                    formStructureJSON: formJson.formStructureJSON,
+                    connectedDB: ObjectID(connectedDBId)
+                };
+                const updatedForm = await conn.collection(collection).updateOne({ formname: formJson.formname}, {$set: dataToUpdate});
+                conn = await connectToMongoDB(process.env.MONGODB_URL);
+
+                resolve(true);
+            } else { 
+                const obj = {
+                    formname: formJson.formname,
+                    formStructureJSON: formJson.formStructureJSON,
+                    connectedDB: ObjectID(connectedDBId)
+                };
+    
+                await conn.collection(collection).insertOne(obj);
+    
+                conn = await connectToMongoDB(process.env.MONGODB_URL);
+    
+                resolve(true);
+            }
+
+        } catch (err) {
+            console.log("Err in addIntoAnotherDb Catch  ==> ", err);
+            reject(err);
+        }
+    });
+}
 
 module.exports = {
     addformJson,
     fetchformJson,
-    fetchFormStructureById
+    fetchFormStructureById,
+    addDbUrl,
+    addIntoAnotherDB
 }

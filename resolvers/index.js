@@ -10,7 +10,7 @@ const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType
 const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData, getMailingList, getMailingListContacts, getCampaignData } = require('./campaign');
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
-const { addformJson, fetchformJson, fetchFormStructureById } = require('./FormJson');
+const { addformJson, fetchformJson, fetchFormStructureById, addDbUrl, addIntoAnotherDB } = require('./FormJson');
 const { addformData, fetchformData } = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
 const { createVideoToken } = require('./videoCall');
@@ -96,7 +96,9 @@ module.exports = {
     addHelpGrowBusiness,
     getCsvFileData,
     getEmailData,
-    saveCsvFileData
+    saveCsvFileData,
+    addDbUrl,
+    addIntoAnotherDB
   },
   Subscription: {
     onCommentAdded: {
