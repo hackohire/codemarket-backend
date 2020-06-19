@@ -1039,7 +1039,7 @@ async function getAlreadyBookedSlots(_, { date }, { header, db, decodedToken }) 
             } else {
                 console.log('Using existing mongoose connection.');
             }
-            let condition = { type: { $in: ['appointment', 'mentor'] }, appointment_date: date }
+            let condition = { type: { $in: ['appointment', 'mentor'] }, 'booking.availabilityDate': date }
             const appointment = await Post.find(condition);
             console.log(appointment, date);
             return resolve({ appointment });

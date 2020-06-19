@@ -89,6 +89,20 @@ const postSchema = new Schema(
 
         formStructureJSON: Object,
 
+        booking: {
+            status: {
+                type: String,
+                enum: ['CREATED', 'REQUEST_SENT', 'ACEPTED', 'REJECTED']
+            },
+            requestBy: [{
+                type: Schema.Types.ObjectId,
+                ref: "user",
+                autopopulate: true
+            }],
+            availabilityDate: String,
+            duration: [String],
+        },
+
         mentor: {
             topics: [{
                 type: Schema.Types.ObjectId,
