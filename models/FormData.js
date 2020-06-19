@@ -5,6 +5,10 @@ const formDataSchema = new Schema(
     {
         formname: String,
         formDataJson: Object,
+        formDataId: {
+            type: Schema.Types.ObjectId,
+            ref: "formdata",
+        },
         connectedFormStructureId: {
             type: Schema.Types.ObjectId,
             ref: "form-structure",

@@ -7,6 +7,7 @@ type formData {
     formname: String
     formDataJson: JSON
     connectedFormStructureId: ID
+    formDataId: String
     company: Company
     createdBy: User
 }
@@ -15,7 +16,7 @@ input formDataInput {
     _id: ID
     createdAt: String
     updatedAt: String
-
+    formDataId: String
     formname: String
     formDataJson: JSON
     connectedFormStructureId: ID
