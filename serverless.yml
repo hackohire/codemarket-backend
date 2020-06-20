@@ -358,7 +358,11 @@ plugins:
   - serverless-offline
   - serverless-domain-manager
   - serverless-prune-plugin
+  - serverless-python-requirements
 custom:
+  pythonRequirements:
+    dockerizePip: false
+    
   dynamodb:
     stages:
       - dev
