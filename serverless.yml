@@ -2,7 +2,6 @@ service: codemarketapi
 
 provider:
   name: aws
-  runtime: nodejs10.x
   region: us-east-1
   versionFunctions: false
   stage: ${opt:stage, 'dev'}
@@ -48,6 +47,7 @@ functions:
   
   graphql:
     handler: handler.handler
+    runtime: nodejs10.x
     # role: ServiceRole
     events:
       - http:
@@ -82,6 +82,7 @@ functions:
             
   webSocketHandler:
     handler: handler.handleWebSocket
+    runtime: nodejs10.x
     events:
       - websocket:
           route: $connect
@@ -91,6 +92,7 @@ functions:
           route: $default
   dynamoDBStreamHandler:
     handler: handler.handleDynamoDBStream
+    runtime: nodejs10.x
     events:
       - stream:
           enabled: true
@@ -100,6 +102,7 @@ functions:
 
   checkoutSessionCompleted:
     handler: handler.checkoutSessionCompleted
+    runtime: nodejs10.x
     events:
       - http:
           path: checkoutSessionCompleted
@@ -108,6 +111,7 @@ functions:
 
   createCheckoutSession:
     handler: handler.createCheckoutSession
+    runtime: nodejs10.x
     events:
       - http:
           path: createCheckoutSession
@@ -116,6 +120,7 @@ functions:
 
   emailCampaignEvent:
     handler: handler.emailCampaignEvent
+    runtime: nodejs10.x
     events:
       - http:
           path: emailCampaignEvent
@@ -127,6 +132,7 @@ functions:
 
   saveImage:
     handler: handler.saveImage
+    runtime: nodejs10.x
     events:
       - http:
           path: saveImage
@@ -135,6 +141,7 @@ functions:
 
   getCheckoutSession:
     handler: handler.getCheckoutSession
+    runtime: nodejs10.x
     events:
       - http:
           path: getCheckoutSession
@@ -143,6 +150,7 @@ functions:
   
   saveContact:
     handler: resolvers/post.saveContact
+    runtime: nodejs10.x
     events:
       - http:
           path: saveContact
@@ -151,6 +159,7 @@ functions:
 
   readAndSaveEmailDataFromS3:
     handler: handler.readAndSaveEmailDataFromS3
+    runtime: nodejs10.x
     events:
       - http:
           path: readAndSaveEmailDataFromS3
@@ -159,6 +168,7 @@ functions:
 
   createStripeUser:
     handler: handler.createStripeUser
+    runtime: nodejs10.x
     events:
       - http:
           path: createStripeUser
@@ -167,6 +177,7 @@ functions:
 
   sendEmailFromQueue:
     handler: handler.sendEmailFromQueue
+    runtime: nodejs10.x
     events:
       - sqs:
           arn:
@@ -177,6 +188,7 @@ functions:
 
   attachCardAndCreateSubscription:
     handler: handler.attachCardAndCreateSubscription
+    runtime: nodejs10.x
     events:
       - http:
           path: attachCardAndCreateSubscription
@@ -185,6 +197,7 @@ functions:
 
   getCouponByName:
     handler: handler.getCouponByName
+    runtime: nodejs10.x
     events:
       - http:
           path: getCouponByName
@@ -193,6 +206,7 @@ functions:
 
   sendEmailWithStaticContent:
     handler: helpers/helper.sendEmailWithStaticContent
+    runtime: nodejs10.x
     events:
       - http:
           path: sendEmailWithStaticContent
@@ -201,6 +215,7 @@ functions:
 
   fetchLinkMeta:
     handler: handler.fetchLinkMeta
+    runtime: nodejs10.x
     events:
       - http:
           path: fetchLinkMeta
@@ -220,6 +235,7 @@ functions:
 
   fetchArticleByLink:
     handler: handler.fetchArticleByLink
+    runtime: nodejs10.x
     events:
       - http:
           path: fetchArticleByLink
@@ -235,6 +251,10 @@ functions:
               - X-Amz-Security-Token
               - x-requested-with
             allowCredentials: false
+
+  hello:
+    runtime: python3.8
+    handler: handler.hello
 
 
 resources:
