@@ -17,6 +17,7 @@ const { createVideoToken } = require('./videoCall');
 const { generateCkEditorToken } = require('./auth');
 const { GraphQLUpload } = require('graphql-upload');
 const { pubSub } = require('../helpers/pubsub');
+const { tweet, fetchTweets } = require('./tweet');
 
 module.exports = {
   JSON: GraphQLJSON,
@@ -54,7 +55,9 @@ module.exports = {
     getMailingList,
     getAlreadyBookedSlots,
     getMailingListContacts,
-    getCampaignData
+    getCampaignData,
+    
+    fetchTweets
   },
   Mutation: {
     createUser,
@@ -91,7 +94,9 @@ module.exports = {
     addHelpGrowBusiness,
     getCsvFileData,
     getEmailData,
-    saveCsvFileData
+    saveCsvFileData,
+    
+    tweet
   },
   Subscription: {
     onCommentAdded: {

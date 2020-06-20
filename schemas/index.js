@@ -12,6 +12,7 @@ const graphQlHelpBusinessGrowSchema = require('./temporary');
 const schema = require('./schema');
 const formJsonSchema = require('./FormJson');
 const formDataSchema = require('./FormData');
+const tweetSchema = require('./tweet');
 
 const schemaArray = [
     schema,
@@ -29,7 +30,8 @@ const schemaArray = [
     formDataSchema,
     graphQlHelpBusinessGrowSchema,
     formJsonSchema,
-    graphQlVideoCallSchema
+    graphQlVideoCallSchema,
+    tweetSchema
 ];
 
 module.exports = schemaArray;

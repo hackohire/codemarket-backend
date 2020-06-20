@@ -9,10 +9,7 @@ const fieldSchema = new Schema(
         name: String,
         label: String,
         type: String,
-        description: [new Schema({
-            type: String,
-            data: Schema.Types.Mixed,
-        })],
+        
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: "user",
