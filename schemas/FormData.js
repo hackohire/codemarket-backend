@@ -10,6 +10,9 @@ type formData {
     formDataId: String
     company: Company
     createdBy: User
+    cFormJson: JSON
+    pFormJson: JSON
+    connectedFormData: formData
 }
 
 input formDataInput {
@@ -19,12 +22,19 @@ input formDataInput {
     formDataId: String
     formname: String
     formDataJson: JSON
+    cFormJson: JSON
+    pFormJson: JSON
     connectedFormStructureId: ID
     company: CompanyInput
     createdBy: String
 }
 
 type fetchSavedDataResponse {
+    data: [formData]
+    total: Int
+}
+
+type mySurveyDataResponse {
     data: [formData]
     total: Int
 }
@@ -38,6 +48,8 @@ extend type Query {
     fetchformDataById(formDataId: String): [formData]
     fetchFormDataByFormId(formId: String, fetchPrograms: Boolean): formData
     fetchSavedDataByFormStructure(pageOptions: PageOptionsInput, formStructureId: String): fetchSavedDataResponse
+    getMySurveyData(pageOptions: PageOptionsInput, id: String): mySurveyDataResponse
+    fetchSurveyAndSummaryFormDataById(id: String): formData
 }`
 
 module.exports = formDataSchema;
