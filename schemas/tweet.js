@@ -5,6 +5,7 @@ const tweetSchema = `
         status: String
         createdBy: User
         tweetDesc: String
+        createdAt: String
     }
     
     input TweetInput {
@@ -13,6 +14,7 @@ const tweetSchema = `
         status: String
         createdBy: String
         tweetDesc: String
+        createdAt: String
     }
 
     extend type Query {
