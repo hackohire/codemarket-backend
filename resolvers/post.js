@@ -68,7 +68,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                                     HTML_CONTENT: post.descriptionHTML ? `${post.descriptionHTML}` : ``
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
-                                await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
+                                await helper.sendEmail(u.email, filePath, payLoad);
                             })
                             console.log(populatedPost.collaborators);
                         }
@@ -86,7 +86,7 @@ async function addPost(_, { post }, { headers, db, decodedToken }) {
                                     HTML_CONTENT: post.descriptionHTML ? `${post.descriptionHTML}` : ``
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
-                                await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
+                                await helper.sendEmail(u.email, filePath, payLoad);
                             })
                         }
 
@@ -306,7 +306,7 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                                     HTML_CONTENT: post.descriptionHTML ? `${post.descriptionHTML}` : ``
                                 };
 
-                                await helper.sendEmail({ to: [u.email] }, filePath, payLoad)
+                                await helper.sendEmail(u.email, filePath, payLoad)
                             });
                         }
 
@@ -333,7 +333,7 @@ async function updatePost(_, { post, updatedBy }, { headers, db, decodedToken })
                                     SUBJECT: `Collaborator Rights Given on ${res.name}`
                                     // TYPE: type ? type : string.capitalize(post.type)
                                 };
-                                await helper.sendEmail({ to: [u.email] }, filePath, payLoad);
+                                await helper.sendEmail(u.email, filePath, payLoad);
                             })
                             console.log(collaboratorsToSendEmail);
                         }
@@ -379,7 +379,7 @@ async function deletePost(_, { postId, deletedBy }, { headers, db, decodedToken 
                         SUBJECT: `${deletedBy.name} deleted the post ${postData.name}`
                     };
 
-                    await helper.sendEmail({ to: [u.email] }, filePath, payLoad)
+                    await helper.sendEmail(u.email, filePath, payLoad)
                 });
             }
 
