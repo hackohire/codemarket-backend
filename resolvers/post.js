@@ -664,6 +664,8 @@ async function getAllPosts(_, { pageOptions, type, reference, companyId, connect
                     $project: {
                         name: 1,
                         type: 1,
+                        booking: 1,
+                        price: 1,
                         description: 1,
                         descriptionHTML: 1,
                         slug: 1,
