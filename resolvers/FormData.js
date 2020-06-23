@@ -190,7 +190,7 @@ async function getMySurveyData(_, { pageOptions, id }, { headers, db, decodedTok
 
             const result = await FormData.aggregate([
                 {
-                    $match: { createdBy: ObjectID(id)}
+                    $match: { createdBy: ObjectID(id), $or: [{formDataId: null}, {formDataId: {$exists: false}}]}
                 },
                 {
                     $lookup: {
@@ -202,7 +202,8 @@ async function getMySurveyData(_, { pageOptions, id }, { headers, db, decodedTok
                 },
                 {
                     $unwind: {
-                        "path": "$connectedFormData"
+                        "path": "$connectedFormData",
+                        "preserveNullAndEmptyArrays": true
                     }
                 },
                 {
@@ -215,7 +216,8 @@ async function getMySurveyData(_, { pageOptions, id }, { headers, db, decodedTok
                 },
                 {
                     $unwind: {
-                        "path": "$pFormJson"
+                        "path": "$pFormJson",
+                        "preserveNullAndEmptyArrays": true
                     }
                 },
                 {
@@ -223,12 +225,13 @@ async function getMySurveyData(_, { pageOptions, id }, { headers, db, decodedTok
                         from: 'form-structures',
                         localField: 'connectedFormData.connectedFormStructureId',
                         foreignField: '_id',
-                        as: 'cFormJson'
+                        as: 'cFormJson',
                     }
                 },
                 {
                     $unwind: {
-                        "path": "$cFormJson"
+                        "path": "$cFormJson",
+                        "preserveNullAndEmptyArrays": true
                     }
                 },
                 {
@@ -241,7 +244,8 @@ async function getMySurveyData(_, { pageOptions, id }, { headers, db, decodedTok
                 },
                 {
                     $unwind: {
-                        "path": "$createdBy"
+                        "path": "$createdBy",
+                        "preserveNullAndEmptyArrays": true
                     }
                 },
                 {
