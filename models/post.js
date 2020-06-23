@@ -89,6 +89,16 @@ const postSchema = new Schema(
 
         formStructureJSON: Object,
 
+        booking: {
+            availability: [
+                {
+                    date: String,
+                    duration: [String, String]
+                }
+            ],
+            duration: [String],
+        },
+
         mentor: {
             topics: [{
                 type: Schema.Types.ObjectId,

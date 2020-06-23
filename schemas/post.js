@@ -39,6 +39,7 @@ const graphQlPostSchema = `
         cancelReason: String
         duration: [String]
 
+        booking: JSON
         mentor: JSON
         job: JSON
         formStructureJSON: JSON
@@ -83,6 +84,7 @@ const graphQlPostSchema = `
         cancelReason: String
         duration: [String]
 
+        booking: JSON
         mentor: JSON
         job: JSON
         formStructureJSON: JSON
