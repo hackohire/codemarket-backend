@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-lambda');
+// const { gql } = require('graphql');
 
 const graphQlEmailSchema = `
     type Email {
@@ -9,21 +9,27 @@ const graphQlEmailSchema = `
         cc: [String]
         bcc: [String]
         subject: String
-        description: [descriptionBlocks]
         descriptionHTML: String
-
+        city: String
         createdBy: User
-
-        company: Company
+        from: String
+        companies: [Company]
 
         dateRange: [String]
 
         status: Status
+
+        campaignId: ID
+
         createdAt: String
         updatedAt: String
         comments: [Comment]
 
         slug: String
+
+        tracking: [TrackingData]
+        isReplied: Boolean
+        repliedHTML: String
     }
 
     input EmailInput {
@@ -33,27 +39,31 @@ const graphQlEmailSchema = `
         bcc: [String]
         subject: String
         type: String
-        description: [InputdescriptionBlock]
         descriptionHTML: String
-
+        from: String
         createdBy: ID
 
-        company: CompanyInput
+        companies: [CompanyInput]
 
         dateRange: [String]
 
         status: Status
 
+        campaignId: ID
+
         createdAt: String
         updatedAt: String
         comments: [CommentInput]
-
+        city: String
         slug: String
+        isReplied: Boolean
+        repliedHTML: String
     }    
 
     extend type Mutation {
-        sendEmail(email: EmailInput): Email
+        sendEmail(email: EmailInput): Email,
+        sendEmailFromFrontend(email: EmailInput): JSON
     }
 `
 
-module.exports = gql(graphQlEmailSchema);
+module.exports = graphQlEmailSchema;

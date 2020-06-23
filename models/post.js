@@ -8,31 +8,8 @@ const { Schema } = mongoose;
 const postSchema = new Schema(
     {
         name: String,
-        description: [new Schema({
-            type: String,
-            data: Schema.Types.Mixed,
-            status: {
-                type: String,
-                enum: ['Completed']
-            }
-        })],
         type: {
             type: String,
-            enum: [
-                'product', 'help-request', 'requirement', 'interview', 'testing', 'howtodoc', 'goal', 'event', 'dream-job', 'job', 'bug',
-
-                'competitive-advantage',   /** company post type */
-
-                'class',
-
-                'service',
-
-                'challenge',
-
-                'assignment',
-
-                'email'                  /** Post type for Email */
-            ],
         },
         featuredImage: String,
         createdBy: {
@@ -43,7 +20,7 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         }],
-        price: Number,
+        price: String,
         categories: [],
         status: {
             type: String,
@@ -55,30 +32,14 @@ const postSchema = new Schema(
             ref: "tag",
         }],
 
-        /** Event Specific Fields */
-        dateRange: [String],
-
         location: new Schema({
             latitude: Number,
             longitude: Number,
             address: String,
             additionalLocationDetails: String
         }),
-        eventType: {
-            type: String,
-            enum: ['hackathon', 'dreamjob', 'interview-workshop', 'mock-interview', 'business'],
-            // default: ''
-        },
-        membershipRequired: {
-            type: Boolean,
-            default: false
-        },
-        usersAttending: [{
-            type: Schema.Types.ObjectId,
-            ref: "user",
-        }],
-        cover: String,
 
+        cover: String,
         /** Dreamjob Specific Fields */
         cities: [{
             type: Schema.Types.ObjectId,
@@ -88,31 +49,23 @@ const postSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "company",
         }],
-        salaryCurrency: String,
-        salaryRangeFrom: Number,
-        salaryRangeTo: Number,
-        jobProfile: [{
-            type: Schema.Types.ObjectId,
-            ref: "tag",
-        }],
-        timeline: Number,
 
         slug: { type: String, slug: ['name', '_id'] },
 
         /** It will contain the url from where the post has been imported */
         referencePostUrl: String,
 
-
-        /** referencePostId right now using it for storing the id of a dream-job as reference in a job post
-         * Purpose is to connect jobs with dream-job
-         */
-        referencePostId: Schema.Types.ObjectId,
+        /** Array of ID of posts, a post is tied to */
+        connectedPosts: [{
+            type: Schema.Types.ObjectId,
+            ref: "post",
+        }],
 
         collaborators: [{
             type: Schema.Types.ObjectId,
             ref: "user",
         }],
-        assignees: [{
+        clients: [{
             type: Schema.Types.ObjectId,
             ref: "user",
         }],
@@ -125,8 +78,57 @@ const postSchema = new Schema(
         email: [String],
         birthDate: String,
         address: String,
-        website: String
+        website: String,
 
+        descriptionHTML: String,
+
+        /** Add Fields Related to the new post types here */
+        appointment_date: String,
+        cancelReason: String,
+        duration: [String],
+
+        formStructureJSON: Object,
+
+        booking: {
+            status: {
+                type: String,
+                enum: ['CREATED', 'REQUEST_SENT', 'ACEPTED', 'REJECTED']
+            },
+            requestBy: [{
+                type: Schema.Types.ObjectId,
+                ref: "user",
+                autopopulate: true
+            }],
+            availabilityDate: String,
+            duration: [String],
+        },
+
+        mentor: {
+            topics: [{
+                type: Schema.Types.ObjectId,
+                ref: "tag",
+                autopopulate: true
+            }],
+            duration: [String],
+            availabilityDate: String,
+            status: {
+                type: String,
+                enum: ['CREATED', 'REQUEST_SENT', 'ACEPTED', 'REJECTED']
+            },
+            requestBy: [{
+                type: Schema.Types.ObjectId,
+                ref: "user",
+                autopopulate: true
+            }]
+        },
+
+        job: {
+            jobProfile: [{
+                type: Schema.Types.ObjectId,
+                ref: "tag",
+                autopopulate: true
+            }],
+        }
 
     },
     {
@@ -134,6 +136,8 @@ const postSchema = new Schema(
         id: true,
     },
 );
+
+postSchema.plugin(require('mongoose-autopopulate'));
 
 postSchema.on('index', function (err) {
     if (err) {

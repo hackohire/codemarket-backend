@@ -1,12 +1,9 @@
-const { gql } = require('apollo-server-lambda')
-
 const commentSchema = `
   
   type Comment {
     parents: [Comment]
     children: [Comment]
     _id: ID
-    text: [descriptionBlocks]
     type: String
     parentId: ID
     createdBy: User
@@ -21,6 +18,8 @@ const commentSchema = `
 
     referenceCompany: Company
     referencePost: Post
+
+    textHTML: String
   }
   
   input CommentInput {
@@ -33,12 +32,13 @@ const commentSchema = `
     userReferenceId: ID
     type: String
     _id: ID
-    text: [InputdescriptionBlock]
     createdBy: ID
     createdAt: String
   
     blockSpecificComment: Boolean
     blockId: ID
+
+    textHTML: String
   }
 
   type FetchLatestCommentsForTheUserEngagedResponse {
@@ -49,14 +49,14 @@ const commentSchema = `
   extend type Query {
     getComments(commentId: String): Comment
     getCommentsByReferenceId(referenceId: String): [Comment]
-    deleteComment(commentId: String): String
+    deleteComment(commentId: String, postId: String, textHTML: String): String
   
     fetchLatestCommentsForTheUserEngaged(pageOptions: PageOptionsInput, userId: ID): FetchLatestCommentsForTheUserEngagedResponse
   }
   
   extend type Mutation {
     addComment(comment: CommentInput): Comment
-    updateComment(commentId: String, text: [InputdescriptionBlock]): Comment
+    updateComment(commentId: String, postId: String, textHTML: String): Comment
   }
   
   type Subscription {
@@ -66,4 +66,4 @@ const commentSchema = `
   }
 `;
 
-module.exports = gql(commentSchema);
+module.exports = commentSchema;

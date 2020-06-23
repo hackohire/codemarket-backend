@@ -4,10 +4,12 @@ provider:
   name: aws
   runtime: nodejs10.x
   region: us-east-1
+  versionFunctions: false
   stage: ${opt:stage, 'dev'}
   # websocketsApiName: codemarket-videochat-socket
   # websocketsApiRouteSelectionExpression: $request.body.action
   environment:
+
     MONGODB_URL: ${file(env.yml):${self:provider.stage}.MONGODB_URL}
     MONGODB_DBNAME: ${file(env.yml):${self:provider.stage}.MONGODB_DBNAME}
     AWS_ACCESSKEY_ID: ${file(env.yml):${self:provider.stage}.AWS_ACCESSKEY_ID}
@@ -22,13 +24,25 @@ provider:
     SMTP_USER: ${file(env.yml):${self:provider.stage}.SMTP_USER}
     SMTP_PASSWORD: ${file(env.yml):${self:provider.stage}.SMTP_PASSWORD}
     FROM_EMAIL: ${file(env.yml):${self:provider.stage}.FROM_EMAIL}
-    SOCKET_URL: ${file(env.yml):${self:provider.stage}.SOCKET_URL}
     STRIPE_SECRET_KEY: ${file(env.yml):${self:provider.stage}.STRIPE_SECRET_KEY}
+    IS_OFFLINE: ${file(env.yml):${self:provider.stage}.IS_OFFLINE}
+    TWILIO_ACCOUNT_SID: ${file(env.yml):${self:provider.stage}.TWILIO_ACCOUNT_SID}
+    TWILIO_API_KEY: ${file(env.yml):${self:provider.stage}.TWILIO_API_KEY}
+    TWILIO_API_SECRET: ${file(env.yml):${self:provider.stage}.TWILIO_API_SECRET}
+    CKEDITOR_ENVIRONMENT_ID: ${file(env.yml):${self:provider.stage}.CKEDITOR_ENVIRONMENT_ID}
+    CKEDITOR_SECRET_KEY: ${file(env.yml):${self:provider.stage}.CKEDITOR_SECRET_KEY}
 
+    BRAINTREE_ENVIRONMENT: ${file(env.yml):${self:provider.stage}.BRAINTREE_ENVIRONMENT}
+    BRAINTREE_MERCHENTID: ${file(env.yml):${self:provider.stage}.BRAINTREE_MERCHENTID}
+    BRAINTREE_publicKey: ${file(env.yml):${self:provider.stage}.BRAINTREE_publicKey}
+    BRAINTREE_privateKey: ${file(env.yml):${self:provider.stage}.BRAINTREE_privateKey}
+
+    SEND_EMAIL_QUEUE: sendEmail-${self:service}-${self:provider.stage}
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
     EVENTS: ${self:service}-${self:provider.stage}-Events
     SUBSCRIPTION_OPERATIONS: ${self:service}-${self:provider.stage}-SubscriptionOperations
+
 
 functions:
   
@@ -65,6 +79,7 @@ functions:
               - x-requested-with
             allowCredentials: false 
 
+            
   webSocketHandler:
     handler: handler.handleWebSocket
     events:
@@ -83,14 +98,6 @@ functions:
           arn:
             Fn::GetAtt: [EventsDynamoDBTable, StreamArn]
 
-  hello:
-    handler: handler1.hello
-    events:
-      - http:
-          path: hello
-          method: GET
-          cors: true
-
   checkoutSessionCompleted:
     handler: handler.checkoutSessionCompleted
     events:
@@ -107,11 +114,46 @@ functions:
           method: POST
           cors: true
 
+  emailCampaignEvent:
+    handler: handler.emailCampaignEvent
+    events:
+      - http:
+          path: emailCampaignEvent
+          method: POST
+          cors: true
+
+      - sns:
+        arn: 'campaign'
+
+  saveImage:
+    handler: handler.saveImage
+    events:
+      - http:
+          path: saveImage
+          method: POST
+          cors: true
+
   getCheckoutSession:
     handler: handler.getCheckoutSession
     events:
       - http:
           path: getCheckoutSession
+          method: POST
+          cors: true
+  
+  saveContact:
+    handler: resolvers/post.saveContact
+    events:
+      - http:
+          path: saveContact
+          method: GET
+          cors: true
+
+  readAndSaveEmailDataFromS3:
+    handler: handler.readAndSaveEmailDataFromS3
+    events:
+      - http:
+          path: readAndSaveEmailDataFromS3
           method: POST
           cors: true
 
@@ -122,6 +164,16 @@ functions:
           path: createStripeUser
           method: POST
           cors: true
+
+  sendEmailFromQueue:
+    handler: handler.sendEmailFromQueue
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - sendEmailProd
+              - Arn
+          batchSize: 1
 
   attachCardAndCreateSubscription:
     handler: handler.attachCardAndCreateSubscription
@@ -136,6 +188,14 @@ functions:
     events:
       - http:
           path: getCouponByName
+          method: POST
+          cors: true
+
+  sendEmailWithStaticContent:
+    handler: helpers/helper.sendEmailWithStaticContent
+    events:
+      - http:
+          path: sendEmailWithStaticContent
           method: POST
           cors: true
 
@@ -179,6 +239,17 @@ functions:
 
 resources:
   Resources:
+
+    # MyTopic:
+    #   Type: AWS::SNS::Topic
+    #   Properties:
+    #     TopicName: campaign
+    
+    sendEmailProd:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: sendEmail-${self:service}-${self:provider.stage}
+
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
       Type: "AWS::ApiGateway::GatewayResponse"
@@ -266,7 +337,7 @@ plugins:
   - serverless-plugin-offline-dynamodb-stream
   - serverless-offline
   - serverless-domain-manager
-
+  - serverless-prune-plugin
 custom:
   dynamodb:
     stages:
@@ -290,12 +361,12 @@ custom:
           - dynamoDBStreamHandler
 
   serverless-offline:
-    port: 3200
+    httpPort: 3200
 
   customDomain:
     domainName: ${self:service}-api.codemarket.io
     basePath: ''
-    certificateName: '*.codemarket.io'
+    certificateName: 'codemarket.io'
     createRoute53Record:	false
     endpointType: 'edge'
     securityPolicy: tls_1_2

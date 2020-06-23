@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-
+const slug = require('mongoose-slug-updater');
+mongoose.plugin(slug, { truncate: 0 });
 
 const companySchema = new Schema(
     {
         name: String,
         cover: String,
+        slug: { type: String, slug: 'name' },
         type: {
             type: String,
             enum: ['non-profit', 'local-business', 'startup', 'smb', 'school', 'government', ''],
@@ -15,6 +17,10 @@ const companySchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         },
+        owners: [{
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        }],
         status: {
             type: String,
             enum: ['Created', 'Drafted', 'Published', 'Unpublished', 'Submitted', 'Approved', 'Rejected', 'Archieved', 'Deleted'],
@@ -55,9 +61,9 @@ const companySchema = new Schema(
     },
 );
 
-// companySchema.index({'name': 'text', }, {
-//     "language_override": "javascript"
-// });
+companySchema.index({'name': 'text', }, {
+    "language_override": "javascript"
+});
 
 module.exports = () => {
     try {

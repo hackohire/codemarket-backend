@@ -17,18 +17,27 @@ const emailSchema = new Schema(
         status: String,
         type: {
             type: String,
-            enum: ['email'],
+            enum: [''],
             default: ''
         },
+        campaignId: Schema.Types.ObjectId,
+        batchId: Schema.Types.ObjectId,
+        uuid: Schema.Types.ObjectId,
+        isReplied: Boolean,
+        repliedHTML: String,
         dateRange: [String],
-        company: {
+        companies: [{
             type: Schema.Types.ObjectId,
             ref: "company",
-        },
+        }],
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: "user",
         },
+        tracking: {
+            type: Array,
+            default: []
+        }
     },
     {
         timestamps: true,

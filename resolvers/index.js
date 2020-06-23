@@ -1,30 +1,36 @@
-const { getUsers, createUser, updateUser, authorize, getUsersAndBugFixesCount, getUserById } = require('./user');
-const { getAllProducts, getListOfUsersWhoPurchased } = require('./product');
+const { getUsers, createUser, updateUser, authorize, getUserById, createTransaction, call } = require('./user');
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
-const { addQuestionOrAnswer, updateQuestionOrAnswer, getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer } = require('./q&a');
 const { findFromCollection, addToCollection } = require('./categories');
-const { addTransaction, getPurchasedUnitsByUserId } = require('./purchase');
-const { addToCart, removeItemFromCart, getCartItemsList } = require('./cart');
-const { like, checkIfUserLikedAndLikeCount } = require('./like');
-const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, deletePost, fullSearch } = require('./post');
-const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId} = require('./company');
-const { rsvpEvent, myRSVP, cancelRSVP } = require('./event');
-const { scheduleCall, getBookingList } = require('./booking');
-const { sendEmail } = require('./email');
-const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription} = require('./subscription');
-const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType  } = require('./post-type');
+const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType, getAlreadyBookedSlots } = require('./post');
+const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId } = require('./company');
+const { sendEmail, sendEmailFromFrontend } = require('./email');
+const { addMakeMoney } = require('./makeMoney');
+const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription } = require('./subscription');
+const { fetchFields, fetchPostTypes, addPostType, updatePostType, deletePostType } = require('./post-type');
+const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailData, saveCsvFileData, getMailingList, getMailingListContacts, getCampaignData } = require('./campaign');
+const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
+const { addformJson, fetchformJson, fetchFormStructureById, addDbUrl, addIntoAnotherDB } = require('./FormJson');
+const { addformData, fetchformData } = require('./FormData');
+const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
+const { createVideoToken } = require('./videoCall');
+const { generateCkEditorToken } = require('./auth');
+const { bookSession } = require('./booking');
+const { GraphQLUpload } = require('graphql-upload');
 const { pubSub } = require('../helpers/pubsub');
 const { addquote,fetchquote } = require('./quote');
+
 module.exports = {
+  JSON: GraphQLJSON,
+  JSONObject: GraphQLJSONObject,
+  Upload: GraphQLUpload,
   Query: {
     hello: () => 'Hello world!',
-    getUsers, getUsersAndBugFixesCount, getUserById,
+    getUsers, getUserById,
 
     getAllPosts,fetchquote,
     fullSearch,
-
-    getAllProducts, getListOfUsersWhoPurchased,
+    fetchformJson, fetchformData, fetchFormStructureById,
     // getProductsByUserId,
     // getProductById,
 
@@ -34,67 +40,68 @@ module.exports = {
 
     findFromCollection,
 
-    getPurchasedUnitsByUserId,
-
-    getCartItemsList,
-
-    checkIfUserLikedAndLikeCount,
-
     getMembershipSubscriptionsByUserId,
-
-    myRSVP,
 
     getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, getListOfUsersInACompany, getEventsByCompanyId,
 
-    getBookingList,
-
-    getQuestionAndAnswersByReferenceId, deleteQuestionOrAnswer,
-
     fetchFields, fetchPostTypes,
+
+    getCampaignsWithTracking,
+    getCountOfAllPost,
+    getEmailPhoneCountForContact,
+    getPostByPostType,
+    getCampaignEmails,
+    // Chat Resolver
+    createVideoToken,
+    getMailingList,
+    getAlreadyBookedSlots,
+    getMailingListContacts,
+    getCampaignData
   },
   Mutation: {
     createUser,
     updateUser,
     authorize,addquote,
 
+    authorize,
+    generateCkEditorToken,
+    createTransaction,
+    addMakeMoney,
     addToCollection,
+
+    call,
     // addProduct,
     // updateProduct,
     // deleteProduct,
-
+    addformJson, addformData,
 
     addComment,
     updateComment,
 
     addPost,
     updatePost,
+    updatePostContent,
     deletePost,
 
-    addTransaction,
-
-    addToCart,
-    removeItemFromCart,
-
-    like,
+    bookSession,
 
     addMembershipSubscription,
     inviteMembersToSubscription,
     cancelSubscription,
     acceptInvitation,
 
-    rsvpEvent,
-
-    cancelRSVP,
-
     addCompany, updateCompany, deleteCompany,
 
-    scheduleCall,
+    sendEmail, sendEmailFromFrontend,
 
-    addQuestionOrAnswer, updateQuestionOrAnswer,
+    addPostType, updatePostType, deletePostType,
 
-    sendEmail,
-
-    addPostType, updatePostType, deletePostType
+    addHelpGrowBusiness,
+    getCsvFileData,
+    getEmailData,
+    saveCsvFileData,
+    addDbUrl,
+    addIntoAnotherDB
   },
   Subscription: {
     onCommentAdded: {
@@ -117,13 +124,19 @@ module.exports = {
     onCommentUpdated: {
       resolve: (rootValue) => {
         // root value is the payload from sendMessage mutation
+        // console.log('RooooooooooooooooT Value MAin', rootValue);
         return rootValue;
       },
       subscribe: withFilter(
         pubSub.subscribe('COMMENT_UPDATED'),
         (rootValue, args) => {
           // this can be async too :)
+          // console.log('postIDDDDDDD  Outer', args.postId);
+          // console.log('RooooooooooooooooT Value  Outer', rootValue);
           if (args.postId === rootValue.referenceId || args.companyId === rootValue.companyReferenceId || args.userId === rootValue.userReferenceId) {
+            // console.log('=========================================================');
+            // console.log('postIDDDDDDD', args.postId);
+            // console.log('RooooooooooooooooT Value', rootValue);
             return true;
           }
 
@@ -151,7 +164,8 @@ module.exports = {
     onUserOnline: {
       resolve: (rootValue) => {
         // root value is the payload from sendMessage mutation
-        return { onCommentAdded: rootValue.comment, };
+        delete rootValue['usersToBeNotified'];
+        return rootValue;
       },
       subscribe: withFilter(
         pubSub.subscribe('LISTEN_NOTIFICATION'),
@@ -171,49 +185,5 @@ module.exports = {
   //   }
   // },
 
-  descriptionBlocks: {
-    __resolveType(block, context, info) {
-
-      switch(block.type) {
-
-        case 'paragraph':
-          return 'ParagraphBlock'
-
-        case 'header':
-          return 'HeaderBlock'
-
-        case 'code':
-          return 'CodeBlock';
-
-        case 'image': 
-          return 'ImageBlock';
-
-        case 'list':
-          return 'ListBlock'
-
-        case 'quote':
-          return 'QuoteBlock'
-
-        case 'table':
-          return 'TableBlock'
-
-        case 'warning':
-          return 'WarningBlock'
-
-        case 'embed':
-          return 'EmbedBlock'
-
-        case 'linkTool':
-          return 'LinkToolBlock'
-
-        case 'delimiter':
-          return 'ParagraphBlock'
-
-        default:
-          console.log('default case')
-          return null;
-      }
-    },
-  },
 
 };

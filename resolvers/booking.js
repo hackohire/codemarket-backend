@@ -1,57 +1,40 @@
 const connectToMongoDB = require('../helpers/db');
-const Product = require('../models/product')();
+const helper = require('../helpers/helper')
 const Post = require('../models/post')();
-const Booking = require('../models/booking')();
-const helper = require('../helpers/helper');
-const User = require('./../models/user')();
+const User = require('../models/user')();
 let conn;
 
-async function scheduleCall(_, { booking }, { headers, db, decodedToken }) {
+const bookSession = async (_, { post, actionBy }) => {
     return new Promise(async (resolve, reject) => {
         try {
 
-            if (!db) {
-                console.log('Creating new mongoose connection.');
-                conn = await connectToMongoDB();
-            } else {
-                console.log('Using existing mongoose connection.');
+            conn = await connectToMongoDB();
+            let updatedPost;
+
+            const filePath = basePath + 'email-template/common-template';
+            const user = await User.findById(actionBy).exec();
+            const postCreator = await User.findById(post.createdBy).exec();
+            let payLoad;
+
+            switch (post.mentor.status) {
+                case 'REQUEST_SENT':
+                    payLoad = {
+                        NAME: postCreator.name,
+
+                        HTML_CONTENT: `<p><a href="${process.env.FRONT_END_URL}user/${user.slug}">${user.name}</a> wants to book the mentoring session with you regarding <a href="${process.env.FRONT_END_URL}post/${post.slug}">${post.name}</a></p ><p>You can accept / reject.</p><p><a href="${process.env.FRONT_END_URL}post/${post.slug}/?accept=true">Accept</a> | <a href="${process.env.FRONT_END_URL}post/${post.slug}/?reject=true">Reject</a></p>`,
+
+                        SUBJECT: `Mentoring Session Request`
+                    };
+                    await helper.sendEmail(postCreator.email, filePath, payLoad)
+
+                    updatedPost = await Post.findByIdAndUpdate(post._id, { $set: { 'mentor.status': post.mentor.status }, $push: { 'mentor.requestBy': actionBy } }, { new: true }).exec();
+
+                    break;
             }
 
-            const int = await new Booking(booking);
-            await int.save(booking).then(async (p) => {
-                console.log(p)
-
-                p.populate('createdBy').populate('expert').populate('referenceId')
-                    .execPopulate().then(async populatedBooking => {
-                        // await helper.sendPostCreationEmail(populatedPost, populatedPost.type === 'product' ? 'Bugfix' : '');
-                        resolve(populatedBooking);
-                    });
-
-            });
+            return resolve(updatedPost);
 
 
-        } catch (e) {
-            console.log(e);
-            return reject(e);
-        }
-    });
-}
-
-async function getBookingList(_, { userId }, { headers, db, decodedToken }) {
-    return new Promise(async (resolve, reject) => {
-        try {
-
-            if (!db) {
-                console.log('Creating new mongoose connection.');
-                conn = await connectToMongoDB();
-            } else {
-                console.log('Using existing mongoose connection.');
-            }
-
-            const bookingList = await Booking.find().or([{createdBy: userId}, {expert: userId}])
-            .populate('createdBy').populate('expert').populate('referenceId').exec();
-
-            resolve(bookingList);
 
 
         } catch (e) {
@@ -62,6 +45,5 @@ async function getBookingList(_, { userId }, { headers, db, decodedToken }) {
 }
 
 module.exports = {
-    scheduleCall,
-    getBookingList
+    bookSession
 }
