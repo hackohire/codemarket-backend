@@ -5,6 +5,8 @@ var T = new Twit({
   consumer_secret: process.env.CONSUMAR_SECRET_KEY,
   access_token: process.env.TWITTER_ACCESS_TOKEN,
   access_token_secret: process.env.TWITTER_ACCESS_SECRET_TOKEN,
+  timeout_ms: 60 * 1000,
+  strictSSL: true,
 });
 
 const socialMedia = {};
@@ -15,8 +17,9 @@ socialMedia.createTwitterPost = (content) => {
     if (err) {
       // Dispaly Error from twitter API
       console.log(err);
-      return
+      return;
     }
+    console.log(data, res);
     return data;
   });
 };
