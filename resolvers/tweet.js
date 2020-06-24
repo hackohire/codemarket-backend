@@ -1,6 +1,8 @@
 const connectToMongoDB = require('../helpers/db');
 const Tweet = require('./../models/tweet')(); 
 /** Impoer Tweet mongoose model */
+const twitter = require('../helpers/twitter');
+const twit = require('./../models/twit')();
 
 let conn;
 
@@ -21,6 +23,8 @@ async function tweet(_, { tweet }) {
             await int.save().then(async (tweet) => {
                 console.log(tweet);
                 await tweet.populate('createdBy').populate('children').execPopulate();
+                let postTwit = await twitter.createTwitterPost(tweet.tweetDesc);
+                console.log(postTwit);
                 resolve(tweet);
             })
         } catch (e) {

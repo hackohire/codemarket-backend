@@ -23,6 +23,9 @@ const tweetSchema = `
 
     extend type Mutation {
         tweet(tweet: TweetInput): Tweet
+        
     }
+
+
 `;
 module.exports = tweetSchema; 

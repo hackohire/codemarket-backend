@@ -43,6 +43,10 @@ provider:
     EVENTS: ${self:service}-${self:provider.stage}-Events
     SUBSCRIPTION_OPERATIONS: ${self:service}-${self:provider.stage}-SubscriptionOperations
 
+    CONSUMER_KEY: ${file(env.yml):${self:provider.stage}.CONSUMER_KEY}
+    CONSUMAR_SECRET_KEY: ${file(env.yml):${self:provider.stage}.CONSUMAR_SECRET_KEY}
+    TWITTER_ACCESS_TOKEN: ${file(env.yml):${self:provider.stage}.TWITTER_ACCESS_TOKEN}
+    TWITTER_ACCESS_SECRET_TOKEN: ${file(env.yml):${self:provider.stage}.TWITTER_ACCESS_SECRET_TOKEN}
 
 functions:
   
