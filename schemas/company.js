@@ -77,6 +77,10 @@ const graphQlCompanySchema = `
         total: Int
     }
 
+    type SocialMediaPostType {
+        content: String
+    }
+
     extend type Query {
         getCompaniesByType(companyType: String, pageOptions: PageOptionsInput): GetCompaniesByTypeResponse
         getCompaniesByUserIdAndType(userId: String, companyType: String): [Company]
@@ -88,7 +92,8 @@ const graphQlCompanySchema = `
     extend type Mutation {
         addCompany(company: CompanyInput): Company
         updateCompany(company: CompanyInput): Company
-        deleteCompany(companyId: String): Boolean
+        deleteCompany(companyId: String): Boolean,
+        createTwitterPost(content: String): SocialMediaPostType
     }
 
     extend type Subscription {
