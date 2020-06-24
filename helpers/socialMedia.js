@@ -10,7 +10,7 @@ var T = new Twit({
 const socialMedia = {};
 
 socialMedia.createTwitterPost = (content) => {
-  console.log(content);
+  console.log("----", content, T);
   T.post("statuses/update", { status: content }, function (err, data, res) {
     if (err) {
       // Dispaly Error from twitter API
