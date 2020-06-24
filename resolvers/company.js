@@ -1,9 +1,12 @@
 const connectToMongoDB = require('../helpers/db');
 const Company = require('../models/company')();
 const Post = require('../models/post')();
+const SocialMediaModel = require('../models/post')();
 const helper = require('../helpers/helper');
 var array = require('lodash/array');
 const auth = require('../helpers/auth');
+const socialMedia = require('../helpers/socialMedia');
+const { reject } = require('lodash');
 let conn;
 
 async function addCompany(_, { company }, { headers, db, event }) {
@@ -262,6 +265,29 @@ async function getListOfUsersInACompany(_, { companyId }, { headers, db, decoded
     });
 }
 
+async function createTwitterPost(_, { content }, { headers, db, decodedToken }) {
+    return new Promise (async (resolve, reject) => {
+        try {
+            console.log(content)
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+            // Save Content into our DB
+            // const socialMedia = new SocialMediaModel(socialMediaPost);
+            // await socialMedia.save();
+            let createPost = await socialMedia.createTwitterPost(content);
+            console.log(createPost);
+            return resolve({content: "Hello"});
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
+    });
+}
+
 
 
 
@@ -279,5 +305,6 @@ module.exports = {
     getCompaniesByType,
     deleteCompany,
     getListOfUsersInACompany,
-    getEventsByCompanyId
+    getEventsByCompanyId,
+    createTwitterPost
 }

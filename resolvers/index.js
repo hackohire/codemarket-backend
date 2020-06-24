@@ -2,7 +2,7 @@ const { getUsers, createUser, updateUser, authorize, getUserById, createTransact
 const { addComment, updateComment, getComments, getCommentsByReferenceId, deleteComment, fetchLatestCommentsForTheUserEngaged } = require('./comment');
 const { findFromCollection, addToCollection } = require('./categories');
 const { getAllPosts, addPost, getPostsByUserIdAndType, getPostById, getPostsByType, updatePost, updatePostContent, deletePost, fullSearch, getCountOfAllPost, getEmailPhoneCountForContact, saveContact, getPostByPostType, getAlreadyBookedSlots } = require('./post');
-const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId } = require('./company');
+const { addCompany, updateCompany, getCompaniesByUserIdAndType, getCompanyById, getCompaniesByType, deleteCompany, getListOfUsersInACompany, getEventsByCompanyId, createTwitterPost } = require('./company');
 const { sendEmail, sendEmailFromFrontend } = require('./email');
 const { addMakeMoney } = require('./makeMoney');
 const { addMembershipSubscription, getMembershipSubscriptionsByUserId, inviteMembersToSubscription, acceptInvitation, cancelSubscription } = require('./subscription');
@@ -87,7 +87,7 @@ module.exports = {
     cancelSubscription,
     acceptInvitation,
 
-    addCompany, updateCompany, deleteCompany,
+    addCompany, updateCompany, deleteCompany, createTwitterPost,
 
     sendEmail, sendEmailFromFrontend,
 
