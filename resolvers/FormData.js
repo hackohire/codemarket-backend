@@ -51,9 +51,15 @@ async function fetchformData(_,{ formId }) {
     });
 }
 
-async function fetchFormDataFromAnotherDB(_, { dbUrl, collection }, { headers, db, decodedToken }) {
+async function fetchFormDataFromAnotherDB(_, { dbUrl, collection, formId }, { headers, db, decodedToken }) {
     return new Promise(async (resolve, reject) => {
+        const conn = await connectToMongoDB(dbUrl);
 
+        const result = conn.collection('FormData').aggregate([
+            {
+                $match: { }
+            }
+        ]).toArray();
     });
 }
 module.exports = {
