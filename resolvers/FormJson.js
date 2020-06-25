@@ -1,5 +1,5 @@
 const connectToMongoDB = require('../helpers/db');
-const FormJson = require('./../models/FormJson')(); /** Impoer Tweet mongoose model */
+const FormJson = require('./../models/FormJson')();
 const dbUrl = require('../models/dbUrl')();
 var ObjectID = require('mongodb').ObjectID;
 
@@ -36,6 +36,7 @@ async function addformJson(_, { formJson, connectedDBId }, { headers }) {
                 const obj = {
                     formname: formJson.formname,
                     formStructureJSON: formJson.formStructureJSON,
+                    createdBy: formJson.createdBy
                 };
                 if (connectedDBId) {
                     obj.connectedDB = ObjectID(connectedDBId)
@@ -57,14 +58,18 @@ async function addformJson(_, { formJson, connectedDBId }, { headers }) {
     });
 }
 
-async function fetchformJson(_, ) {
+async function fetchformJson(_, { userId } ) {
     return new Promise(async (resolve, reject) => {
         try {
             /** Connect Database with the mongo db */
             conn = await connectToMongoDB(process.env.MONGODB_URL);
 
-            /** Find the tweets created by the user */
-            const formJsonList = await FormJson.find({}).exec();
+            let formJsonList;
+            if (userId !== '') {
+               formJsonList = await FormJson.find({ createdBy: userId}).populate('createdBy').populate('connectedDB').exec();
+            } else {
+                formJsonList = await FormJson.find({}).populate('createdBy').populate('connectedDB').exec();
+            }
             return resolve(formJsonList);
         } catch (e) {
             console.log(e);
@@ -133,10 +138,36 @@ async function addIntoAnotherDB(_, { formJson, connectedDBId, collection } , { h
     });
 }
 
+async function deleteFormJson(_, { formId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!db) {
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+
+            FormJson.deleteOne({ _id: formId }, (err, res) => {
+
+                if (err) {
+                    return reject(err)
+                }
+
+                return resolve(res.deletedCount);
+            });
+        } catch (err) {
+            console.log("Catch ERr in deleteFormJson ==> ", err);
+            reject(false);
+        }
+    });  
+}
+
 module.exports = {
     addformJson,
     fetchformJson,
     fetchFormStructureById,
     addDbUrl,
-    addIntoAnotherDB
+    addIntoAnotherDB,
+    deleteFormJson
 }

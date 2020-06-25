@@ -1,5 +1,6 @@
 const connectToMongoDB = require('../helpers/db');
 const FormData = require('./../models/FormData')(); /** Impoer Tweet mongoose model */
+const FormJson = require('./../models/FormJson')();
 
 let conn;
 
@@ -24,16 +25,24 @@ async function addformData(_, { formData }, { headers }) {
     });
 }
 
-async function fetchformData(_,{formname}) {
+async function fetchformData(_,{ formId }) {
     return new Promise(async (resolve, reject) => {
         try {
-            /** Connect Database with the mongo db */
-            conn = await connectToMongoDB();
 
-            /** Find the tweets created by the user */
-            let condition = {'formname': formname}
-            const formDataList = await FormData.find(condition).exec();
-            console.log(formDataList)
+            const actualForm = await FormJson.findOne({ _id: formId }).populate('connectedDB').exec();
+
+            let formDataList;
+            if (actualForm && actualForm.connectedDB && actualForm.connectedDB.mongoUrl) {
+                conn = await connectToMongoDB(actualForm.connectedDB.mongoUrl);
+
+                formDataList = await FormData.find({ connectedFormStructureId: formId }).exec();
+                conn = await connectToMongoDB(process.env.MONGODB_URL);
+                console.log("form List ==> ", formDataList);
+            } else {
+                conn = await connectToMongoDB();
+
+                formDataList = await FormData.find({ connectedFormStructureId: formId }).exec();
+            }
             return resolve(formDataList);
         } catch (e) {
             console.log(e);
@@ -42,8 +51,13 @@ async function fetchformData(_,{formname}) {
     });
 }
 
+async function fetchFormDataFromAnotherDB(_, { dbUrl, collection }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
 
+    });
+}
 module.exports = {
     addformData,
-    fetchformData
+    fetchformData,
+    fetchFormDataFromAnotherDB
 }

@@ -26,7 +26,8 @@ extend type Mutation {
 }
 
 extend type Query {
-    fetchformData(formname: String, formData: formDataInput): [formData]
+    fetchformData(formId: String): [formData]
+    fetchFormDataFromAnotherDB(dbUrl: String, collection: String) : [formData]
 }
 `
 
