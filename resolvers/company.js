@@ -1,3 +1,4 @@
+const Twit = require("twit");
 const connectToMongoDB = require('../helpers/db');
 const Company = require('../models/company')();
 const Post = require('../models/post')();
@@ -8,6 +9,16 @@ const auth = require('../helpers/auth');
 const socialMedia = require('../helpers/socialMedia');
 const { reject } = require('lodash');
 let conn;
+
+
+var T = new Twit({
+  consumer_key: process.env.CONSUMER_KEY,
+  consumer_secret: process.env.CONSUMAR_SECRET_KEY,
+  access_token: process.env.TWITTER_ACCESS_TOKEN,
+  access_token_secret: process.env.TWITTER_ACCESS_SECRET_TOKEN,
+  timeout_ms: 60 * 1000,
+  strictSSL: true,
+});
 
 async function addCompany(_, { company }, { headers, db, event }) {
     return new Promise(async (resolve, reject) => {
@@ -278,9 +289,17 @@ async function createTwitterPost(_, { content }, { headers, db, decodedToken }) 
             // Save Content into our DB
             // const socialMedia = new SocialMediaModel(socialMediaPost);
             // await socialMedia.save();
-            let createPost = await socialMedia.createTwitterPost(content);
-            console.log(createPost);
-            return resolve({content: "Hello"});
+            T.post("statuses/update", { status: content }, function (err, data, res) {
+                if (err) {
+                  // Dispaly Error from twitter API
+                  console.log(err);
+                  return reject(err);
+                }
+                console.log("----", content, T);
+                console.log("-----", data, res);
+                return resolve({content: "Hello"});
+                // return data;
+              });
         } catch (e) {
             console.log(e);
             return reject(e);

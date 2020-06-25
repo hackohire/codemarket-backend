@@ -12,14 +12,14 @@ var T = new Twit({
 const socialMedia = {};
 
 socialMedia.createTwitterPost = (content) => {
-  console.log("----", content, T);
   T.post("statuses/update", { status: content }, function (err, data, res) {
     if (err) {
       // Dispaly Error from twitter API
       console.log(err);
       return;
     }
-    console.log(data, res);
+    console.log("----", content, T);
+    console.log("-----", data, res);
     return data;
   });
 };
