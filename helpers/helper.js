@@ -88,7 +88,7 @@ async function sendEmailWithStaticContent(event, context) {
 
 }
 
-async function sendEmail(toEmail, filePath, body, city, fromEmail = '') {
+async function sendEmail(toEmail, filePath, body, fromEmail = '') {
     return new Promise(async (resolve, reject) => {
         try {
 

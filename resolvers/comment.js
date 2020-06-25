@@ -105,7 +105,7 @@ async function addComment(_, { comment }, { headers, db, decodedToken, context }
                             SUBJECT: `${commentObj.createdBy.name} has added a New Comment!`,
                             HTML_CONTENT: `${comment.textHTML}`
                         };
-                        await helper.sendEmail({ to: [user.email] }, filePathToOtherUsers, payLoadToOtherUsers);
+                        await helper.sendEmail(user.email, filePathToOtherUsers, payLoadToOtherUsers);
                     })
                 }
 
@@ -255,7 +255,7 @@ async function deleteComment(_, { commentId, postId, textHTML }, { headers, db, 
                         SUBJECT: `${commentData.createdBy.name} has deleted a Comment!`,
                         HTML_CONTENT: `${textHTML}`
                     };
-                    await helper.sendEmail({ to: [user.email] }, filePathToOtherUsers, payLoadToOtherUsers);
+                    await helper.sendEmail(user.email, filePathToOtherUsers, payLoadToOtherUsers);
                 })
             }
 
@@ -326,7 +326,7 @@ async function updateComment(_, { commentId, postId, textHTML }, { headers, db, 
                         SUBJECT: `${commentData.createdBy.name} has updated a Comment!`,
                         HTML_CONTENT: `${textHTML}`
                     };
-                    await helper.sendEmail({ to: [user.email] }, filePathToOtherUsers, payLoadToOtherUsers);
+                    await helper.sendEmail(user.email, filePathToOtherUsers, payLoadToOtherUsers);
                 })
             }
 
