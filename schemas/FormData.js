@@ -6,19 +6,32 @@ type formData {
 
     formname: String
     formDataJson: JSON
-    createdBy: String
     connectedFormStructureId: ID
+    formDataId: String
+    company: Company
+    createdBy: User
+    cFormJson: JSON
+    pFormJson: JSON
+    connectedFormData: formData
 }
 
 input formDataInput {
     _id: ID
     createdAt: String
     updatedAt: String
-
+    formDataId: String
     formname: String
     formDataJson: JSON
-    createdBy: String
+    cFormJson: JSON
+    pFormJson: JSON
     connectedFormStructureId: ID
+    company: CompanyInput
+    createdBy: String
+}
+
+type fetchSavedDataResponse {
+    data: [formData]
+    total: Int
 }
 
 extend type Mutation {
@@ -26,8 +39,10 @@ extend type Mutation {
 }
 
 extend type Query {
-    fetchformData(formId: String): [formData]
+    fetchformData(pageOptions: PageOptionsInput, formId: String): fetchSavedDataResponse
     fetchFormDataFromAnotherDB(dbUrl: String, collection: String, formId: String) : [formData]
+    fetchSavedDataByFormStructure(pageOptions: PageOptionsInput, formStructureId: String): fetchSavedDataResponse
+    fetchSurveyAndSummaryFormDataById(id: String): formData
 }
 `
 

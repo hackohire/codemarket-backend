@@ -11,7 +11,7 @@ const { getCampaignsWithTracking, getCampaignEmails, getCsvFileData, getEmailDat
 const { addHelpGrowBusiness } = require('./temporary');
 const { withFilter } = require('aws-lambda-graphql');
 const { addformJson, fetchformJson, fetchFormStructureById, addDbUrl, addIntoAnotherDB, deleteFormJson } = require('./FormJson');
-const { addformData, fetchformData, fetchFormDataFromAnotherDB } = require('./FormData');
+const { addformData, fetchformData, fetchFormDataFromAnotherDB, fetchSavedDataByFormStructure, fetchSurveyAndSummaryFormDataById } = require('./FormData');
 const { GraphQLJSON, GraphQLJSONObject } = require('graphql-type-json');
 const { createVideoToken } = require('./videoCall');
 const { generateCkEditorToken } = require('./auth');
@@ -56,7 +56,9 @@ module.exports = {
     getAlreadyBookedSlots,
     getMailingListContacts,
     getCampaignData,
-    fetchFormDataFromAnotherDB
+    fetchFormDataFromAnotherDB,
+    fetchSavedDataByFormStructure,
+    fetchSurveyAndSummaryFormDataById
   },
   Mutation: {
     createUser,
