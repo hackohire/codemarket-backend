@@ -1,10 +1,20 @@
 const connectToMongoDB = require('../helpers/db');
 const Tweet = require('./../models/tweet')(); 
 /** Impoer Tweet mongoose model */
-const twitter = require('../helpers/twitter');
+/*const twitter = require('../helpers/twitter');*/
 const twit = require('./../models/twit')();
+const Twit = require("twit");
 
 let conn;
+
+var T = new Twit({
+    consumer_key: process.env.CONSUMER_KEY,
+    consumer_secret: process.env.CONSUMAR_SECRET_KEY,
+    access_token: process.env.TWITTER_ACCESS_TOKEN,
+    access_token_secret: process.env.TWITTER_ACCESS_SECRET_TOKEN,
+    timeout_ms: 60 * 1000,
+    strictSSL: true,
+  });
 
 async function tweet(_, { tweet }) {
     return new Promise(async (resolve, reject) => {
@@ -23,9 +33,19 @@ async function tweet(_, { tweet }) {
             await int.save().then(async (tweet) => {
                 console.log(tweet);
                 await tweet.populate('createdBy').populate('children').execPopulate();
-                let postTwit = await twitter.createTwitterPost(tweet.tweetDesc);
-                console.log(postTwit);
-                resolve(tweet);
+                //let postTwit = await twitter.createTwitterPost(tweet.tweetDesc);
+                //console.log(postTwit);
+                console.log(tweet.tweetDesc);
+                T.post("statuses/update", { status: tweet.tweetDesc }, function (err, data, res) {
+                    if (err) {
+                        // Dispaly Error from twitter API
+                        console.log(err);
+                        return
+                    }
+                    //return data;
+                    resolve(tweet);
+                });
+
             })
         } catch (e) {
             console.log(e);

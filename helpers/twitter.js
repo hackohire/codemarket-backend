@@ -5,6 +5,8 @@ var T = new Twit({
   consumer_secret: process.env.CONSUMAR_SECRET_KEY,
   access_token: process.env.TWITTER_ACCESS_TOKEN,
   access_token_secret: process.env.TWITTER_ACCESS_SECRET_TOKEN,
+  timeout_ms: 60 * 1000,
+  strictSSL: true,
 });
 
 const twitter = {};
