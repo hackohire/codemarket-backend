@@ -21,6 +21,9 @@ const formDataSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "user",
         },
+        commonFormId: {
+            type: Schema.Types.ObjectId,
+        }
     },
     {
         timestamps: true, /** Will automatically create, createdAt & updatedAt fields */

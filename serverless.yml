@@ -11,6 +11,7 @@ provider:
   environment:
 
     MONGODB_URL: ${file(env.yml):${self:provider.stage}.MONGODB_URL}
+    MONGODB_PROD_URL: ${file(env.yml):${self:provider.stage}.MONGODB_PROD_URL}
     MONGODB_DBNAME: ${file(env.yml):${self:provider.stage}.MONGODB_DBNAME}
     AWS_ACCESSKEY_ID: ${file(env.yml):${self:provider.stage}.AWS_ACCESSKEY_ID}
     AWS_SECRETKEY: ${file(env.yml):${self:provider.stage}.AWS_SECRETKEY}

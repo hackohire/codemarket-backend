@@ -6,6 +6,7 @@ type formJson {
 
     formname: String
     formStructureJSON: JSON
+    commonId: String
 }
 
 input formJsonInput {
@@ -15,6 +16,7 @@ input formJsonInput {
 
     formname: String
     formStructureJSON: JSON
+    commonId: String
 }
 
 extend type Mutation {
