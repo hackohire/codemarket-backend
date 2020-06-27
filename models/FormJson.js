@@ -12,6 +12,9 @@ const formJsonSchema = new Schema(
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: "user",
+        },
+        commonId: {
+            type: Schema.Types.ObjectId
         }
     },
     {

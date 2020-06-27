@@ -13,6 +13,7 @@ type formData {
     cFormJson: JSON
     pFormJson: JSON
     connectedFormData: formData
+    commonFormId: String
 }
 
 input formDataInput {
@@ -27,6 +28,7 @@ input formDataInput {
     connectedFormStructureId: ID
     company: CompanyInput
     createdBy: String
+    commonFormId: String
 }
 
 type fetchSavedDataResponse {

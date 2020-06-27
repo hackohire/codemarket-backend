@@ -8,6 +8,7 @@ type formJson {
     formStructureJSON: JSON
     createdBy: User
     connectedDB: connectedDBType
+    commonId: String
 }
 
 type connectedDBType {
@@ -31,6 +32,7 @@ input formJsonInput {
     formStructureJSON: JSON
     createdBy: String
     connectedDB: inputConnectedDBType
+    commonId: String
 }
 
 extend type Mutation {

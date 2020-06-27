@@ -12,6 +12,9 @@ const formDataSchema = new Schema(
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: "user",
+        },
+        commonFormId: {
+            type: Schema.Types.ObjectId,
         }
     },
     {
