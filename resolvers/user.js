@@ -213,7 +213,7 @@ const createTransaction = async (_, { data }) => {
 
             conn = await connectToMongoDB();
 
-            const insertedTransaction = await conn.collection('donations').insertOne(data);
+            const insertedTransaction = await conn.collection('transactions').insertOne(data);
             console.log('insertedTransaction', insertedTransaction);
 
             return resolve(data);
