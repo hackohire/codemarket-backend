@@ -30,59 +30,50 @@ async function fetchformData(_,{pageOptions, formId }) {
     return new Promise(async (resolve, reject) => {
         try {
 
-            const actualForm = await FormJson.findOne({ _id: formId }).populate('connectedDB').exec();
+            // const actualForm = await FormJson.findOne({ _id: formId }).populate('connectedDB').exec();
 
             const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'updatedAt';
             let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
 
             let formDataList;
-            if (actualForm && actualForm.connectedDB && actualForm.connectedDB.mongoUrl) {
-                conn = await connectToMongoDB(actualForm.connectedDB.mongoUrl);
+            conn = await connectToMongoDB();
 
-                // formDataList = await FormData.find({ connectedFormStructureId: formId }).exec();
-
-                const result = await FormData.aggregate([
-                    {
-                        $match: { connectedFormStructureId: ObjectID(formId)}
+            const result = await FormData.aggregate([
+                {
+                    $match: { commonFormId: ObjectID(formId)}
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'createdBy',
+                        foreignField: '_id',
+                        as: 'createdBy'
+                    }
+                },
+                {
+                    $unwind: {
+                        "path": "$createdBy"
+                    }
+                },
+                {
+                    $facet: {
+                        data: [
+                            { $sort: sort },
+                            { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                            { $limit: pageOptions.limit },
+                        ],
+                        pageInfo: [
+                            { $group: { _id: null, count: { $sum: 1 } } },
+                        ],
                     },
-                    {
-                        $lookup: {
-                            from: 'users',
-                            localField: 'createdBy',
-                            foreignField: '_id',
-                            as: 'createdBy'
-                        }
-                    },
-                    {
-                        $unwind: {
-                            "path": "$createdBy"
-                        }
-                    },
-                    {
-                        $facet: {
-                            data: [
-                                { $sort: sort },
-                                { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
-                                { $limit: pageOptions.limit },
-                            ],
-                            pageInfo: [
-                                { $group: { _id: null, count: { $sum: 1 } } },
-                            ],
-                        },
-                    },
-                ]);
-                
-                return await resolve(
-                    {
-                        data: result && result.length ? result[0].data : [],
-                        total: result && result.length && result[0].pageInfo && result[0].pageInfo.length ? result[0].pageInfo[0].count : 0
-                    });
-            } else {
-                conn = await connectToMongoDB();
-
-                formDataList = await FormData.find({ connectedFormStructureId: formId }).exec();
-                return resolve(formDataList);
-            }
+                },
+            ]);
+            
+            return await resolve(
+                {
+                    data: result && result.length ? result[0].data : [],
+                    total: result && result.length && result[0].pageInfo && result[0].pageInfo.length ? result[0].pageInfo[0].count : 0
+                });
         } catch (e) {
             console.log(e);
             return reject(e);
@@ -178,33 +169,36 @@ async function fetchSurveyAndSummaryFormDataById(_, { id }, { headers, db, decod
                 },
                 {
                     $unwind: {
-                        "path": "$connectedFormData"
+                        "path": "$connectedFormData",
+                        "preserveNullAndEmptyArrays": true
                     }
                 },
                 {
                     $lookup: {
                         from: 'form-structures',
-                        localField: 'connectedFormStructureId',
-                        foreignField: '_id',
+                        localField: 'commonFormId',
+                        foreignField: 'commonId',
                         as: 'pFormJson'
                     }
                 },
                 {
                     $unwind: {
-                        "path": "$pFormJson"
+                        "path": "$pFormJson",
+                        "preserveNullAndEmptyArrays": true
                     }
                 },
                 {
                     $lookup: {
                         from: 'form-structures',
-                        localField: 'connectedFormData.connectedFormStructureId',
-                        foreignField: '_id',
+                        localField: 'connectedFormData.commonFormId',
+                        foreignField: 'commonId',
                         as: 'cFormJson'
                     }
                 },
                 {
                     $unwind: {
-                        "path": "$cFormJson"
+                        "path": "$cFormJson",
+                        "preserveNullAndEmptyArrays": true
                     }
                 }
             ]);
