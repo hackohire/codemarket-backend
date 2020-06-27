@@ -37,6 +37,12 @@ provider:
     BRAINTREE_publicKey: ${file(env.yml):${self:provider.stage}.BRAINTREE_publicKey}
     BRAINTREE_privateKey: ${file(env.yml):${self:provider.stage}.BRAINTREE_privateKey}
 
+    CONSUMAR_SECRET_KEY: ${file(env.yml):${self:provider.stage}.CONSUMAR_SECRET_KEY}
+    CONSUMER_KEY: ${file(env.yml):${self:provider.stage}.CONSUMER_KEY}
+    TWITTER_ACCESS_SECRET_TOKEN: ${file(env.yml):${self:provider.stage}.TWITTER_ACCESS_SECRET_TOKEN}
+    TWITTER_ACCESS_TOKEN: ${file(env.yml):${self:provider.stage}.TWITTER_ACCESS_TOKEN}
+    TWITTER_CALLBACK_URL: ${file(env.yml):${self:provider.stage}.TWITTER_CALLBACK_URL}
+
     SEND_EMAIL_QUEUE: sendEmail-${self:service}-${self:provider.stage}
     CONNECTIONS: ${self:service}-${self:provider.stage}-Connections
     SUBSCRIPTIONS: ${self:service}-${self:provider.stage}-Subscriptions
