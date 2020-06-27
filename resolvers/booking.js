@@ -1,40 +1,44 @@
 const connectToMongoDB = require('../helpers/db');
-const helper = require('../helpers/helper')
-const Post = require('../models/post')();
+const helper = require('../helpers/helper');
+const Booking = require('../models/booking')();
 const User = require('../models/user')();
 let conn;
 
-const bookSession = async (_, { post, actionBy }) => {
+const bookSession = async (_, { post, booking }) => {
     return new Promise(async (resolve, reject) => {
         try {
 
             conn = await connectToMongoDB();
-            let updatedPost;
 
             const filePath = basePath + 'email-template/common-template';
-            const user = await User.findById(actionBy).exec();
+            const user = await User.findById(booking.createdBy).exec();
             const postCreator = await User.findById(post.createdBy).exec();
-            let payLoad;
+            let payLoadToAuthor, payLoadToUserWhoBooked, newBooking;
 
-            switch (post.mentor.status) {
-                case 'REQUEST_SENT':
-                    payLoad = {
+            switch (booking.status) {
+                case 'BOOKED':
+                    payLoadToAuthor = {
                         NAME: postCreator.name,
 
-                        HTML_CONTENT: `<p><a href="${process.env.FRONT_END_URL}user/${user.slug}">${user.name}</a> wants to book the mentoring session with you regarding <a href="${process.env.FRONT_END_URL}post/${post.slug}">${post.name}</a></p ><p>You can accept / reject.</p><p><a href="${process.env.FRONT_END_URL}post/${post.slug}/?accept=true">Accept</a> | <a href="${process.env.FRONT_END_URL}post/${post.slug}/?reject=true">Reject</a></p>`,
+                        HTML_CONTENT: `<p><a href="${process.env.FRONT_END_URL}user/${user.slug}">${user.name}</a> has booked <strong>15 min</strong> session with you regarding <a href="${process.env.FRONT_END_URL}post/${post.slug}">${post.name}</a> on <strong>${booking.date} ${booking.duration[0]}-${booking.duration[1]}</strong></p>`,
 
-                        SUBJECT: `Mentoring Session Request`
+                        SUBJECT: `15 Minutes Call`
                     };
-                    await helper.sendEmail(postCreator.email, filePath, payLoad)
+                    await helper.sendEmail(postCreator.email, filePath, payLoadToAuthor);
 
-                    updatedPost = await Post.findByIdAndUpdate(post._id, { $set: { 'mentor.status': post.mentor.status }, $push: { 'mentor.requestBy': actionBy } }, { new: true }).exec();
+                    payLoadToUserWhoBooked = {
+                        NAME: user.name,
 
-                    break;
+                        HTML_CONTENT: `<p> You have successfully booked <strong>15 Min</strong> session with <a href="${process.env.FRONT_END_URL}user/${postCreator.slug}">${postCreator.name}</a> regarding <a href="${process.env.FRONT_END_URL}post/${post.slug}">${post.name}</a> on <strong>${booking.date} ${booking.duration[0]}-${booking.duration[1]}</strong></p>`,
+
+                        SUBJECT: `15 Minutes Call`
+                    }
+                    await helper.sendEmail(user.email, filePath, payLoadToUserWhoBooked);
+
+                    newBooking = new Booking(booking);
+
+                    return resolve((await newBooking.save()).toJSON());
             }
-
-            return resolve(updatedPost);
-
-
 
 
         } catch (e) {

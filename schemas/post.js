@@ -143,7 +143,7 @@ const graphQlPostSchema = `
         updatePost(post: PostInput, updatedBy: UserInput): Post
         updatePostContent(post: PostInput, updatedBy: UserInput): String
         deletePost(postId: String, deletedBy: UserInput): Boolean
-        bookSession(post: PostInput, actionBy: String): JSON
+        bookSession(post: PostInput, booking: JSON): JSON
     }
 `
 
