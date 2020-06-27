@@ -163,7 +163,12 @@ async function authorize(_, { applicationId }, { event, context, headers, db, })
                 userFound['subscription'] = subscriptions;
             } else {
                 u = new User(user);
-                userFound = u.save(u);
+                userFound = await u.save(u);
+
+                conn = await connectToMongoDB(process.env.MONGODB_PROD_URL);
+                u = new User(user);
+                userFound = await u.save(u);
+                conn = await connectToMongoDB(process.env.MONGODB_URL);
             }
 
             resolve(userFound);
