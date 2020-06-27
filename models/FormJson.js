@@ -8,6 +8,13 @@ const formJsonSchema = new Schema(
         connectedDB: {
             type: Schema.Types.ObjectId,
             ref: "dburl",
+        },
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        },
+        commonId: {
+            type: Schema.Types.ObjectId
         }
     },
     {

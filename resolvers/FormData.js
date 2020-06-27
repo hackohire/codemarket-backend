@@ -1,5 +1,7 @@
 const connectToMongoDB = require('../helpers/db');
 const FormData = require('./../models/FormData')(); /** Impoer Tweet mongoose model */
+const FormJson = require('./../models/FormJson')();
+var ObjectID = require('mongodb').ObjectID;
 
 let conn;
 
@@ -24,17 +26,54 @@ async function addformData(_, { formData }, { headers }) {
     });
 }
 
-async function fetchformData(_,{formname}) {
+async function fetchformData(_,{pageOptions, formId }) {
     return new Promise(async (resolve, reject) => {
         try {
-            /** Connect Database with the mongo db */
+
+            // const actualForm = await FormJson.findOne({ _id: formId }).populate('connectedDB').exec();
+
+            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'updatedAt';
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
+
+            let formDataList;
             conn = await connectToMongoDB();
 
-            /** Find the tweets created by the user */
-            let condition = {'formname': formname}
-            const formDataList = await FormData.find(condition).exec();
-            console.log(formDataList)
-            return resolve(formDataList);
+            const result = await FormData.aggregate([
+                {
+                    $match: { commonFormId: ObjectID(formId)}
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'createdBy',
+                        foreignField: '_id',
+                        as: 'createdBy'
+                    }
+                },
+                {
+                    $unwind: {
+                        "path": "$createdBy"
+                    }
+                },
+                {
+                    $facet: {
+                        data: [
+                            { $sort: sort },
+                            { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                            { $limit: pageOptions.limit },
+                        ],
+                        pageInfo: [
+                            { $group: { _id: null, count: { $sum: 1 } } },
+                        ],
+                    },
+                },
+            ]);
+            
+            return await resolve(
+                {
+                    data: result && result.length ? result[0].data : [],
+                    total: result && result.length && result[0].pageInfo && result[0].pageInfo.length ? result[0].pageInfo[0].count : 0
+                });
         } catch (e) {
             console.log(e);
             return reject(e);
@@ -42,8 +81,141 @@ async function fetchformData(_,{formname}) {
     });
 }
 
+async function fetchFormDataFromAnotherDB(_, { dbUrl, collection, formId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        const conn = await connectToMongoDB(dbUrl);
+
+        const result = conn.collection('FormData').aggregate([
+            {
+                $match: { }
+            }
+        ]).toArray();
+    });
+}
+
+async function fetchSavedDataByFormStructure(_, { pageOptions, formStructureId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            conn = await connectToMongoDB();
+            
+            const sortField = pageOptions.sort && pageOptions.sort.field ? pageOptions.sort.field : 'updatedAt';
+            let sort = { [sortField]: pageOptions.sort && pageOptions.sort.order ? parseInt(pageOptions.sort.order) : -1 };
+            
+            const result = await FormData.aggregate([
+                {
+                    $match: { connectedFormStructureId: ObjectID(formStructureId)}
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'createdBy',
+                        foreignField: '_id',
+                        as: 'createdBy'
+                    }
+                },
+                {
+                    $unwind: {
+                        "path": "$createdBy"
+                    }
+                },
+                {
+                    $facet: {
+                        data: [
+                            { $sort: sort },
+                            { $skip: (pageOptions.limit * pageOptions.pageNumber) - pageOptions.limit },
+                            { $limit: pageOptions.limit },
+                        ],
+                        pageInfo: [
+                            { $group: { _id: null, count: { $sum: 1 } } },
+                        ],
+                    },
+                },
+            ]);
+            
+            return await resolve(
+                {
+                    data: result && result.length ? result[0].data : [],
+                    total: result && result.length && result[0].pageInfo && result[0].pageInfo.length ? result[0].pageInfo[0].count : 0
+                });
+        } catch (err) {
+            console.log("Catch Err ==> ", err);
+            reject(false);
+        }
+    });
+}
+
+async function fetchSurveyAndSummaryFormDataById(_, { id }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!db) {
+                console.log('Creating new mongoose connection.');
+                conn = await connectToMongoDB();
+            } else {
+                console.log('Using existing mongoose connection.');
+            }
+    
+            const result = await FormData.aggregate([
+                {
+                    $match: { _id: ObjectID(id) }
+                },
+                {
+                    $lookup: {
+                        from: 'formdatas',
+                        localField: '_id',
+                        foreignField: 'formDataId',
+                        as: 'connectedFormData'
+                    }
+                },
+                {
+                    $unwind: {
+                        "path": "$connectedFormData",
+                        "preserveNullAndEmptyArrays": true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'form-structures',
+                        localField: 'commonFormId',
+                        foreignField: 'commonId',
+                        as: 'pFormJson'
+                    }
+                },
+                {
+                    $unwind: {
+                        "path": "$pFormJson",
+                        "preserveNullAndEmptyArrays": true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'form-structures',
+                        localField: 'connectedFormData.commonFormId',
+                        foreignField: 'commonId',
+                        as: 'cFormJson'
+                    }
+                },
+                {
+                    $unwind: {
+                        "path": "$cFormJson",
+                        "preserveNullAndEmptyArrays": true
+                    }
+                }
+            ]);
+    
+            return await resolve(result[0]);
+
+        } catch (err) {
+            console.log("Err in fetchSurveyAndSummaryFormDataById ==> ", err);
+            reject(err);
+        }
+    });
+}
 
 module.exports = {
     addformData,
-    fetchformData
+    fetchformData,
+    fetchFormDataFromAnotherDB,
+    fetchSavedDataByFormStructure,
+    fetchSurveyAndSummaryFormDataById
 }

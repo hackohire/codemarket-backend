@@ -6,7 +6,9 @@ type formJson {
 
     formname: String
     formStructureJSON: JSON
+    createdBy: User
     connectedDB: connectedDBType
+    commonId: String
 }
 
 type connectedDBType {
@@ -28,17 +30,20 @@ input formJsonInput {
 
     formname: String
     formStructureJSON: JSON
+    createdBy: String
     connectedDB: inputConnectedDBType
+    commonId: String
 }
 
 extend type Mutation {
     addformJson(formJson: formJsonInput, connectedDBId: String): formJson
     addDbUrl(name: String, mongoUrl: String) : connectedDBType
     addIntoAnotherDB(formJson: formJsonInput, connectedDBId: String, collection: String) : formJson
+    deleteFormJson(formId: String): Boolean
 }
 
 extend type Query {
-    fetchformJson(formJson: formJsonInput): [formJson]
+    fetchformJson(userId: String): [formJson]
     fetchFormStructureById(formId: String): formJson
 }
 `
