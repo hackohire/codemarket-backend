@@ -48,7 +48,9 @@ const userSchema = new Schema(
             default: ['User'],
 
         },
-        stripeId: String
+        stripeId: String,
+        hashedOauthAccessToken: String,
+        hashedOauthAccessTokenSecret: String
     },
     {
         timestamps: true,

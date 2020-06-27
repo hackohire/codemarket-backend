@@ -81,19 +81,25 @@ const graphQlCompanySchema = `
         content: String
     }
 
+    type RedirectLink {
+        link: String
+    }
+
     extend type Query {
         getCompaniesByType(companyType: String, pageOptions: PageOptionsInput): GetCompaniesByTypeResponse
         getCompaniesByUserIdAndType(userId: String, companyType: String): [Company]
         getCompanyById(slug: String): Company
         getListOfUsersInACompany(companyId: String): [User]
         getEventsByCompanyId(companyId: String): [Post]
+        getOAuthRequestToken(userId: String): RedirectLink
     }
 
     extend type Mutation {
         addCompany(company: CompanyInput): Company
         updateCompany(company: CompanyInput): Company
-        deleteCompany(companyId: String): Boolean,
+        deleteCompany(companyId: String): Boolean
         createTwitterPost(content: String): SocialMediaPostType
+        saveAccessToken(oAuthToken: String, oAuthVerifier: String, userId: String): Stringm 
     }
 
     extend type Subscription {

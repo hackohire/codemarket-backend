@@ -1,4 +1,6 @@
 const Twit = require("twit");
+const oauth = require("oauth");
+const CryptoJS = require("crypto-js");
 const connectToMongoDB = require('../helpers/db');
 const Company = require('../models/company')();
 const Post = require('../models/post')();
@@ -7,11 +9,16 @@ const helper = require('../helpers/helper');
 var array = require('lodash/array');
 const auth = require('../helpers/auth');
 const socialMedia = require('../helpers/socialMedia');
-const { reject } = require('lodash');
+const User = require('../models/user')();
 let conn;
 
-
-var T = new Twit({
+const consumer = new oauth.OAuth("https://twitter.com/oauth/request_token", 
+                                    "https://twitter.com/oauth/access_token",
+                                    process.env.CONSUMER_KEY, 
+                                    process.env.CONSUMAR_SECRET_KEY, 
+                                    "1.0A", 
+                                    process.env.TWITTER_CALLBACK_URL, "HMAC-SHA1");
+const T = new Twit({
   consumer_key: process.env.CONSUMER_KEY,
   consumer_secret: process.env.CONSUMAR_SECRET_KEY,
   access_token: process.env.TWITTER_ACCESS_TOKEN,
@@ -307,6 +314,70 @@ async function createTwitterPost(_, { content }, { headers, db, decodedToken }) 
     });
 }
 
+async function getOAuthRequestToken(_, { userId }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        console.log(userId);
+
+        if (!db) {
+            console.log('Creating new mongoose connection.');
+            conn = await connectToMongoDB();
+        } else {
+            console.log('Using existing mongoose connection.');
+        }
+        
+        consumer.getOAuthRequestToken(function (error, oauthToken, oauthTokenSecret, results) {
+            if (error) {
+                console.log(error);
+                reject(error)
+            } else {
+                console.log(error, oauthToken, oauthTokenSecret, results);
+                const redirect = {
+                    link: `https://twitter.com/oauth/authorize?oauth_token=${oauthToken}`
+                }
+                console.log(redirect);
+                resolve(redirect);
+            }
+        });
+    });
+}
+
+async function saveAccessToken(_, { oAuthToken, oAuthVerifier, userId    }, { headers, db, decodedToken }) {
+    return new Promise(async (resolve, reject) => {
+        if (!db) {
+            console.log('Creating new mongoose connection.');
+            conn = await connectToMongoDB();
+        } else {
+            console.log('Using existing mongoose connection.');
+        }
+        
+        consumer.getOAuthAccessToken(
+            oAuthToken,
+            process.env.CONSUMAR_SECRET_KEY,
+            oAuthVerifier,
+            (error, oauthAccessToken, oauthAccessTokenSecret, results) => {
+              if (error) {
+                console.log(error);
+                return reject(error);
+              }
+              else {
+                const hashedOauthAccessToken = CryptoJS.AES
+                    .encrypt(oauthAccessToken, process.env.OAUTH_SECRET)
+                    .toString();
+                const hashedOauthAccessTokenSecret = CryptoJS.AES
+                    .encrypt(oauthAccessTokenSecret, process.env.OAUTH_SECRET)
+                    .toString();
+
+                    updatedCompany = await User.findByIdAndUpdate(userId, 
+                                    { hashedOauthAccessToken: hashedOauthAccessToken, 
+                                    hashedOauthAccessTokenSecret: hashedOauthAccessTokenSecret }, 
+                                    { new: true }).exec();
+
+                return resolve({ message: 'token saved' });
+              }
+            });
+    });
+}
+
 
 
 
@@ -318,12 +389,13 @@ module.exports = {
 
     addCompany,
     updateCompany,
-
     getCompaniesByUserIdAndType,
     getCompanyById,
     getCompaniesByType,
     deleteCompany,
     getListOfUsersInACompany,
     getEventsByCompanyId,
-    createTwitterPost
+    createTwitterPost,
+    getOAuthRequestToken,
+    saveAccessToken
 }
