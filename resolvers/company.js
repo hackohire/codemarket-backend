@@ -325,7 +325,7 @@ async function getOAuthRequestToken(_, { userId }, { headers, db, decodedToken }
             console.log('Using existing mongoose connection.');
         }
         
-        consumer.getOAuthRequestToken(function (error, oauthToken, oauthTokenSecret, results) {
+        consumer.getOAuthRequestToken(async function (error, oauthToken, oauthTokenSecret, results) {
             if (error) {
                 console.log(error);
                 reject(error)
@@ -354,7 +354,7 @@ async function saveAccessToken(_, { oAuthToken, oAuthVerifier, userId    }, { he
             oAuthToken,
             process.env.CONSUMAR_SECRET_KEY,
             oAuthVerifier,
-            (error, oauthAccessToken, oauthAccessTokenSecret, results) => {
+            async (error, oauthAccessToken, oauthAccessTokenSecret, results) => {
               if (error) {
                 console.log(error);
                 return reject(error);
