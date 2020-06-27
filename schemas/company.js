@@ -99,7 +99,7 @@ const graphQlCompanySchema = `
         updateCompany(company: CompanyInput): Company
         deleteCompany(companyId: String): Boolean
         createTwitterPost(content: String): SocialMediaPostType
-        saveAccessToken(oAuthToken: String, oAuthVerifier: String, userId: String): Stringm 
+        saveAccessToken(oAuthToken: String, oAuthVerifier: String, userId: String): String
     }
 
     extend type Subscription {
