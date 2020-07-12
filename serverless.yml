@@ -1,4 +1,4 @@
-service: artapi
+service: dev3api
 
 provider:
   name: aws
